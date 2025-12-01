@@ -64,6 +64,40 @@ db.close();
 - **Budget years**: auto-creates the current budget year if none exists, lets you switch the current year, and allows summaries scoped to a selected period.
 - **Offline-first**: no external services; all state lives in SQLite on disk.
 
+## UI preview
+
+The UI preview now uses the intended stack from `PROJECT.md`: **React + Vite + TailwindCSS**. The Vite root is `src/ui`, and the build output lands in `dist/ui`.
+
+To explore the mock dashboard locally:
+
+```bash
+npm run ui:dev
+```
+
+Then open `http://localhost:4173` in your browser. You can also produce a production bundle with:
+
+```bash
+npm run ui:build
+```
+
+The preview still uses sample data; upcoming work will connect it to the SQLite-backed flows described in `PROJECT.md`.
+
+## Desktop shell (Electron)
+
+Electron is now wired up to host the Vite/Tailwind renderer. During development you can launch both the dev server and the Electron shell together:
+
+```bash
+npm run desktop:dev
+```
+
+For a production-like view that renders the built assets instead of the dev server:
+
+```bash
+npm run desktop:start
+```
+
+The Electron entry point is `src/electron/main.js`, and the preload hook lives in `src/electron/preload.js`.
+
 ## Project direction
 
 The intended stack for the desktop app is Electron + React (Vite) with TailwindCSS, Framer Motion, and `better-sqlite3` for data storage (see `PROJECT.md`). Future work will connect the renderer and main processes to this schema via IPC while keeping the app fully offline and private.
