@@ -1,0 +1,17 @@
+{
+  "name": "fattern",
+  "version": "1.0.0",
+  "description": "Local-first desktop invoicing/expense app groundwork",
+  "main": "index.js",
+  "scripts": {
+    "init-db": "node scripts/init-db.js",
+    "lint": "echo \"No linters configured yet\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "better-sqlite3": "^12.5.0"
+  }
+}
