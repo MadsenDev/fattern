@@ -13,6 +13,7 @@ class FatternDatabase {
   constructor() {
     const { db } = initializeDatabase();
     this.db = db;
+    this.ensureCurrentBudgetYear();
   }
 
   close() {
@@ -81,7 +82,7 @@ class FatternDatabase {
     const date = invoiceDate instanceof Date ? invoiceDate : new Date(invoiceDate);
     const budgetYear = budgetYearId
       ? this.db.prepare('SELECT * FROM budget_years WHERE id = ?').get(budgetYearId)
-      : this.getCurrentBudgetYear();
+      : this.ensureCurrentBudgetYear();
 
     const label = budgetYear ? budgetYear.label || `${date.getFullYear()}` : `${date.getFullYear()}`;
     const resetBoundary = budgetYear ? new Date(budgetYear.start_date) : new Date(date.getFullYear(), 0, 1);
@@ -209,6 +210,59 @@ class FatternDatabase {
     return this.db.prepare('SELECT * FROM expenses WHERE id = ?').get(info.lastInsertRowid);
   }
 
+  createExpenseCategory(category) {
+    const insert = this.db.prepare(`
+      INSERT INTO expense_categories (name, parent_id)
+      VALUES (@name, @parent_id)
+    `);
+
+    const info = insert.run({
+      name: category.name,
+      parent_id: category.parentId || null,
+    });
+
+    return this.db.prepare('SELECT * FROM expense_categories WHERE id = ?').get(info.lastInsertRowid);
+  }
+
+  listExpenseCategories() {
+    return this.db.prepare('SELECT * FROM expense_categories ORDER BY name').all();
+  }
+
+  createProduct(product) {
+    const insert = this.db.prepare(`
+      INSERT INTO products (name, sku, description, unit_price, vat_rate, unit, active)
+      VALUES (@name, @sku, @description, @unit_price, @vat_rate, @unit, @active)
+    `);
+
+    const info = insert.run({
+      name: product.name,
+      sku: product.sku || null,
+      description: product.description || null,
+      unit_price: product.unitPrice,
+      vat_rate: product.vatRate ?? null,
+      unit: product.unit || null,
+      active: product.active === false ? 0 : 1,
+    });
+
+    return this.db.prepare('SELECT * FROM products WHERE id = ?').get(info.lastInsertRowid);
+  }
+
+  listProducts({ includeInactive = false } = {}) {
+    const query = includeInactive
+      ? 'SELECT * FROM products ORDER BY name'
+      : 'SELECT * FROM products WHERE active = 1 ORDER BY name';
+
+    return this.db.prepare(query).all();
+  }
+
+  setProductActive(productId, active) {
+    this.db
+      .prepare('UPDATE products SET active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+      .run(active ? 1 : 0, productId);
+
+    return this.db.prepare('SELECT * FROM products WHERE id = ?').get(productId);
+  }
+
   linkExpenseToInvoice(invoiceId, expenseId) {
     this.db
       .prepare('INSERT OR IGNORE INTO invoice_expense_links (invoice_id, expense_id) VALUES (?, ?)')
@@ -239,6 +293,25 @@ class FatternDatabase {
       expenses,
       net: income - expenses,
     };
+  }
+
+  listBudgetYears() {
+    return this.db.prepare('SELECT * FROM budget_years ORDER BY start_date').all();
+  }
+
+  setCurrentBudgetYear(budgetYearId) {
+    const existing = this.db.prepare('SELECT * FROM budget_years WHERE id = ?').get(budgetYearId);
+    if (!existing) {
+      throw new Error('Budget year not found');
+    }
+
+    const transaction = this.db.transaction(() => {
+      this.db.prepare('UPDATE budget_years SET is_current = 0').run();
+      this.db.prepare('UPDATE budget_years SET is_current = 1 WHERE id = ?').run(budgetYearId);
+    });
+
+    transaction();
+    return this.getCurrentBudgetYear();
   }
 }
 
