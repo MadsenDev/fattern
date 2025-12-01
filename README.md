@@ -26,6 +26,41 @@ This repository currently contains the groundwork for the data layer described i
    - budget_years
    - settings
 
+## Database helpers
+
+The `FatternDatabase` class wraps `better-sqlite3` to apply the schema, ensure filesystem folders exist, and expose convenience helpers for the workflows described in `PROJECT.md`.
+
+```js
+const { FatternDatabase } = require('./src/db/fatternDatabase');
+
+const db = new FatternDatabase();
+const customer = db.createCustomer({ name: 'Oslo Bikes AS', email: 'post@oslobikes.no' });
+const invoice = db.createInvoice({
+  customerId: customer.id,
+  invoiceDate: '2025-01-10',
+  dueDate: '2025-01-24',
+  items: [
+    { description: 'Workshop time', quantity: 5, unitPrice: 1200, vatRate: 0.25 },
+    { description: 'Parts', quantity: 1, unitPrice: 800, vatRate: 0.25 },
+  ],
+});
+
+const expense = db.addExpense({ vendor: 'Flytoget', amount: 220, date: '2025-01-08' });
+db.linkExpenseToInvoice(invoice.id, expense.id);
+
+const summary = db.getIncomeExpenseSummary();
+console.log(summary);
+
+db.close();
+```
+
+### Helper highlights
+
+- **Filesystem safety**: uses `~/Fattern/data`, `~/Fattern/exports`, and `~/Fattern/logs` as outlined in `PROJECT.md`.
+- **Invoice numbers**: sequential numbering with yearly (or budget-year) resets using the `companies.invoice_count` and `invoice_reset_date` columns.
+- **Budget years**: auto-creates the current budget year if none exists and allows summaries scoped to a selected period.
+- **Offline-first**: no external services; all state lives in SQLite on disk.
+
 ## Project direction
 
 The intended stack for the desktop app is Electron + React (Vite) with TailwindCSS, Framer Motion, and `better-sqlite3` for data storage (see `PROJECT.md`). Future work will connect the renderer and main processes to this schema via IPC while keeping the app fully offline and private.
