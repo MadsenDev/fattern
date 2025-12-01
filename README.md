@@ -34,18 +34,20 @@ The `FatternDatabase` class wraps `better-sqlite3` to apply the schema, ensure f
 const { FatternDatabase } = require('./src/db/fatternDatabase');
 
 const db = new FatternDatabase();
+const category = db.createExpenseCategory({ name: 'Travel' });
+const product = db.createProduct({ name: 'Workshop time', unitPrice: 1200, vatRate: 0.25, unit: 'hour' });
 const customer = db.createCustomer({ name: 'Oslo Bikes AS', email: 'post@oslobikes.no' });
 const invoice = db.createInvoice({
   customerId: customer.id,
   invoiceDate: '2025-01-10',
   dueDate: '2025-01-24',
   items: [
-    { description: 'Workshop time', quantity: 5, unitPrice: 1200, vatRate: 0.25 },
+    { productId: product.id, description: product.name, quantity: 5, unitPrice: product.unit_price, vatRate: product.vat_rate },
     { description: 'Parts', quantity: 1, unitPrice: 800, vatRate: 0.25 },
   ],
 });
 
-const expense = db.addExpense({ vendor: 'Flytoget', amount: 220, date: '2025-01-08' });
+const expense = db.addExpense({ vendor: 'Flytoget', amount: 220, date: '2025-01-08', categoryId: category.id });
 db.linkExpenseToInvoice(invoice.id, expense.id);
 
 const summary = db.getIncomeExpenseSummary();
@@ -58,7 +60,8 @@ db.close();
 
 - **Filesystem safety**: uses `~/Fattern/data`, `~/Fattern/exports`, and `~/Fattern/logs` as outlined in `PROJECT.md`.
 - **Invoice numbers**: sequential numbering with yearly (or budget-year) resets using the `companies.invoice_count` and `invoice_reset_date` columns.
-- **Budget years**: auto-creates the current budget year if none exists and allows summaries scoped to a selected period.
+- **Products & expense categories**: helpers to seed and list reusable products and nested categories.
+- **Budget years**: auto-creates the current budget year if none exists, lets you switch the current year, and allows summaries scoped to a selected period.
 - **Offline-first**: no external services; all state lives in SQLite on disk.
 
 ## Project direction
