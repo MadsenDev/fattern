@@ -40,6 +40,42 @@ class FatternDatabase {
     return this.db.prepare('SELECT * FROM companies WHERE id = ?').get(info.lastInsertRowid);
   }
 
+  updateCompany(updates = {}) {
+    const existing = this.ensureCompany();
+    const payload = {
+      id: existing.id,
+      name: updates.name ?? existing.name,
+      org_number: updates.org_number ?? existing.org_number,
+      address: updates.address ?? existing.address,
+      post_number: updates.post_number ?? existing.post_number,
+      post_location: updates.post_location ?? existing.post_location,
+      contact_email: updates.contact_email ?? existing.contact_email,
+      contact_number: updates.contact_number ?? existing.contact_number,
+      account_number: updates.account_number ?? existing.account_number,
+      vat_rate:
+        typeof updates.vat_rate === 'number'
+          ? updates.vat_rate
+          : existing.vat_rate ?? 0.25,
+    };
+
+    this.db.prepare(
+      `UPDATE companies
+       SET name = @name,
+           org_number = @org_number,
+           address = @address,
+           post_number = @post_number,
+           post_location = @post_location,
+           contact_email = @contact_email,
+           contact_number = @contact_number,
+           account_number = @account_number,
+           vat_rate = @vat_rate,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = @id`
+    ).run(payload);
+
+    return this.db.prepare('SELECT * FROM companies WHERE id = ?').get(existing.id);
+  }
+
   getCurrentBudgetYear() {
     const row = this.db.prepare('SELECT * FROM budget_years WHERE is_current = 1 LIMIT 1').get();
     return row || null;

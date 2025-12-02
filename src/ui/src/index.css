@@ -2,12 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  color-scheme: light;
-}
+@layer base {
+  :root {
+    color-scheme: light;
+    background-color: theme('colors.cloud');
+    color: theme('colors.ink');
+  }
 
-body {
-  font-family: theme('fontFamily.sans');
+  body {
+    font-family: theme('fontFamily.sans');
+    background-color: theme('colors.cloud');
+    color: theme('colors.ink');
+  }
 }
 
 ::-webkit-scrollbar {
@@ -15,7 +21,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: rgba(15, 23, 42, 0.12);
+  background-color: rgba(13, 62, 81, 0.18);
   border-radius: 12px;
 }
 
@@ -23,26 +29,28 @@ body {
   background: transparent;
 }
 
-.card {
-  @apply bg-white rounded-xl shadow-card border border-sand/60;
-}
+@layer components {
+  .card {
+    @apply bg-white rounded-xl shadow-card border border-sand/60;
+  }
 
-.badge {
-  @apply inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium;
-}
+  .badge {
+    @apply inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium;
+  }
 
-.badge-muted {
-  @apply bg-sand text-ink/80;
-}
+  .badge-muted {
+    @apply bg-cloud text-ink-subtle border border-sand/60;
+  }
 
-.badge-success {
-  @apply bg-emerald-50 text-moss;
-}
+  .badge-success {
+    @apply bg-brand-50 text-brand-700 border border-brand-100;
+  }
 
-.badge-warn {
-  @apply bg-amber-50 text-amber-700;
-}
+  .badge-warn {
+    @apply bg-brand-100 text-brand-900 border border-brand-200;
+  }
 
-.badge-ghost {
-  @apply bg-white border border-sand text-ink/80;
+  .badge-ghost {
+    @apply bg-white border border-sand text-ink-soft;
+  }
 }
