@@ -36,15 +36,15 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
   const steps = [
     {
       id: 'intro',
-      title: 'Welcome to Fattern',
-      description: 'Set up your company profile so invoices are labeled correctly.',
-      actionLabel: 'Get started',
+      title: 'Velkommen til Fattern',
+      description: 'Sett opp selskapsprofilen slik at fakturaene får riktig informasjon.',
+      actionLabel: 'Kom i gang',
     },
     {
       id: 'company',
-      title: 'Tell us about your company',
-      description: 'This information appears on invoices and inside the app.',
-      actionLabel: 'Save and start',
+      title: 'Fortell oss om selskapet ditt',
+      description: 'Denne informasjonen brukes i appen og på fakturaer.',
+      actionLabel: 'Lagre og start',
     },
   ];
 
@@ -68,7 +68,7 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
     };
 
     if (!payload.name) {
-      setError('Company name is required.');
+      setError('Selskapsnavn må fylles ut.');
       setSaving(false);
       return;
     }
@@ -84,8 +84,8 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
       markComplete();
       onComplete?.(updated);
     } catch (err) {
-      console.error('Failed to save company', err);
-      setError('Something went wrong while saving. Please try again.');
+      console.error('Kunne ikke lagre selskap', err);
+      setError('Noe gikk galt under lagring. Prøv igjen.');
     } finally {
       setSaving(false);
     }
@@ -99,7 +99,7 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
             <div className="flex items-center gap-4">
               <img src="/fattern-monogram.svg" alt="Fattern" className="h-12 w-12 drop-shadow-xl" />
               <div>
-                <p className="text-xs uppercase tracking-[0.4em] text-ink-subtle">Onboarding</p>
+                <p className="text-xs uppercase tracking-[0.4em] text-ink-subtle">Oppstart</p>
                 <h2 className="text-2xl font-semibold text-ink">{current.title}</h2>
               </div>
             </div>
@@ -125,25 +125,25 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
           <div className="flex items-center gap-4">
             <img src="/fattern-monogram.svg" alt="Fattern" className="h-12 w-12 drop-shadow-xl" />
             <div>
-              <p className="text-xs uppercase tracking-[0.4em] text-ink-subtle">Onboarding</p>
+              <p className="text-xs uppercase tracking-[0.4em] text-ink-subtle">Oppstart</p>
               <h2 className="text-2xl font-semibold text-ink">{current.title}</h2>
             </div>
           </div>
-          <p className="mt-4 text-ink-soft">{current.description}</p>
+              <p className="mt-4 text-ink-soft">{current.description}</p>
 
           <form className="mt-8 grid gap-4 md:grid-cols-2" onSubmit={handleSubmit}>
             <div className="md:col-span-2">
-              <label className="text-sm font-medium text-ink">Company name*</label>
+              <label className="text-sm font-medium text-ink">Selskapsnavn*</label>
               <input
                 className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
                 value={form.name}
                 onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
                 required
-                placeholder="Acme Studio AS"
+                placeholder="Bedrift AS"
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-ink">Registration number</label>
+              <label className="text-sm font-medium text-ink">Organisasjonsnummer</label>
               <input
                 className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm"
                 value={form.org_number || ''}
@@ -152,16 +152,16 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-ink">Email</label>
+              <label className="text-sm font-medium text-ink">E-post</label>
               <input
                 className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm"
                 value={form.contact_email || ''}
                 onChange={(e) => setForm((prev) => ({ ...prev, contact_email: e.target.value }))}
-                placeholder="hello@studio.no"
+                placeholder="hei@studio.no"
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-ink">Phone</label>
+              <label className="text-sm font-medium text-ink">Telefon</label>
               <input
                 className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm"
                 value={form.contact_number || ''}
@@ -170,7 +170,7 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-ink">Bank account</label>
+              <label className="text-sm font-medium text-ink">Kontonummer</label>
               <input
                 className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm"
                 value={form.account_number || ''}
@@ -179,16 +179,16 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="text-sm font-medium text-ink">Address</label>
+              <label className="text-sm font-medium text-ink">Adresse</label>
               <input
                 className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm"
                 value={form.address || ''}
                 onChange={(e) => setForm((prev) => ({ ...prev, address: e.target.value }))}
-                placeholder="Fattern Street 1"
+                placeholder="Fatternveien 1"
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-ink">Postal code</label>
+              <label className="text-sm font-medium text-ink">Postnummer</label>
               <input
                 className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm"
                 value={form.post_number || ''}
@@ -196,7 +196,7 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-ink">City</label>
+              <label className="text-sm font-medium text-ink">Poststed</label>
               <input
                 className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm"
                 value={form.post_location || ''}
@@ -204,7 +204,7 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-ink">VAT rate</label>
+              <label className="text-sm font-medium text-ink">MVA-sats</label>
               <input
                 type="number"
                 step="0.01"
@@ -214,7 +214,7 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
                 value={form.vat_rate}
                 onChange={(e) => setForm((prev) => ({ ...prev, vat_rate: e.target.value }))}
               />
-              <p className="mt-1 text-xs text-ink-subtle">0.25 equals 25% VAT.</p>
+              <p className="mt-1 text-xs text-ink-subtle">0,25 tilsvarer 25 % MVA.</p>
             </div>
 
             {error ? (
@@ -230,14 +230,14 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
                   onComplete?.(form);
                 }}
               >
-                Skip
+                Hopp over
               </button>
               <button
                 type="submit"
                 className="rounded-2xl bg-brand-700 px-5 py-2 text-sm font-semibold text-white shadow-card disabled:opacity-50"
                 disabled={saving}
               >
-                {saving ? 'Saving…' : current.actionLabel}
+                {saving ? 'Lagrer …' : current.actionLabel}
               </button>
             </div>
           </form>

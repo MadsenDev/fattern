@@ -51,6 +51,12 @@ function registerDatabaseHandlers(database) {
   );
   handle('db:create-expense-category', (category) => database.createExpenseCategory(category));
   handle('db:list-expense-categories', () => database.listExpenseCategories());
+  handle('db:list-invoices', ({ budgetYearId, limit } = {}) =>
+    database.listInvoicesForBudgetYear(budgetYearId, limit)
+  );
+  handle('db:list-expenses', ({ budgetYearId, limit } = {}) =>
+    database.listExpensesForBudgetYear(budgetYearId, limit)
+  );
 }
 
 module.exports = {

@@ -19,6 +19,8 @@ contextBridge.exposeInMainWorld('fattern', {
     createExpense: (expense) => invoke('db:create-expense', expense),
     createExpenseCategory: (category) => invoke('db:create-expense-category', category),
     listExpenseCategories: () => invoke('db:list-expense-categories'),
+    listInvoices: (options) => invoke('db:list-invoices', options),
+    listExpenses: (options) => invoke('db:list-expenses', options),
   },
   system: {
     getLocale: () => invoke('system:get-locale'),

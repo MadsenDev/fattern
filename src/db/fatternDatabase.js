@@ -264,6 +264,81 @@ class FatternDatabase {
     return this.db.prepare('SELECT * FROM expense_categories ORDER BY name').all();
   }
 
+  getBudgetYearRange(budgetYearId) {
+    if (budgetYearId) {
+      const record = this.db.prepare('SELECT * FROM budget_years WHERE id = ?').get(budgetYearId);
+      if (record) {
+        return {
+          start: record.start_date,
+          end: record.end_date,
+        };
+      }
+    }
+
+    const now = new Date();
+    const start = `${now.getFullYear()}-01-01`;
+    const end = `${now.getFullYear()}-12-31`;
+    return { start, end };
+  }
+
+  listInvoicesForBudgetYear(budgetYearId, limit = 10) {
+    const { start, end } = this.getBudgetYearRange(budgetYearId);
+
+    const rows = this.db
+      .prepare(
+        `
+        SELECT
+          invoices.id,
+          invoices.invoice_number,
+          invoices.invoice_date,
+          invoices.total,
+          invoices.status,
+          customers.name as customer_name
+        FROM invoices
+        LEFT JOIN customers ON customers.id = invoices.customer_id
+        WHERE invoices.invoice_date BETWEEN @start AND @end
+        ORDER BY invoices.invoice_date DESC
+        LIMIT @limit
+      `
+      )
+      .all({ start, end, limit });
+
+    return rows.map((row) => ({
+      id: row.invoice_number || `#${row.id}`,
+      customer: row.customer_name || 'Ukjent kunde',
+      amount: row.total ?? 0,
+      status: row.status || 'draft',
+      date: row.invoice_date,
+    }));
+  }
+
+  listExpensesForBudgetYear(budgetYearId, limit = 10) {
+    const { start, end } = this.getBudgetYearRange(budgetYearId);
+
+    const rows = this.db
+      .prepare(
+        `
+        SELECT
+          expenses.*,
+          expense_categories.name as category_name
+        FROM expenses
+        LEFT JOIN expense_categories ON expense_categories.id = expenses.category_id
+        WHERE expenses.date BETWEEN @start AND @end
+        ORDER BY expenses.date DESC
+        LIMIT @limit
+      `
+      )
+      .all({ start, end, limit });
+
+    return rows.map((row) => ({
+      id: row.id,
+      vendor: row.vendor || 'Ukjent leverandør',
+      amount: row.amount ?? 0,
+      category: row.category_name || 'Ukjent kategori',
+      date: row.date,
+    }));
+  }
+
   createProduct(product) {
     const insert = this.db.prepare(`
       INSERT INTO products (name, sku, description, unit_price, vat_rate, unit, active)
