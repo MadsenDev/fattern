@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 
-export function useExpenses(budgetYearId) {
+export function useExpenses(budgetYearId, options = {}) {
   const [data, setData] = useState(null);
   const [isLoading, setLoading] = useState(false);
+  const { limit } = options;
 
   useEffect(() => {
     const api = typeof window !== 'undefined' ? window.fattern?.db : null;
@@ -15,7 +16,7 @@ export function useExpenses(budgetYearId) {
     setLoading(true);
 
     api
-      .listExpenses({ budgetYearId, limit: 10 })
+      .listExpenses({ budgetYearId, limit })
       .then((rows) => {
         if (!cancelled) {
           setData(rows);
@@ -31,7 +32,7 @@ export function useExpenses(budgetYearId) {
     return () => {
       cancelled = true;
     };
-  }, [budgetYearId]);
+  }, [budgetYearId, limit]);
 
   return { expenses: data, isLoading };
 }

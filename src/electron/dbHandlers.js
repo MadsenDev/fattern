@@ -39,9 +39,25 @@ function registerDatabaseHandlers(database) {
   handle('db:set-current-budget-year', (budgetYearId) =>
     database.setCurrentBudgetYear(budgetYearId)
   );
+  handle('db:update-budget-year', (payload = {}) =>
+    database.updateBudgetYear({
+      id: payload.id,
+      label: payload.label,
+      startDate: toDate(payload.startDate, undefined),
+      endDate: toDate(payload.endDate, undefined),
+    })
+  );
+  handle('db:delete-budget-year', (budgetYearId) =>
+    database.deleteBudgetYear(budgetYearId)
+  );
 
   handle('db:create-customer', (customer) => database.createCustomer(customer));
+  handle('db:update-customer', (customerId, updates) => database.updateCustomer(customerId, updates));
+  handle('db:delete-customer', (customerId) => database.deleteCustomer(customerId));
   handle('db:create-invoice', (invoice) => database.createInvoice(invoice));
+  handle('db:get-invoice', (invoiceId) => database.getInvoice(invoiceId));
+  handle('db:update-invoice', (invoiceId, invoice) => database.updateInvoice(invoiceId, invoice));
+  handle('db:delete-invoice', (invoiceId) => database.deleteInvoice(invoiceId));
 
   handle('db:create-expense', (expense = {}) =>
     database.addExpense({
@@ -57,6 +73,19 @@ function registerDatabaseHandlers(database) {
   handle('db:list-expenses', ({ budgetYearId, limit } = {}) =>
     database.listExpensesForBudgetYear(budgetYearId, limit)
   );
+  handle('db:list-customers', () => database.listCustomers());
+  handle('db:list-products', (options = {}) => database.listProducts(options));
+  handle('db:create-product', (product) => database.createProduct(product));
+  handle('db:update-product', (productId, updates) => database.updateProduct(productId, updates));
+  handle('db:delete-product', (productId) => database.deleteProduct(productId));
+  handle('db:set-product-active', (productId, active) => database.setProductActive(productId, active));
+  handle('db:get-setting', (key, defaultValue) => database.getSetting(key, defaultValue));
+  handle('db:set-setting', (key, value) => database.setSetting(key, value));
+  handle('db:get-all-settings', () => database.getAllSettings());
+
+  // Import handlers
+  handle('db:bulk-create-customers', (customers) => database.bulkCreateCustomers(customers));
+  handle('db:bulk-create-products', (products) => database.bulkCreateProducts(products));
 }
 
 module.exports = {

@@ -45,8 +45,9 @@ export function useDashboardData() {
         income: result?.income ?? 0,
         expenses: result?.expenses ?? 0,
         net: result?.net ?? 0,
-        overdue: 0,
-        unpaid: 0,
+        overdue: result?.overdue ?? 0,
+        unpaid: result?.unpaid ?? 0,
+        paid: result?.paid ?? 0,
       });
     } catch (error) {
       console.error('Kunne ikke hente sammendrag', error);
@@ -109,6 +110,48 @@ export function useDashboardData() {
     }
   }, []);
 
+  const createBudgetYear = useCallback(async (payload) => {
+    const api = getDbApi();
+    if (!api?.createBudgetYear) return null;
+
+    try {
+      const created = await api.createBudgetYear(payload);
+      await refreshMetadata();
+      return created;
+    } catch (error) {
+      console.error('Kunne ikke opprette budsjettår', error);
+      throw error;
+    }
+  }, [refreshMetadata]);
+
+  const updateBudgetYear = useCallback(async (payload) => {
+    const api = getDbApi();
+    if (!api?.updateBudgetYear) return null;
+
+    try {
+      const updated = await api.updateBudgetYear(payload);
+      await refreshMetadata();
+      return updated;
+    } catch (error) {
+      console.error('Kunne ikke oppdatere budsjettår', error);
+      throw error;
+    }
+  }, [refreshMetadata]);
+
+  const deleteBudgetYear = useCallback(async (id) => {
+    const api = getDbApi();
+    if (!api?.deleteBudgetYear) return false;
+
+    try {
+      const result = await api.deleteBudgetYear(id);
+      await refreshMetadata();
+      return result;
+    } catch (error) {
+      console.error('Kunne ikke slette budsjettår', error);
+      throw error;
+    }
+  }, [refreshMetadata]);
+
   return {
     company,
     budgetYears,
@@ -117,6 +160,9 @@ export function useDashboardData() {
     expenses,
     selectedBudgetYearId,
     selectBudgetYear,
+    createBudgetYear,
+    updateBudgetYear,
+    deleteBudgetYear,
     refreshMetadata,
     isLoading,
   };

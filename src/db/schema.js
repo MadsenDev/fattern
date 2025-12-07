@@ -28,6 +28,7 @@ const schemaStatements = [
     post_location TEXT,
     vat_exempt INTEGER DEFAULT 0,
     active INTEGER DEFAULT 1,
+    image_path TEXT,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
   );`,
@@ -40,6 +41,7 @@ const schemaStatements = [
     vat_rate REAL,
     unit TEXT,
     active INTEGER DEFAULT 1,
+    image_path TEXT,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
   );`,

@@ -3,22 +3,31 @@ import { FiBarChart2, FiCalendar } from 'react-icons/fi';
 import { TbCoin, TbReceipt } from 'react-icons/tb';
 import { LoadingScreen } from './components/LoadingScreen';
 import { OnboardingFlow } from './components/OnboardingFlow';
+import { Layout } from './components/layout/Layout';
+import { TitleBar } from './components/TitleBar';
 import { DashboardView } from './components/dashboard/DashboardView';
-import {
-  navItems,
-  budgetYears as mockBudgetYears,
-  invoices as mockInvoices,
-  expenses as mockExpenses,
-  workflowShortcuts,
-  activityFeed as mockActivityFeed,
-  clientHighlights as mockClientHighlights,
-  statusBadge,
-  statusLabel,
-} from './data/mockData.jsx';
+import { InvoicesPage } from './pages/InvoicesPage';
+import { ExpensesPage } from './pages/ExpensesPage';
+import { CustomersPage } from './pages/CustomersPage';
+import { ProductsPage } from './pages/ProductsPage';
+import { SettingsPage } from './pages/SettingsPage';
+import { TemplateEditorPage } from './pages/TemplateEditorPage';
+import { BudgetYearModal } from './components/budget/BudgetYearModal';
+import { ProductModal } from './components/products/ProductModal';
+import { CustomerModal } from './components/customers/CustomerModal';
+import { InvoiceModal } from './components/invoices/InvoiceModal';
+import { TimelineModal } from './components/events/TimelineModal';
+import { ConfirmModal } from './components/ConfirmModal';
+import { ToastContainer } from './components/Toast';
+import { useToast } from './hooks/useToast';
+import { navItems, workflowShortcuts, statusBadge, statusLabel } from './data/mockData.jsx';
 import { formatCurrency } from './utils/formatCurrency';
+import { formatDate } from './utils/formatDate';
 import { useDashboardData } from './hooks/useDashboardData';
 import { useInvoices } from './hooks/useInvoices';
 import { useExpenses } from './hooks/useExpenses';
+import { useCustomers } from './hooks/useCustomers';
+import { useProducts } from './hooks/useProducts';
 import i18n from './i18n/config';
 
 function hasCompletedOnboarding() {
@@ -27,12 +36,29 @@ function hasCompletedOnboarding() {
 }
 
 function App() {
-  const [activityFeed] = useState(mockActivityFeed);
-  const [clientHighlights] = useState(mockClientHighlights);
   const [isLoading, setIsLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(() => !hasCompletedOnboarding());
-  const [fallbackSelectedYear, setFallbackSelectedYear] = useState(mockBudgetYears[0]?.id ?? null);
+  const [isBudgetYearModalOpen, setIsBudgetYearModalOpen] = useState(false);
+  const [editingBudgetYear, setEditingBudgetYear] = useState(null);
+  const [budgetYearModalMode, setBudgetYearModalMode] = useState('create');
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [productModalMode, setProductModalMode] = useState('create');
+  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState(null);
+  const [customerModalMode, setCustomerModalMode] = useState('create');
+  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
+  const [editingInvoice, setEditingInvoice] = useState(null);
+  const [invoiceModalMode, setInvoiceModalMode] = useState('create');
+  const [invoicesRefreshKey, setInvoicesRefreshKey] = useState(0);
+  const [currentPage, setCurrentPage] = useState('Oversikt');
+  const [templateEditorId, setTemplateEditorId] = useState(null);
+  const [isTimelineModalOpen, setIsTimelineModalOpen] = useState(false);
+  const [productsRefreshKey, setProductsRefreshKey] = useState(0);
+  const [customersRefreshKey, setCustomersRefreshKey] = useState(0);
+  const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, item: null, type: null, onConfirm: null, onDeactivate: null, showDeactivate: false });
+  const { toasts, toast, removeToast } = useToast();
 
   const {
     company,
@@ -41,18 +67,25 @@ function App() {
     selectedBudgetYearId,
     selectBudgetYear,
     refreshMetadata,
+    createBudgetYear,
+    updateBudgetYear,
+    deleteBudgetYear,
   } = useDashboardData();
 
-  const { invoices: liveInvoices } = useInvoices(selectedBudgetYearId);
-  const { expenses: liveExpenses } = useExpenses(selectedBudgetYearId);
+  const { invoices: liveInvoices } = useInvoices(selectedBudgetYearId, { limit: 10, refreshKey: invoicesRefreshKey });
+  const { invoices: allInvoices } = useInvoices(selectedBudgetYearId, { limit: null, refreshKey: invoicesRefreshKey });
+  const { expenses: liveExpenses } = useExpenses(selectedBudgetYearId, { limit: 10 });
+  const { expenses: allExpenses } = useExpenses(selectedBudgetYearId, { limit: null });
+  const { customers } = useCustomers(customersRefreshKey);
+  const { products } = useProducts({ includeInactive: true, refreshKey: productsRefreshKey });
 
   const invoices = useMemo(
-    () => (Array.isArray(liveInvoices) && liveInvoices.length ? liveInvoices : mockInvoices),
+    () => (Array.isArray(liveInvoices) && liveInvoices.length ? liveInvoices : []),
     [liveInvoices]
   );
 
   const expenses = useMemo(
-    () => (Array.isArray(liveExpenses) && liveExpenses.length ? liveExpenses : mockExpenses),
+    () => (Array.isArray(liveExpenses) && liveExpenses.length ? liveExpenses : []),
     [liveExpenses]
   );
 
@@ -82,8 +115,8 @@ function App() {
 
   const summary = dbSummary ?? fallbackSummary;
 
-  const availableBudgetYears = budgetYears.length ? budgetYears : mockBudgetYears;
-  const selectedYear = selectedBudgetYearId ?? fallbackSelectedYear ?? availableBudgetYears[0]?.id;
+  const availableBudgetYears = budgetYears;
+  const selectedYear = selectedBudgetYearId ?? availableBudgetYears[0]?.id ?? null;
 
   useEffect(() => {
     let isMounted = true;
@@ -111,28 +144,33 @@ function App() {
     }
   }, [company]);
 
-useEffect(() => {
-  const api = typeof window !== 'undefined' ? window.fattern?.system : null;
-  if (!api?.getLocale) return;
+  useEffect(() => {
+    const api = typeof window !== 'undefined' ? window.fattern?.system : null;
+    if (!api?.getLocale) return;
 
-  api
-    .getLocale()
-    .then((locale) => {
-      if (!locale) return;
-      const normalized = locale.split?.('-')[0] || locale;
-      i18n.changeLanguage(normalized);
-    })
-    .catch((err) => {
-      console.error('Unable to detect locale', err);
-    });
-}, []);
+    api
+      .getLocale()
+      .then((locale) => {
+        if (!locale) return;
+        const normalized = locale.split?.('-')[0] || locale;
+        i18n.changeLanguage(normalized);
+      })
+      .catch((err) => {
+        console.error('Unable to detect locale', err);
+      });
+  }, []);
 
   const utilization =
     summary.income > 0 ? Math.min(100, Math.round((summary.expenses / summary.income) * 100)) : 0;
-  const collectionRate =
-    summary.income > 0
-      ? Math.max(0, 100 - Math.round(((summary.overdue + summary.unpaid) / summary.income) * 100))
-      : 0;
+  // Collection rate: percentage of invoices that are paid
+  // Only count invoices that are sent or paid (exclude drafts)
+  const collectionRate = useMemo(() => {
+    if (!summary) return 0;
+    const totalInvoiced = (summary.paid || 0) + (summary.unpaid || 0) + (summary.overdue || 0);
+    if (totalInvoiced === 0) return 0; // No invoices sent yet
+    const paid = summary.paid || 0;
+    return Math.round((paid / totalInvoiced) * 100);
+  }, [summary]);
   const netMargin = summary.income > 0 ? Math.round((summary.net / summary.income) * 100) : 0;
 
   const statHighlights = [
@@ -160,54 +198,512 @@ useEffect(() => {
     },
   ];
 
-  if (isLoading) {
-    return <LoadingScreen progress={loadingProgress} />;
-  }
+  const activityFeed = useMemo(() => {
+    const items = [];
 
-  const activityWithCurrency = activityFeed.map((item) =>
-    typeof item.amount === 'number'
-      ? { ...item, formattedAmount: formatCurrency(Math.abs(item.amount)) }
-      : item
-  );
+    // Use all invoices and expenses for complete timeline
+    const allInvoicesForFeed = allInvoices || [];
+    const allExpensesForFeed = allExpenses || [];
+
+    allInvoicesForFeed.forEach((invoice) => {
+      items.push({
+        id: `inv-${invoice.id}`,
+        title: invoice.status === 'overdue' ? 'Purring nødvendig' : 'Faktura opprettet',
+        detail: `Faktura ${invoice.invoice_number || invoice.id} · ${invoice.customer}`,
+        time: invoice.date ? formatDate(invoice.date) : 'Ukjent dato',
+        amount: invoice.amount,
+        status: invoice.status === 'overdue' ? 'warn' : 'success',
+        timestamp: invoice.date ? new Date(invoice.date).getTime() : 0,
+      });
+    });
+
+    allExpensesForFeed.forEach((expense) => {
+      items.push({
+        id: `exp-${expense.id}`,
+        title: 'Utgift registrert',
+        detail: `${expense.vendor} · ${expense.category}`,
+        time: expense.date ? formatDate(expense.date) : 'Ukjent dato',
+        amount: -Math.abs(expense.amount),
+        status: 'neutral',
+        timestamp: expense.date ? new Date(expense.date).getTime() : 0,
+      });
+    });
+
+    // Sort by timestamp (newest first)
+    return items.sort((a, b) => b.timestamp - a.timestamp);
+  }, [allInvoices, allExpenses]);
+
+  const clientHighlights = useMemo(() => {
+    const totals = new Map();
+
+    invoices.forEach((invoice) => {
+      if (!invoice.customer) return;
+      const current = totals.get(invoice.customer) ?? 0;
+      totals.set(invoice.customer, current + (invoice.amount || 0));
+    });
+
+    const derived = Array.from(totals.entries())
+      .map(([name, value]) => ({
+        name,
+        value,
+        meta: 'Fakturerte beløp i aktivt år',
+      }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 3);
+
+    return derived;
+  }, [invoices]);
 
   const handleOnboardingComplete = () => {
     refreshMetadata();
     setShowOnboarding(false);
   };
 
+  const openCreateBudgetYearModal = () => {
+    setEditingBudgetYear(null);
+    setBudgetYearModalMode('create');
+    setIsBudgetYearModalOpen(true);
+  };
+
+  const openEditBudgetYearModal = (year) => {
+    setEditingBudgetYear(year);
+    setBudgetYearModalMode('edit');
+    setIsBudgetYearModalOpen(true);
+  };
+
+  const handleDeleteBudgetYear = async (year) => {
+    if (!year || !year.id) return;
+    if (year.is_current) {
+      setDeleteConfirm({
+        isOpen: true,
+        item: year,
+        type: 'budgetYear',
+        title: 'Kan ikke slette',
+        description: 'Kan ikke slette aktivt budsjettår. Velg et annet år som aktivt først.',
+        variant: 'warning',
+        confirmLabel: 'OK',
+        onConfirm: () => {},
+      });
+      return;
+    }
+
+    setDeleteConfirm({
+      isOpen: true,
+      item: year,
+      type: 'budgetYear',
+      title: 'Slett budsjettår',
+      description: `Er du sikker på at du vil slette budsjettåret "${year.label}"? Denne handlingen kan ikke angres.`,
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          await deleteBudgetYear?.(year.id);
+          toast.success('Budsjettår slettet');
+        } catch (error) {
+          console.error('Kunne ikke slette budsjettår', error);
+          toast.error('Kunne ikke slette budsjettår');
+          throw error;
+        }
+      },
+    });
+  };
+
   const handleSelectYear = (yearId) => {
     if (budgetYears.length) {
       selectBudgetYear(yearId);
-    } else {
-      setFallbackSelectedYear(yearId);
+    }
+  };
+
+  const openCreateProductModal = () => {
+    setEditingProduct(null);
+    setProductModalMode('create');
+    setIsProductModalOpen(true);
+  };
+
+  const openEditProductModal = (product) => {
+    setEditingProduct(product);
+    setProductModalMode('edit');
+    setIsProductModalOpen(true);
+  };
+
+  const handleDeleteProduct = (product) => {
+    if (!product || !product.id) return;
+
+    setDeleteConfirm({
+      isOpen: true,
+      item: product,
+      type: 'product',
+      title: 'Slett eller deaktiver produkt',
+      description: `Produktet "${product.name}" kan være i bruk i eksisterende fakturaer. Vi anbefaler å deaktivere produktet i stedet for å slette det. Deaktiverte produkter vil ikke vises i lister, men vil fortsatt være tilgjengelige i eksisterende fakturaer.`,
+      variant: 'danger',
+      showDeactivate: true,
+      onDeactivate: async () => {
+        const api = typeof window !== 'undefined' ? window.fattern?.db : null;
+        if (!api?.setProductActive) {
+          throw new Error('API ikke tilgjengelig');
+        }
+        await api.setProductActive(product.id, false);
+        // Force refresh of products list
+        setProductsRefreshKey((prev) => prev + 1);
+        toast.success('Produkt deaktivert');
+      },
+      onConfirm: async () => {
+        try {
+          const api = typeof window !== 'undefined' ? window.fattern?.db : null;
+          if (api?.deleteProduct) {
+            await api.deleteProduct(product.id);
+            setProductsRefreshKey((prev) => prev + 1);
+            toast.success('Produkt slettet');
+          }
+        } catch (error) {
+          console.error('Kunne ikke slette produkt', error);
+          toast.error('Kunne ikke slette produkt');
+          throw error;
+        }
+      },
+    });
+  };
+
+  const handleProductSubmit = async (payload) => {
+    try {
+      const api = typeof window !== 'undefined' ? window.fattern?.db : null;
+      if (!api) return;
+
+      if (productModalMode === 'edit' && payload.id) {
+        await api.updateProduct(payload.id, payload);
+      } else {
+        // Remove id from payload when creating
+        const { id, ...createPayload } = payload;
+        await api.createProduct(createPayload);
+      }
+      setProductsRefreshKey((prev) => prev + 1);
+      toast.success(productModalMode === 'edit' ? 'Produkt oppdatert' : 'Produkt opprettet');
+    } catch (error) {
+      console.error('Kunne ikke lagre produkt', error);
+      toast.error('Kunne ikke lagre produkt');
+      throw error;
+    }
+  };
+
+  const openCreateCustomerModal = () => {
+    setEditingCustomer(null);
+    setCustomerModalMode('create');
+    setIsCustomerModalOpen(true);
+  };
+
+  const openEditCustomerModal = (customer) => {
+    setEditingCustomer(customer);
+    setCustomerModalMode('edit');
+    setIsCustomerModalOpen(true);
+  };
+
+  const handleDeleteCustomer = (customer) => {
+    if (!customer || !customer.id) return;
+
+    setDeleteConfirm({
+      isOpen: true,
+      item: customer,
+      type: 'customer',
+      title: 'Slett kunde',
+      description: `Er du sikker på at du vil slette kunden "${customer.name}"? Denne handlingen kan ikke angres.`,
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          const api = typeof window !== 'undefined' ? window.fattern?.db : null;
+          if (api?.deleteCustomer) {
+            await api.deleteCustomer(customer.id);
+            setCustomersRefreshKey((prev) => prev + 1);
+          }
+        } catch (error) {
+          console.error('Kunne ikke slette kunde', error);
+          throw error;
+        }
+      },
+    });
+  };
+
+  const handleCustomerSubmit = async (payload) => {
+    try {
+      const api = typeof window !== 'undefined' ? window.fattern?.db : null;
+      if (!api) return;
+
+      if (customerModalMode === 'edit' && payload.id) {
+        await api.updateCustomer(payload.id, payload);
+      } else {
+        // Remove id from payload when creating
+        const { id, ...createPayload } = payload;
+        await api.createCustomer(createPayload);
+      }
+      setCustomersRefreshKey((prev) => prev + 1);
+      toast.success(customerModalMode === 'edit' ? 'Kunde oppdatert' : 'Kunde opprettet');
+    } catch (error) {
+      console.error('Kunne ikke lagre kunde', error);
+      toast.error('Kunne ikke lagre kunde');
+      throw error;
+    }
+  };
+
+  const openCreateInvoiceModal = () => {
+    setEditingInvoice(null);
+    setInvoiceModalMode('create');
+    setIsInvoiceModalOpen(true);
+  };
+
+  const openEditInvoiceModal = async (invoice) => {
+    if (!invoice || !invoice.dbId) return;
+    try {
+      const api = typeof window !== 'undefined' ? window.fattern?.db : null;
+      if (!api?.getInvoice) return;
+      const fullInvoice = await api.getInvoice(invoice.dbId);
+      setEditingInvoice(fullInvoice);
+      setInvoiceModalMode('edit');
+      setIsInvoiceModalOpen(true);
+    } catch (error) {
+      console.error('Kunne ikke hente faktura', error);
+    }
+  };
+
+  const handleDeleteInvoice = (invoice) => {
+    if (!invoice || !invoice.dbId) return;
+
+    setDeleteConfirm({
+      isOpen: true,
+      item: invoice,
+      type: 'invoice',
+      title: 'Slett faktura',
+      description: `Er du sikker på at du vil slette faktura "${invoice.id}"? Denne handlingen kan ikke angres.`,
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          const api = typeof window !== 'undefined' ? window.fattern?.db : null;
+          if (api?.deleteInvoice) {
+            await api.deleteInvoice(invoice.dbId);
+            setInvoicesRefreshKey((prev) => prev + 1);
+          }
+        } catch (error) {
+          console.error('Kunne ikke slette faktura', error);
+          throw error;
+        }
+      },
+    });
+  };
+
+  const handleInvoiceSubmit = async (payload) => {
+    const api = typeof window !== 'undefined' ? window.fattern?.db : null;
+    if (!api) {
+      throw new Error('Database API ikke tilgjengelig');
+    }
+
+    try {
+      if (invoiceModalMode === 'edit' && payload.id) {
+        await api.updateInvoice(payload.id, payload);
+        toast.success('Faktura oppdatert');
+      } else {
+        // Remove id from payload when creating
+        const { id, ...createPayload } = payload;
+        if (!selectedBudgetYearId) {
+          throw new Error('Ingen budsjettår valgt. Velg et budsjettår først.');
+        }
+        createPayload.budgetYearId = selectedBudgetYearId;
+        const result = await api.createInvoice(createPayload);
+        console.log('Invoice created successfully:', result);
+        
+        // Check if invoice date is outside the current budget year range
+        const selectedYear = budgetYears.find((y) => y.id === selectedBudgetYearId);
+        if (selectedYear && result?.invoice_date) {
+          const invoiceDate = new Date(result.invoice_date);
+          const yearStart = new Date(selectedYear.start_date);
+          const yearEnd = new Date(selectedYear.end_date);
+          
+          if (invoiceDate < yearStart || invoiceDate > yearEnd) {
+            toast.warning(
+              `Faktura opprettet, men vises ikke i listen fordi fakturadatoen (${formatDate(result.invoice_date)}) er utenfor budsjettåret "${selectedYear.label}" (${formatDate(selectedYear.start_date)} - ${formatDate(selectedYear.end_date)})`
+            );
+          } else {
+            toast.success('Faktura opprettet');
+          }
+        } else {
+          toast.success('Faktura opprettet');
+        }
+      }
+      setInvoicesRefreshKey((prev) => prev + 1);
+    } catch (error) {
+      console.error('Kunne ikke lagre faktura', error);
+      const errorMessage = error?.message || 'Kunne ikke lagre faktura';
+      toast.error(errorMessage);
+      throw error;
+    }
+  };
+
+  if (isLoading) {
+    return <LoadingScreen progress={loadingProgress} />;
+  }
+
+  const renderPage = () => {
+    switch (currentPage) {
+      case 'Fakturaer':
+        return (
+          <InvoicesPage
+            invoices={allInvoices || []}
+            formatCurrency={formatCurrency}
+            onCreateInvoice={openCreateInvoiceModal}
+            onEditInvoice={openEditInvoiceModal}
+            onDeleteInvoice={handleDeleteInvoice}
+            showToast={toast}
+          />
+        );
+      case 'Utgifter':
+        return (
+          <ExpensesPage
+            expenses={allExpenses || []}
+            formatCurrency={formatCurrency}
+          />
+        );
+      case 'Kunder':
+        return (
+          <CustomersPage
+            customers={customers || []}
+            onEditCustomer={openEditCustomerModal}
+            onDeleteCustomer={handleDeleteCustomer}
+            onCreateCustomer={openCreateCustomerModal}
+          />
+        );
+      case 'Produkter':
+        return (
+          <ProductsPage
+            products={products || []}
+            formatCurrency={formatCurrency}
+            onCreateProduct={openCreateProductModal}
+            onEditProduct={openEditProductModal}
+            onDeleteProduct={handleDeleteProduct}
+          />
+        );
+      case 'Innstillinger':
+        return (
+          <SettingsPage
+            company={company}
+            onCompanyUpdate={refreshMetadata}
+            onOpenTemplateEditor={(templateId) => setTemplateEditorId(templateId || 'default_invoice')}
+            onRefreshData={() => {
+              setCustomersRefreshKey((prev) => prev + 1);
+              setProductsRefreshKey((prev) => prev + 1);
+            }}
+          />
+        );
+      case 'Oversikt':
+      default:
+        return (
+          <DashboardView
+            budgetYears={availableBudgetYears}
+            selectedYear={selectedYear}
+            onSelectYear={handleSelectYear}
+            statHighlights={statHighlights}
+            invoices={invoices}
+            expenses={expenses}
+            activityFeed={activityFeed}
+            clientHighlights={clientHighlights}
+            summaries={summary}
+            utilization={utilization}
+            collectionRate={collectionRate}
+            formatCurrency={formatCurrency}
+            onOpenBudgetYearModal={openCreateBudgetYearModal}
+            onEditBudgetYear={openEditBudgetYearModal}
+            onDeleteBudgetYear={handleDeleteBudgetYear}
+            onCreateInvoice={openCreateInvoiceModal}
+            onCreateExpense={() => setCurrentPage('Utgifter')}
+            onNavigate={setCurrentPage}
+            onOpenTimeline={() => setIsTimelineModalOpen(true)}
+          />
+        );
     }
   };
 
   return (
-    <>
-      <DashboardView
-        company={company}
-        navItems={navItems}
-        workflowShortcuts={workflowShortcuts}
-        budgetYears={availableBudgetYears}
-        selectedYear={selectedYear}
-        onSelectYear={handleSelectYear}
-        statHighlights={statHighlights}
-        invoices={invoices}
-        expenses={expenses}
-        activityFeed={activityWithCurrency}
-        clientHighlights={clientHighlights}
-        summaries={summary}
-        utilization={utilization}
-        collectionRate={collectionRate}
-        statusBadge={statusBadge}
-        statusLabel={statusLabel}
-        formatCurrency={formatCurrency}
-      />
+    <div className="flex h-screen flex-col overflow-hidden">
+      <TitleBar variant="light" />
+      {templateEditorId ? (
+        <TemplateEditorPage
+          templateId={templateEditorId}
+          onClose={() => setTemplateEditorId(null)}
+        />
+      ) : (
+        <div className="flex-1 overflow-auto">
+          <Layout
+            company={company}
+            navItems={navItems}
+            workflowShortcuts={workflowShortcuts}
+            activeNavItem={currentPage}
+            onNavigate={setCurrentPage}
+          >
+            {renderPage()}
+          </Layout>
+        </div>
+      )}
       {showOnboarding ? (
         <OnboardingFlow initialCompany={company} onComplete={handleOnboardingComplete} />
       ) : null}
-    </>
+      <BudgetYearModal
+        isOpen={isBudgetYearModalOpen}
+        mode={budgetYearModalMode}
+        initialYear={editingBudgetYear}
+        onClose={() => setIsBudgetYearModalOpen(false)}
+        onSubmit={async (payload) => {
+          try {
+            if (budgetYearModalMode === 'edit') {
+              await updateBudgetYear?.(payload);
+              toast.success('Budsjettår oppdatert');
+            } else {
+              await createBudgetYear?.(payload);
+              toast.success('Budsjettår opprettet');
+            }
+          } catch (error) {
+            console.error('Kunne ikke lagre budsjettår', error);
+            toast.error('Kunne ikke lagre budsjettår');
+            throw error;
+          }
+        }}
+      />
+      <ProductModal
+        isOpen={isProductModalOpen}
+        mode={productModalMode}
+        initialProduct={editingProduct}
+        onClose={() => setIsProductModalOpen(false)}
+        onSubmit={handleProductSubmit}
+      />
+      <CustomerModal
+        isOpen={isCustomerModalOpen}
+        mode={customerModalMode}
+        initialCustomer={editingCustomer}
+        onClose={() => setIsCustomerModalOpen(false)}
+        onSubmit={handleCustomerSubmit}
+      />
+      <InvoiceModal
+        isOpen={isInvoiceModalOpen}
+        mode={invoiceModalMode}
+        initialInvoice={editingInvoice}
+        onClose={() => setIsInvoiceModalOpen(false)}
+        onSubmit={handleInvoiceSubmit}
+        customers={customers || []}
+        products={products || []}
+      />
+      <ConfirmModal
+        isOpen={deleteConfirm.isOpen}
+        onClose={() => setDeleteConfirm({ isOpen: false, item: null, type: null, onConfirm: null, onDeactivate: null })}
+        onConfirm={deleteConfirm.onConfirm}
+        onDeactivate={deleteConfirm.onDeactivate}
+        title={deleteConfirm.title}
+        description={deleteConfirm.description}
+        variant={deleteConfirm.variant || 'danger'}
+        confirmLabel={deleteConfirm.confirmLabel || 'Slett'}
+        showDeactivate={deleteConfirm.showDeactivate || false}
+      />
+      <TimelineModal
+        isOpen={isTimelineModalOpen}
+        onClose={() => setIsTimelineModalOpen(false)}
+        activityFeed={activityFeed}
+        formatCurrency={formatCurrency}
+      />
+      <ToastContainer toasts={toasts} onClose={removeToast} />
+    </div>
   );
 }
 

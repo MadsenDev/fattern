@@ -68,7 +68,7 @@ db.close();
 
 The UI preview now uses the intended stack from `PROJECT.md`: **React + Vite + TailwindCSS**. The Vite root is `src/ui`, and the build output lands in `dist/ui`.
 
-To explore the mock dashboard locally:
+To explore the dashboard locally:
 
 ```bash
 npm run ui:dev
@@ -80,7 +80,13 @@ Then open `http://localhost:4173` in your browser. You can also produce a produc
 npm run ui:build
 ```
 
-The preview still uses sample data; upcoming work will connect it to the SQLite-backed flows described in `PROJECT.md`.
+The UI is fully connected to the SQLite database and includes:
+- Dashboard with financial overview
+- Full CRUD for invoices, products, customers, and budget years
+- Sortable tables with visual indicators
+- Toast notification system
+- Custom invoice template editor
+- PDF generation (default and template-based)
 
 ## Desktop shell (Electron)
 

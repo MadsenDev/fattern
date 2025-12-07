@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 
-export function useInvoices(budgetYearId) {
+export function useInvoices(budgetYearId, options = {}) {
   const [data, setData] = useState(null);
   const [isLoading, setLoading] = useState(false);
+  const { limit, refreshKey } = options;
 
   useEffect(() => {
     const api = typeof window !== 'undefined' ? window.fattern?.db : null;
@@ -15,7 +16,7 @@ export function useInvoices(budgetYearId) {
     setLoading(true);
 
     api
-      .listInvoices({ budgetYearId, limit: 10 })
+      .listInvoices({ budgetYearId, limit })
       .then((rows) => {
         if (!cancelled) {
           setData(rows);
@@ -31,7 +32,7 @@ export function useInvoices(budgetYearId) {
     return () => {
       cancelled = true;
     };
-  }, [budgetYearId]);
+  }, [budgetYearId, limit, refreshKey]);
 
   return { invoices: data, isLoading };
 }

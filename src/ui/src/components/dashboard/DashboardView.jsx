@@ -1,10 +1,9 @@
 import { FiClock, FiTrendingUp } from 'react-icons/fi';
 import { StatCard } from '../StatCard';
+import { StatusBadge } from '../StatusBadge';
+import { formatDate } from '../../utils/formatDate';
 
 export function DashboardView({
-  company,
-  navItems,
-  workflowShortcuts,
   budgetYears,
   selectedYear,
   onSelectYear,
@@ -16,87 +15,19 @@ export function DashboardView({
   summaries,
   utilization,
   collectionRate,
-  statusBadge,
-  statusLabel,
   formatCurrency,
+  onOpenBudgetYearModal,
+  onEditBudgetYear,
+  onDeleteBudgetYear,
+  onCreateInvoice,
+  onCreateExpense,
+  onNavigate,
+  onOpenTimeline,
 }) {
-  const displayName = company?.name && company.name !== 'Default Company' ? company.name : 'Fattern';
   const fmt = (value) => (typeof formatCurrency === 'function' ? formatCurrency(value) : value);
 
   return (
-    <div className="min-h-screen bg-brand-50/60 px-4 py-6 lg:px-8 xl:px-12">
-      <div className="grid w-full gap-6 lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)]">
-        <aside className="hidden flex-col gap-6 lg:sticky lg:top-6 lg:flex lg:h-[calc(100vh-3rem)] lg:overflow-y-auto xl:top-8 xl:h-[calc(100vh-4rem)]">
-          <div className="rounded-3xl border border-sand/60 bg-white/80 p-6 shadow-card backdrop-blur-sm">
-            <div className="rounded-3xl bg-gradient-to-br from-brand-700 to-brand-500 p-5 text-white shadow-inner">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-sm uppercase tracking-wider text-white/70">Arbeidsområde</p>
-                  <p className="mt-3 text-2xl font-semibold">{displayName}</p>
-                  <p className="mt-2 text-sm text-white/80">Lokal-først økonomiverktøy</p>
-                </div>
-                <img
-                  src="/fattern-monogram.svg"
-                  alt="Fattern monogram"
-                  className="hidden h-16 w-auto shrink-0 drop-shadow-2xl sm:block"
-                />
-              </div>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <button className="rounded-2xl border border-white/40 px-3 py-1 text-xs font-medium text-white/90">
-                  Synk konto
-                </button>
-                <button className="rounded-2xl border border-white/40 px-3 py-1 text-xs font-medium text-white/90">
-                  Inviter team
-                </button>
-              </div>
-            </div>
-
-            <nav className="mt-6 space-y-1">
-              {navItems.map((item) => {
-                const isActive = item.label === 'Overview';
-                return (
-                  <button
-                    key={item.label}
-                    className={`flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-left text-sm font-medium transition ${
-                      isActive
-                        ? 'bg-brand-50 text-brand-700 border border-brand-100'
-                        : 'text-ink-soft hover:bg-cloud'
-                    }`}
-                  >
-                    <span
-                      className={`flex h-8 w-8 items-center justify-center rounded-xl ${
-                        isActive ? 'bg-white text-brand-600' : 'bg-cloud text-ink-soft'
-                      }`}
-                    >
-                      {item.icon}
-                    </span>
-                    {item.label}
-                  </button>
-                );
-              })}
-            </nav>
-
-            <div className="mt-6 rounded-2xl border border-sand/70 bg-cloud/60 p-4">
-              <p className="text-xs uppercase tracking-widest text-ink-subtle">Arbeidsflyt</p>
-              <ul className="mt-3 space-y-2 text-sm text-ink-soft">
-                {workflowShortcuts.map((shortcut) => (
-                  <li key={shortcut.label} className="flex items-center justify-between rounded-xl px-2 py-1">
-                    <span>{shortcut.label}</span>
-                    <span className="rounded-xl border border-sand/70 px-2 py-0.5 text-xs font-semibold">
-                      {shortcut.helper}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="mt-4 rounded-2xl border border-sand/70 p-4 text-xs text-ink-subtle">
-              SQLite · Frakoblet · v1 forhåndsvisning
-            </div>
-          </div>
-        </aside>
-
-        <main className="flex-1 space-y-6">
+    <div className="space-y-6">
           <header className="relative overflow-hidden rounded-3xl border border-sand/60 bg-white shadow-card">
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand-50/60 via-transparent to-transparent" />
             <div className="relative z-10 space-y-6 p-6 lg:p-8">
@@ -115,15 +46,29 @@ export function DashboardView({
                     value={selectedYear}
                     onChange={(e) => onSelectYear(e.target.value)}
                   >
-                    {budgetYears.map((year) => (
-                      <option key={year.id} value={year.id}>{`${year.label} (${year.start} → ${year.end})`}</option>
-                    ))}
+                    {budgetYears.map((year) => {
+                      const start = year.start ?? year.start_date;
+                      const end = year.end ?? year.end_date;
+                      return (
+                        <option key={year.id} value={year.id}>
+                          {`${year.label} (${start ? formatDate(start) : '—'} → ${
+                            end ? formatDate(end) : '—'
+                          })`}
+                        </option>
+                      );
+                    })}
                   </select>
                   <div className="flex gap-2">
-                    <button className="flex-1 rounded-2xl border border-sand/80 bg-white px-3 py-2 text-sm font-medium text-ink transition hover:-translate-y-0.5">
+                    <button
+                      onClick={onCreateInvoice}
+                      className="flex-1 rounded-2xl border border-sand/80 bg-white px-3 py-2 text-sm font-medium text-ink transition hover:-translate-y-0.5"
+                    >
                       Ny faktura
                     </button>
-                    <button className="flex-1 rounded-2xl bg-ink px-3 py-2 text-sm font-medium text-white shadow-card transition hover:-translate-y-0.5">
+                    <button
+                      onClick={() => onNavigate?.('Utgifter')}
+                      className="flex-1 rounded-2xl bg-ink px-3 py-2 text-sm font-medium text-white shadow-card transition hover:-translate-y-0.5"
+                    >
                       Legg til utgift
                     </button>
                   </div>
@@ -159,7 +104,7 @@ export function DashboardView({
                   <FiClock /> {summaries ? fmt(summaries.overdue) : '-'} forfalt
                 </div>
                 <div className="flex items-center gap-2 rounded-2xl border border-sand/70 px-3 py-2 text-xs font-medium text-ink-soft">
-                  Aktivt år · {selectedYear}
+                  Aktivt år · {budgetYears.find((y) => y.id === selectedYear)?.label || selectedYear}
                 </div>
               </div>
             </div>
@@ -178,7 +123,12 @@ export function DashboardView({
                   <h3 className="text-lg font-semibold">Fakturaløp</h3>
                   <p className="mt-1 text-sm text-ink-subtle">Hvor dagens kontantstrøm holder til</p>
                 </div>
-                <button className="text-sm font-medium text-accent hover:underline">Åpne løp</button>
+                <button
+                  onClick={() => onNavigate?.('Fakturaer')}
+                  className="text-sm font-medium text-accent hover:underline"
+                >
+                  Åpne løp
+                </button>
               </div>
               <div className="overflow-x-auto rounded-2xl border border-sand/60">
                 <table className="min-w-full text-sm">
@@ -192,20 +142,29 @@ export function DashboardView({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-sand/60 bg-white">
-                    {invoices.map((invoice) => (
-                      <tr key={invoice.id} className="hover:bg-cloud/60">
-                        <td className="px-4 py-3 font-semibold text-ink">{invoice.id}</td>
-                        <td className="px-4 py-3 text-ink-soft">{invoice.customer}</td>
-                        <td className="px-4 py-3">
-                          <span className={`badge ${statusBadge[invoice.status]}`}>
-                            <span className="h-2 w-2 rounded-full bg-current/60"></span>
-                            {statusLabel[invoice.status]}
-                          </span>
+                    {invoices.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="px-4 py-8 text-center text-sm text-ink-subtle">
+                          Ingen fakturaer i denne perioden
                         </td>
-                        <td className="px-4 py-3 text-ink-subtle">{invoice.date}</td>
-                        <td className="px-4 py-3 text-right font-medium text-ink">{fmt(invoice.amount)}</td>
                       </tr>
-                    ))}
+                    ) : (
+                      invoices.map((invoice) => (
+                        <tr key={invoice.id} className="hover:bg-cloud/60">
+                          <td className="px-4 py-3 font-semibold text-ink">
+                            {invoice.invoice_number || invoice.id}
+                          </td>
+                          <td className="px-4 py-3 text-ink-soft">{invoice.customer}</td>
+                          <td className="px-4 py-3">
+                            <StatusBadge status={invoice.status} />
+                          </td>
+                          <td className="px-4 py-3 text-ink-subtle">
+                            {invoice.date ? formatDate(invoice.date) : '—'}
+                          </td>
+                          <td className="px-4 py-3 text-right font-medium text-ink">{fmt(invoice.amount)}</td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -217,10 +176,20 @@ export function DashboardView({
                   <h3 className="text-lg font-semibold">Siste hendelser</h3>
                   <p className="mt-1 text-sm text-ink-subtle">Økonomihendelser i arbeidsområdet</p>
                 </div>
-                <button className="text-sm font-medium text-accent hover:underline">Åpne tidslinje</button>
+                <button
+                  onClick={onOpenTimeline}
+                  className="text-sm font-medium text-accent hover:underline"
+                >
+                  Åpne tidslinje
+                </button>
               </div>
               <div className="space-y-3">
-                {activityFeed.map((item) => (
+                {activityFeed.length === 0 ? (
+                  <div className="rounded-2xl border border-sand/60 bg-white p-6 text-center text-sm text-ink-subtle">
+                    Ingen aktivitet å vise
+                  </div>
+                ) : (
+                  activityFeed.map((item) => (
                   <div key={item.id} className="flex items-start gap-3 rounded-2xl border border-sand/60 bg-white p-3">
                     <div
                       className={`mt-0.5 flex h-10 w-10 items-center justify-center rounded-2xl border ${
@@ -247,7 +216,8 @@ export function DashboardView({
                       </p>
                     ) : null}
                   </div>
-                ))}
+                  ))
+                )}
               </div>
             </section>
           </div>
@@ -259,10 +229,20 @@ export function DashboardView({
                   <h3 className="text-lg font-semibold">Utgifter</h3>
                   <p className="mt-1 text-sm text-ink-subtle">Rask status på ferske kvitteringer</p>
                 </div>
-                <button className="text-sm font-medium text-accent hover:underline">Registrer utgift</button>
+                <button
+                  onClick={() => onNavigate?.('Utgifter')}
+                  className="text-sm font-medium text-accent hover:underline"
+                >
+                  Registrer utgift
+                </button>
               </div>
               <div className="space-y-3">
-                {expenses.map((expense) => (
+                {expenses.length === 0 ? (
+                  <div className="rounded-2xl border border-sand/70 bg-white px-4 py-6 text-center text-sm text-ink-subtle">
+                    Ingen utgifter registrert
+                  </div>
+                ) : (
+                  expenses.map((expense) => (
                   <div
                     key={expense.id}
                     className="flex items-center justify-between rounded-2xl border border-sand/70 bg-white px-4 py-3"
@@ -273,10 +253,13 @@ export function DashboardView({
                     </div>
                     <div className="text-right">
                       <p className="font-semibold text-ink">{fmt(expense.amount)}</p>
-                      <p className="text-xs text-ink-subtle">{expense.date}</p>
+                      <p className="text-xs text-ink-subtle">
+                        {expense.date ? formatDate(expense.date) : '—'}
+                      </p>
                     </div>
                   </div>
-                ))}
+                  ))
+                )}
               </div>
             </section>
 
@@ -286,10 +269,20 @@ export function DashboardView({
                   <h3 className="text-lg font-semibold">Kunderelasjoner</h3>
                   <p className="mt-1 text-sm text-ink-subtle">Viktigste kontoer som driver inntekter</p>
                 </div>
-                <button className="text-sm font-medium text-accent hover:underline">Se alle kunder</button>
+                <button
+                  onClick={() => onNavigate?.('Kunder')}
+                  className="text-sm font-medium text-accent hover:underline"
+                >
+                  Se alle kunder
+                </button>
               </div>
               <div className="space-y-3">
-                {clientHighlights.map((client) => (
+                {clientHighlights.length === 0 ? (
+                  <div className="rounded-2xl border border-brand-100 bg-white px-4 py-6 text-center text-sm text-ink-subtle">
+                    Ingen kunder med fakturaer
+                  </div>
+                ) : (
+                  clientHighlights.map((client) => (
                   <div
                     key={client.name}
                     className="flex items-center justify-between rounded-2xl border border-brand-100 bg-white px-4 py-3"
@@ -300,7 +293,8 @@ export function DashboardView({
                     </div>
                     <p className="text-right text-sm font-semibold text-brand-700">{fmt(client.value)}</p>
                   </div>
-                ))}
+                  ))
+                )}
               </div>
             </section>
           </div>
@@ -311,11 +305,19 @@ export function DashboardView({
                 <h3 className="text-lg font-semibold">Status for budsjettår</h3>
                 <p className="mt-1 text-sm text-ink-subtle">Sammenlign perioder og aktiver nye sykluser</p>
               </div>
-              <button className="text-sm font-medium text-accent hover:underline">Administrer år</button>
+              <button
+                type="button"
+                className="text-sm font-medium text-accent hover:underline"
+                onClick={onOpenBudgetYearModal}
+              >
+                Administrer år
+              </button>
             </div>
             <div className="grid gap-4 md:grid-cols-3">
               {budgetYears.map((year) => {
                 const isActive = selectedYear === year.id;
+                const start = year.start ?? year.start_date;
+                const end = year.end ?? year.end_date;
                 return (
                   <div
                     key={year.id}
@@ -325,7 +327,7 @@ export function DashboardView({
                   >
                     <p className="text-sm font-semibold text-ink">{year.label}</p>
                     <p className="mt-1 text-xs text-ink-subtle">
-                      {year.start} → {year.end}
+                      {start ? formatDate(start) : '—'} → {end ? formatDate(end) : '—'}
                     </p>
                     <span
                       className={`mt-3 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
@@ -334,13 +336,29 @@ export function DashboardView({
                     >
                       {isActive ? 'Aktiv' : 'Tilgjengelig'}
                     </span>
+                    <div className="mt-3 flex items-center justify-between text-xs">
+                      <button
+                        type="button"
+                        className="font-medium text-accent hover:underline"
+                        onClick={() => onEditBudgetYear?.(year)}
+                      >
+                        Rediger
+                      </button>
+                      {!isActive ? (
+                        <button
+                          type="button"
+                          className="font-medium text-rose-600 hover:underline"
+                          onClick={() => onDeleteBudgetYear?.(year)}
+                        >
+                          Slett
+                        </button>
+                      ) : null}
+                    </div>
                   </div>
                 );
               })}
             </div>
           </section>
-        </main>
-      </div>
     </div>
   );
 }

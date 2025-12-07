@@ -144,8 +144,8 @@ class FatternDatabase {
 
   createCustomer(customer) {
     const insert = this.db.prepare(`
-      INSERT INTO customers (name, contact_name, address, email, phone, org_number, post_number, post_location, vat_exempt, active)
-      VALUES (@name, @contact_name, @address, @email, @phone, @org_number, @post_number, @post_location, @vat_exempt, @active)
+      INSERT INTO customers (name, contact_name, address, email, phone, org_number, post_number, post_location, vat_exempt, active, image_path)
+      VALUES (@name, @contact_name, @address, @email, @phone, @org_number, @post_number, @post_location, @vat_exempt, @active, @image_path)
     `);
 
     const info = insert.run({
@@ -159,9 +159,63 @@ class FatternDatabase {
       post_location: customer.postLocation || null,
       vat_exempt: customer.vatExempt ? 1 : 0,
       active: customer.active === false ? 0 : 1,
+      image_path: customer.imagePath || null,
     });
 
     return this.db.prepare('SELECT * FROM customers WHERE id = ?').get(info.lastInsertRowid);
+  }
+
+  updateCustomer(customerId, updates) {
+    const existing = this.db.prepare('SELECT * FROM customers WHERE id = ?').get(customerId);
+    if (!existing) {
+      throw new Error('Customer not found');
+    }
+
+    const payload = {
+      id: customerId,
+      name: updates.name ?? existing.name,
+      contact_name: updates.contactName !== undefined ? (updates.contactName || null) : existing.contact_name,
+      address: updates.address !== undefined ? (updates.address || null) : existing.address,
+      email: updates.email !== undefined ? (updates.email || null) : existing.email,
+      phone: updates.phone !== undefined ? (updates.phone || null) : existing.phone,
+      org_number: updates.orgNumber !== undefined ? (updates.orgNumber || null) : existing.org_number,
+      post_number: updates.postNumber !== undefined ? (updates.postNumber || null) : existing.post_number,
+      post_location: updates.postLocation !== undefined ? (updates.postLocation || null) : existing.post_location,
+      vat_exempt: updates.vatExempt !== undefined ? (updates.vatExempt ? 1 : 0) : existing.vat_exempt,
+      active: updates.active !== undefined ? (updates.active ? 1 : 0) : existing.active,
+      image_path: updates.imagePath !== undefined ? (updates.imagePath || null) : existing.image_path,
+    };
+
+    this.db
+      .prepare(
+        `UPDATE customers
+         SET name = @name,
+             contact_name = @contact_name,
+             address = @address,
+             email = @email,
+             phone = @phone,
+             org_number = @org_number,
+             post_number = @post_number,
+             post_location = @post_location,
+             vat_exempt = @vat_exempt,
+             active = @active,
+             image_path = @image_path,
+             updated_at = CURRENT_TIMESTAMP
+         WHERE id = @id`
+      )
+      .run(payload);
+
+    return this.db.prepare('SELECT * FROM customers WHERE id = ?').get(customerId);
+  }
+
+  deleteCustomer(customerId) {
+    const existing = this.db.prepare('SELECT * FROM customers WHERE id = ?').get(customerId);
+    if (!existing) {
+      throw new Error('Customer not found');
+    }
+
+    this.db.prepare('DELETE FROM customers WHERE id = ?').run(customerId);
+    return true;
   }
 
   createInvoice(invoice) {
@@ -227,6 +281,121 @@ class FatternDatabase {
     return this.db.prepare('SELECT * FROM invoices WHERE id = ?').get(invoiceId);
   }
 
+  getInvoice(invoiceId) {
+    const invoice = this.db.prepare('SELECT * FROM invoices WHERE id = ?').get(invoiceId);
+    if (!invoice) return null;
+
+    const items = this.db
+      .prepare('SELECT * FROM invoice_items WHERE invoice_id = ? ORDER BY id')
+      .all(invoiceId);
+
+    return {
+      ...invoice,
+      items: items.map((item) => ({
+        id: item.id,
+        productId: item.product_id,
+        description: item.description,
+        quantity: item.quantity,
+        unitPrice: item.unit_price,
+        vatRate: item.vat_rate,
+        lineTotal: item.line_total,
+      })),
+    };
+  }
+
+  updateInvoice(invoiceId, invoice) {
+    const existing = this.db.prepare('SELECT * FROM invoices WHERE id = ?').get(invoiceId);
+    if (!existing) {
+      throw new Error('Invoice not found');
+    }
+
+    const items = invoice.items || [];
+    const subtotal = items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+    const vatTotal = items.reduce((sum, item) => sum + item.quantity * item.unitPrice * (item.vatRate ?? 0), 0);
+    const total = subtotal + vatTotal;
+
+    const transaction = this.db.transaction(() => {
+      // Update invoice
+      const updateInvoice = this.db.prepare(`
+        UPDATE invoices
+        SET customer_id = @customer_id,
+            invoice_date = @invoice_date,
+            due_date = @due_date,
+            vat_total = @vat_total,
+            subtotal = @subtotal,
+            total = @total,
+            notes = @notes,
+            status = @status,
+            your_reference = @your_reference,
+            our_reference = @our_reference,
+            start_date = @start_date,
+            end_date = @end_date,
+            delivery_reference = @delivery_reference,
+            reference = @reference,
+            custom_fields = @custom_fields,
+            credited = @credited,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = @id
+      `);
+
+      updateInvoice.run({
+        id: invoiceId,
+        customer_id: invoice.customerId,
+        invoice_date: toDateOnlyString(invoice.invoiceDate || new Date()),
+        due_date: toDateOnlyString(invoice.dueDate || new Date()),
+        vat_total: vatTotal,
+        subtotal,
+        total,
+        notes: invoice.notes || null,
+        status: invoice.status || 'draft',
+        your_reference: invoice.yourReference || null,
+        our_reference: invoice.ourReference || null,
+        start_date: invoice.startDate ? toDateOnlyString(invoice.startDate) : null,
+        end_date: invoice.endDate ? toDateOnlyString(invoice.endDate) : null,
+        delivery_reference: invoice.deliveryReference || null,
+        reference: invoice.reference || null,
+        custom_fields: invoice.customFields ? JSON.stringify(invoice.customFields) : null,
+        credited: invoice.credited ? 1 : 0,
+      });
+
+      // Delete existing items
+      this.db.prepare('DELETE FROM invoice_items WHERE invoice_id = ?').run(invoiceId);
+
+      // Insert new items
+      const insertItem = this.db.prepare(`
+        INSERT INTO invoice_items (invoice_id, product_id, description, quantity, unit_price, vat_rate, line_total)
+        VALUES (@invoice_id, @product_id, @description, @quantity, @unit_price, @vat_rate, @line_total)
+      `);
+
+      items.forEach((item) => {
+        const lineTotal = item.quantity * item.unitPrice * (1 + (item.vatRate ?? 0));
+        insertItem.run({
+          invoice_id: invoiceId,
+          product_id: item.productId || null,
+          description: item.description,
+          quantity: item.quantity,
+          unit_price: item.unitPrice,
+          vat_rate: item.vatRate ?? null,
+          line_total: lineTotal,
+        });
+      });
+    });
+
+    transaction();
+    return this.getInvoice(invoiceId);
+  }
+
+  deleteInvoice(invoiceId) {
+    const existing = this.db.prepare('SELECT * FROM invoices WHERE id = ?').get(invoiceId);
+    if (!existing) {
+      throw new Error('Invoice not found');
+    }
+
+    // Items will be deleted via CASCADE
+    this.db.prepare('DELETE FROM invoices WHERE id = ?').run(invoiceId);
+    return true;
+  }
+
   addExpense(expense) {
     const insert = this.db.prepare(`
       INSERT INTO expenses (category_id, vendor, amount, currency, date, notes, attachment_path)
@@ -284,26 +453,26 @@ class FatternDatabase {
   listInvoicesForBudgetYear(budgetYearId, limit = 10) {
     const { start, end } = this.getBudgetYearRange(budgetYearId);
 
-    const rows = this.db
-      .prepare(
-        `
-        SELECT
-          invoices.id,
-          invoices.invoice_number,
-          invoices.invoice_date,
-          invoices.total,
-          invoices.status,
-          customers.name as customer_name
-        FROM invoices
-        LEFT JOIN customers ON customers.id = invoices.customer_id
-        WHERE invoices.invoice_date BETWEEN @start AND @end
-        ORDER BY invoices.invoice_date DESC
-        LIMIT @limit
-      `
-      )
-      .all({ start, end, limit });
+    const query = `
+      SELECT
+        invoices.id,
+        invoices.invoice_number,
+        invoices.invoice_date,
+        invoices.total,
+        invoices.status,
+        customers.name as customer_name
+      FROM invoices
+      LEFT JOIN customers ON customers.id = invoices.customer_id
+      WHERE invoices.invoice_date BETWEEN @start AND @end
+      ORDER BY invoices.invoice_date DESC
+      ${limit != null ? 'LIMIT @limit' : ''}
+    `;
+
+    const params = limit != null ? { start, end, limit } : { start, end };
+    const rows = this.db.prepare(query).all(params);
 
     return rows.map((row) => ({
+      dbId: row.id,
       id: row.invoice_number || `#${row.id}`,
       customer: row.customer_name || 'Ukjent kunde',
       amount: row.total ?? 0,
@@ -315,20 +484,19 @@ class FatternDatabase {
   listExpensesForBudgetYear(budgetYearId, limit = 10) {
     const { start, end } = this.getBudgetYearRange(budgetYearId);
 
-    const rows = this.db
-      .prepare(
-        `
-        SELECT
-          expenses.*,
-          expense_categories.name as category_name
-        FROM expenses
-        LEFT JOIN expense_categories ON expense_categories.id = expenses.category_id
-        WHERE expenses.date BETWEEN @start AND @end
-        ORDER BY expenses.date DESC
-        LIMIT @limit
-      `
-      )
-      .all({ start, end, limit });
+    const query = `
+      SELECT
+        expenses.*,
+        expense_categories.name as category_name
+      FROM expenses
+      LEFT JOIN expense_categories ON expense_categories.id = expenses.category_id
+      WHERE expenses.date BETWEEN @start AND @end
+      ORDER BY expenses.date DESC
+      ${limit != null ? 'LIMIT @limit' : ''}
+    `;
+
+    const params = limit != null ? { start, end, limit } : { start, end };
+    const rows = this.db.prepare(query).all(params);
 
     return rows.map((row) => ({
       id: row.id,
@@ -339,10 +507,14 @@ class FatternDatabase {
     }));
   }
 
+  listCustomers() {
+    return this.db.prepare('SELECT * FROM customers ORDER BY name').all();
+  }
+
   createProduct(product) {
     const insert = this.db.prepare(`
-      INSERT INTO products (name, sku, description, unit_price, vat_rate, unit, active)
-      VALUES (@name, @sku, @description, @unit_price, @vat_rate, @unit, @active)
+      INSERT INTO products (name, sku, description, unit_price, vat_rate, unit, active, image_path)
+      VALUES (@name, @sku, @description, @unit_price, @vat_rate, @unit, @active, @image_path)
     `);
 
     const info = insert.run({
@@ -353,6 +525,7 @@ class FatternDatabase {
       vat_rate: product.vatRate ?? null,
       unit: product.unit || null,
       active: product.active === false ? 0 : 1,
+      image_path: product.imagePath || null,
     });
 
     return this.db.prepare('SELECT * FROM products WHERE id = ?').get(info.lastInsertRowid);
@@ -367,11 +540,59 @@ class FatternDatabase {
   }
 
   setProductActive(productId, active) {
+    const activeValue = active === true || active === 1 || active === '1' ? 1 : 0;
     this.db
       .prepare('UPDATE products SET active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
-      .run(active ? 1 : 0, productId);
+      .run(activeValue, productId);
 
     return this.db.prepare('SELECT * FROM products WHERE id = ?').get(productId);
+  }
+
+  updateProduct(productId, updates) {
+    const existing = this.db.prepare('SELECT * FROM products WHERE id = ?').get(productId);
+    if (!existing) {
+      throw new Error('Product not found');
+    }
+
+    const payload = {
+      id: productId,
+      name: updates.name ?? existing.name,
+      sku: updates.sku ?? existing.sku,
+      description: updates.description ?? existing.description,
+      unit_price: updates.unitPrice ?? existing.unit_price,
+      vat_rate: updates.vatRate ?? existing.vat_rate,
+      unit: updates.unit ?? existing.unit,
+      active: updates.active !== undefined ? (updates.active ? 1 : 0) : existing.active,
+      image_path: updates.imagePath !== undefined ? (updates.imagePath || null) : existing.image_path,
+    };
+
+    this.db
+      .prepare(
+        `UPDATE products
+         SET name = @name,
+             sku = @sku,
+             description = @description,
+             unit_price = @unit_price,
+             vat_rate = @vat_rate,
+             unit = @unit,
+             active = @active,
+             image_path = @image_path,
+             updated_at = CURRENT_TIMESTAMP
+         WHERE id = @id`
+      )
+      .run(payload);
+
+    return this.db.prepare('SELECT * FROM products WHERE id = ?').get(productId);
+  }
+
+  deleteProduct(productId) {
+    const existing = this.db.prepare('SELECT * FROM products WHERE id = ?').get(productId);
+    if (!existing) {
+      throw new Error('Product not found');
+    }
+
+    this.db.prepare('DELETE FROM products WHERE id = ?').run(productId);
+    return true;
   }
 
   linkExpenseToInvoice(invoiceId, expenseId) {
@@ -394,20 +615,81 @@ class FatternDatabase {
     const expenseRow = this.db
       .prepare('SELECT COALESCE(SUM(amount), 0) as expenses FROM expenses WHERE date BETWEEN ? AND ?')
       .get(startDate, endDate);
+    
+    // Calculate overdue and unpaid amounts
+    const overdueRow = this.db
+      .prepare('SELECT COALESCE(SUM(total), 0) as overdue FROM invoices WHERE invoice_date BETWEEN ? AND ? AND status = ?')
+      .get(startDate, endDate, 'overdue');
+    const unpaidRow = this.db
+      .prepare('SELECT COALESCE(SUM(total), 0) as unpaid FROM invoices WHERE invoice_date BETWEEN ? AND ? AND status = ?')
+      .get(startDate, endDate, 'sent');
+    
+    // Calculate paid amount (invoices with status 'paid')
+    const paidRow = this.db
+      .prepare('SELECT COALESCE(SUM(total), 0) as paid FROM invoices WHERE invoice_date BETWEEN ? AND ? AND status = ?')
+      .get(startDate, endDate, 'paid');
 
     const income = incomeRow.income;
     const expenses = expenseRow.expenses;
+    const overdue = overdueRow.overdue;
+    const unpaid = unpaidRow.unpaid;
+    const paid = paidRow.paid;
 
     return {
       budgetYear,
       income,
       expenses,
       net: income - expenses,
+      overdue,
+      unpaid,
+      paid,
     };
   }
 
   listBudgetYears() {
     return this.db.prepare('SELECT * FROM budget_years ORDER BY start_date').all();
+  }
+
+  updateBudgetYear({ id, label, startDate, endDate }) {
+    const existing = this.db.prepare('SELECT * FROM budget_years WHERE id = ?').get(id);
+    if (!existing) {
+      throw new Error('Budget year not found');
+    }
+
+    const payload = {
+      id,
+      label: label ?? existing.label,
+      start_date: startDate ? toDateOnlyString(startDate) : existing.start_date,
+      end_date: endDate ? toDateOnlyString(endDate) : existing.end_date,
+    };
+
+    this.db
+      .prepare(
+        `UPDATE budget_years
+         SET label = @label,
+             start_date = @start_date,
+             end_date = @end_date,
+             updated_at = CURRENT_TIMESTAMP
+         WHERE id = @id`
+      )
+      .run(payload);
+
+    return this.db.prepare('SELECT * FROM budget_years WHERE id = ?').get(id);
+  }
+
+  deleteBudgetYear(id) {
+    const existing = this.db.prepare('SELECT * FROM budget_years WHERE id = ?').get(id);
+    if (!existing) {
+      return false;
+    }
+
+    // Prevent deleting the current active year to avoid confusing state.
+    if (existing.is_current) {
+      throw new Error('Cannot delete the active budget year');
+    }
+
+    const result = this.db.prepare('DELETE FROM budget_years WHERE id = ?').run(id);
+    return result.changes > 0;
   }
 
   setCurrentBudgetYear(budgetYearId) {
@@ -423,6 +705,84 @@ class FatternDatabase {
 
     transaction();
     return this.getCurrentBudgetYear();
+  }
+
+  getSetting(key, defaultValue = null) {
+    const row = this.db.prepare('SELECT value FROM settings WHERE key = ?').get(key);
+    return row ? row.value : defaultValue;
+  }
+
+  setSetting(key, value) {
+    this.db
+      .prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)')
+      .run(key, String(value));
+    return this.getSetting(key);
+  }
+
+  getAllSettings() {
+    const rows = this.db.prepare('SELECT key, value FROM settings').all();
+    return rows.reduce((acc, row) => {
+      acc[row.key] = row.value;
+      return acc;
+    }, {});
+  }
+
+  // Bulk import methods
+  bulkCreateCustomers(customers) {
+    const insert = this.db.prepare(`
+      INSERT INTO customers (name, contact_name, address, email, phone, org_number, post_number, post_location, vat_exempt, active, image_path)
+      VALUES (@name, @contact_name, @address, @email, @phone, @org_number, @post_number, @post_location, @vat_exempt, @active, @image_path)
+    `);
+
+    const transaction = this.db.transaction((customers) => {
+      const results = [];
+      for (const customer of customers) {
+        const info = insert.run({
+          name: customer.name || '',
+          contact_name: customer.contact_name || customer.contactName || null,
+          address: customer.address || null,
+          email: customer.email || null,
+          phone: customer.phone || null,
+          org_number: customer.org_number || customer.orgNumber || null,
+          post_number: customer.post_number || customer.postNumber || null,
+          post_location: customer.post_location || customer.postLocation || null,
+          vat_exempt: customer.vat_exempt || customer.vatExempt ? 1 : 0,
+          active: customer.active !== false ? 1 : 0,
+          image_path: customer.image_path || customer.imagePath || null,
+        });
+        results.push(info.lastInsertRowid);
+      }
+      return results;
+    });
+
+    return transaction(customers);
+  }
+
+  bulkCreateProducts(products) {
+    const insert = this.db.prepare(`
+      INSERT INTO products (name, sku, description, unit_price, vat_rate, unit, active, image_path)
+      VALUES (@name, @sku, @description, @unit_price, @vat_rate, @unit, @active, @image_path)
+    `);
+
+    const transaction = this.db.transaction((products) => {
+      const results = [];
+      for (const product of products) {
+        const info = insert.run({
+          name: product.name || '',
+          sku: product.sku || null,
+          description: product.description || null,
+          unit_price: product.unit_price || product.unitPrice || 0,
+          vat_rate: product.vat_rate !== undefined ? product.vat_rate : (product.vatRate !== undefined ? product.vatRate : null),
+          unit: product.unit || null,
+          active: product.active !== false ? 1 : 0,
+          image_path: product.image_path || product.imagePath || null,
+        });
+        results.push(info.lastInsertRowid);
+      }
+      return results;
+    });
+
+    return transaction(products);
   }
 }
 
