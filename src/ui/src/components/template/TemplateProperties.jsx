@@ -64,6 +64,9 @@ export function TemplateProperties({ element, onUpdate, template }) {
     ...(element.type === 'table' 
       ? [{ id: 'table', label: 'Tabell', icon: FiTable }] 
       : []),
+    ...(element.type === 'shape' 
+      ? [{ id: 'shape', label: 'Form', icon: FiSettings }] 
+      : []),
     { id: 'style', label: 'Stil', icon: FiSettings },
   ];
 
@@ -138,6 +141,18 @@ export function TemplateProperties({ element, onUpdate, template }) {
                   onChange={(e) => applyUpdate({ height: parseFloat(e.target.value) || 0 })}
                   className="w-full rounded-lg border border-sand/60 bg-white px-3 py-2 text-sm text-ink"
                 />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-ink-soft">Z-index (lag)</label>
+                <input
+                  type="number"
+                  value={element.zIndex ?? 1}
+                  onChange={(e) => applyUpdate({ zIndex: parseInt(e.target.value) || 1 })}
+                  className="w-full rounded-lg border border-sand/60 bg-white px-3 py-2 text-sm text-ink"
+                />
+                <p className="mt-1 text-xs text-ink-subtle">
+                  Lavere tall vises bak andre elementer. Formelementer har vanligvis 0.
+                </p>
               </div>
             </div>
           </div>
@@ -436,6 +451,41 @@ export function TemplateProperties({ element, onUpdate, template }) {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Shape Tab */}
+        {activeTab === 'shape' && element.type === 'shape' && (
+          <div className="space-y-4">
+            <div>
+              <label className="mb-1 block text-xs font-medium text-ink-soft">Formtype</label>
+              <select
+                value={element.shapeType || 'rectangle'}
+                onChange={(e) => applyUpdate({ shapeType: e.target.value })}
+                className="w-full rounded-lg border border-sand/60 bg-white px-3 py-2 text-sm text-ink"
+              >
+                <option value="rectangle">Rektangel</option>
+                <option value="circle">Sirkel</option>
+                <option value="line">Linje</option>
+              </select>
+            </div>
+            {element.shapeType === 'line' && (
+              <div>
+                <p className="text-xs text-ink-subtle">
+                  Linjen vil være horisontal hvis bredden er større enn høyden, ellers vertikal.
+                </p>
+                <p className="mt-2 text-xs text-ink-subtle">
+                  Bruk "Stil"-fanen for å justere farger, rammer og andre stilegenskaper.
+                </p>
+              </div>
+            )}
+            {element.shapeType !== 'line' && (
+              <div>
+                <p className="text-xs text-ink-subtle">
+                  Bruk "Stil"-fanen for å justere bakgrunnsfarge, rammer, avrunding og andre stilegenskaper.
+                </p>
+              </div>
+            )}
           </div>
         )}
 

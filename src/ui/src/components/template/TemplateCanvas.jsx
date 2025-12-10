@@ -24,6 +24,34 @@ export function TemplateCanvas({
   // Keep A4 dimensions constant - scale is applied via transform
   const canvasWidth = A4_WIDTH;
   const canvasHeight = A4_HEIGHT;
+  
+  // Snap pan to grid to keep canvas aligned
+  const snapToGrid = (value, gridSize, zoom) => {
+    return Math.round(value / (gridSize * zoom)) * (gridSize * zoom);
+  };
+  
+  const snappedPan = {
+    x: snapToGrid(pan.x, GRID_SIZE, zoomFactor),
+    y: snapToGrid(pan.y, GRID_SIZE, zoomFactor),
+  };
+  
+  // Calculate grid alignment offset to ensure canvas edges align with grid
+  // When centered, we want the canvas edges to fall on grid lines
+  // We calculate the offset needed to align the canvas to the nearest grid intersection
+  const getGridAlignmentOffset = (dimension, gridSize, zoom) => {
+    // The offset needed to align the dimension to the grid
+    // We want the center to be at a position where edges align
+    const halfDimension = dimension / 2;
+    const gridSizeScaled = gridSize * zoom;
+    // Find the offset that makes the edges align with grid
+    const remainder = halfDimension % gridSizeScaled;
+    // If remainder is close to 0 or gridSizeScaled, we're already aligned
+    // Otherwise, adjust by the remainder
+    return remainder < gridSizeScaled / 2 ? -remainder : gridSizeScaled - remainder;
+  };
+  
+  const gridOffsetX = getGridAlignmentOffset(canvasWidth, GRID_SIZE, zoomFactor);
+  const gridOffsetY = getGridAlignmentOffset(canvasHeight, GRID_SIZE, zoomFactor);
 
   // Track space key state for panning
   const [isSpacePressed, setIsSpacePressed] = useState(false);
@@ -142,7 +170,7 @@ export function TemplateCanvas({
           backgroundImage: `linear-gradient(to right, rgba(13, 62, 81, 0.1) 1px, transparent 1px),
                             linear-gradient(to bottom, rgba(13, 62, 81, 0.1) 1px, transparent 1px)`,
           backgroundSize: `${GRID_SIZE * zoomFactor}px ${GRID_SIZE * zoomFactor}px`,
-          backgroundPosition: `${pan.x % (GRID_SIZE * zoomFactor)}px ${pan.y % (GRID_SIZE * zoomFactor)}px`,
+          backgroundPosition: `${snappedPan.x % (GRID_SIZE * zoomFactor)}px ${snappedPan.y % (GRID_SIZE * zoomFactor)}px`,
         }}
       />
 
@@ -155,22 +183,25 @@ export function TemplateCanvas({
           top: '50%',
           width: `${canvasWidth}px`,
           height: `${canvasHeight}px`,
-          transform: `translate(calc(-50% + ${pan.x}px), calc(-50% + ${pan.y}px)) scale(${zoomFactor})`,
+          transform: `translate(calc(-50% + ${snappedPan.x + gridOffsetX}px), calc(-50% + ${snappedPan.y + gridOffsetY}px)) scale(${zoomFactor})`,
           transformOrigin: 'center',
         }}
       >
-        {/* Elements */}
-        {template.elements.map((element) => (
-          <TemplateElement
-            key={element.id}
-            element={element}
-            zoom={zoomFactor}
-            isSelected={selectedElementId === element.id}
-            onSelect={() => onSelectElement(element.id)}
-            onUpdate={(updates) => onUpdateElement(element.id, updates)}
-            onDelete={() => onDeleteElement(element.id)}
-          />
-        ))}
+        {/* Elements - sorted by z-index (lower z-index renders first/behind) */}
+        {[...template.elements]
+          .sort((a, b) => (a.zIndex ?? 1) - (b.zIndex ?? 1))
+          .map((element) => (
+            <TemplateElement
+              key={element.id}
+              element={element}
+              zoom={zoomFactor}
+              isSelected={selectedElementId === element.id}
+              onSelect={() => onSelectElement(element.id)}
+              onUpdate={(updates) => onUpdateElement(element.id, updates)}
+              onDelete={() => onDeleteElement(element.id)}
+              templateId={template?.meta?.id || template?.id}
+            />
+          ))}
       </div>
     </div>
   );

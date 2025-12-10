@@ -96,6 +96,15 @@ const schemaStatements = [
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
   );`,
+  `CREATE TABLE IF NOT EXISTS expense_items (
+    id INTEGER PRIMARY KEY,
+    expense_id INTEGER NOT NULL REFERENCES expenses(id) ON DELETE CASCADE,
+    description TEXT NOT NULL,
+    quantity REAL NOT NULL DEFAULT 1,
+    unit_price REAL NOT NULL,
+    vat_rate REAL,
+    line_total REAL
+  );`,
   `CREATE TABLE IF NOT EXISTS invoice_expense_links (
     invoice_id INTEGER NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,
     expense_id INTEGER NOT NULL REFERENCES expenses(id) ON DELETE CASCADE,

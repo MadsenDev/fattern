@@ -4,61 +4,130 @@ const path = require('path');
 const os = require('os');
 
 /**
+ * Converts an image file path to a data URL
+ */
+function imagePathToDataURL(imagePath) {
+  if (!imagePath || !fs.existsSync(imagePath)) {
+    return null;
+  }
+
+  try {
+    const buffer = fs.readFileSync(imagePath);
+    const base64 = buffer.toString('base64');
+    const ext = path.extname(imagePath).toLowerCase();
+    
+    // Determine MIME type from extension
+    const mimeTypes = {
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.png': 'image/png',
+      '.gif': 'image/gif',
+      '.webp': 'image/webp',
+      '.svg': 'image/svg+xml',
+    };
+    
+    const mimeType = mimeTypes[ext] || 'image/png';
+    return `data:${mimeType};base64,${base64}`;
+  } catch (error) {
+    console.error('Failed to convert image to data URL:', error);
+    return null;
+  }
+}
+
+/**
+ * Processes template elements to convert image paths to data URLs
+ */
+async function processTemplateImages(template) {
+  const { TemplateStorage } = require('../db/templateStorage');
+  const templateStorage = new TemplateStorage();
+  
+  const processedElements = await Promise.all(
+    template.elements.map(async (element) => {
+      if (element.type === 'image' && element.src) {
+        // If already a data URL or HTTP URL, use as-is
+        if (element.src.startsWith('data:') || element.src.startsWith('http')) {
+          return element;
+        }
+        
+        // Convert file path to absolute path
+        let imagePath = element.src;
+        if (!path.isAbsolute(imagePath)) {
+          imagePath = templateStorage.getImagePath(imagePath);
+        }
+        
+        // Convert to data URL
+        const dataURL = imagePathToDataURL(imagePath);
+        if (dataURL) {
+          return { ...element, src: dataURL };
+        }
+      }
+      return element;
+    })
+  );
+  
+  return { ...template, elements: processedElements };
+}
+
+/**
  * Generates a PDF from a template using Electron's printToPDF
  */
 async function generateTemplatePDF(template, invoiceData, company, customer) {
-  return new Promise((resolve, reject) => {
-    // Create a hidden browser window
-    const win = new BrowserWindow({
-      show: false,
-      width: 794,
-      height: 1123,
-      webPreferences: {
-        nodeIntegration: false,
-        contextIsolation: true,
-      },
-    });
+  return new Promise(async (resolve, reject) => {
+    try {
+      // Process template to convert image paths to data URLs
+      const processedTemplate = await processTemplateImages(template);
+      
+      // Create a hidden browser window
+      const win = new BrowserWindow({
+        show: false,
+        width: 794,
+        height: 1123,
+        webPreferences: {
+          nodeIntegration: false,
+          contextIsolation: true,
+        },
+      });
 
-    // Prepare data object for template rendering
-    const data = {
-      invoice: {
-        invoice_number: invoiceData.invoice_number || invoiceData.id,
-        invoice_date: invoiceData.invoice_date,
-        due_date: invoiceData.due_date,
-        status: invoiceData.status,
-        total: invoiceData.total,
-        subtotal: invoiceData.subtotal,
-        vat_total: invoiceData.vat_total,
-        items: (invoiceData.items || []).map((item) => ({
-          description: item.description,
-          quantity: item.quantity,
-          unit_price: item.unit_price || item.unitPrice,
-          vat_rate: item.vat_rate || item.vatRate || 0,
-          line_total: item.line_total || item.lineTotal || (item.quantity * (item.unit_price || item.unitPrice) * (1 + (item.vat_rate || item.vatRate || 0))),
-        })),
-      },
-      customer: customer ? {
-        name: customer.name,
-        org_number: customer.org_number,
-        address: customer.address,
-        post_number: customer.post_number,
-        post_location: customer.post_location,
-        email: customer.email,
-        phone: customer.phone,
-      } : {},
-      company: company ? {
-        name: company.name,
-        org_number: company.org_number,
-        address: company.address,
-        post_number: company.post_number,
-        post_location: company.post_location,
-        contact_email: company.contact_email,
-        contact_number: company.contact_number,
-      } : {},
-    };
+      // Prepare data object for template rendering
+      const data = {
+        invoice: {
+          invoice_number: invoiceData.invoice_number || invoiceData.id,
+          invoice_date: invoiceData.invoice_date,
+          due_date: invoiceData.due_date,
+          status: invoiceData.status,
+          total: invoiceData.total,
+          subtotal: invoiceData.subtotal,
+          vat_total: invoiceData.vat_total,
+          items: (invoiceData.items || []).map((item) => ({
+            description: item.description,
+            quantity: item.quantity,
+            unit_price: item.unit_price || item.unitPrice,
+            vat_rate: item.vat_rate || item.vatRate || 0,
+            line_total: item.line_total || item.lineTotal || (item.quantity * (item.unit_price || item.unitPrice) * (1 + (item.vat_rate || item.vatRate || 0))),
+          })),
+        },
+        customer: customer ? {
+          name: customer.name,
+          org_number: customer.org_number,
+          address: customer.address,
+          post_number: customer.post_number,
+          post_location: customer.post_location,
+          email: customer.email,
+          phone: customer.phone,
+        } : {},
+        company: company ? {
+          name: company.name,
+          org_number: company.org_number,
+          address: company.address,
+          post_number: company.post_number,
+          post_location: company.post_location,
+          contact_email: company.contact_email,
+          contact_number: company.contact_number,
+        } : {},
+      };
 
-    // Generate HTML from template
-    const html = renderTemplateToHTML(template, data);
+      // Generate HTML from processed template
+      const html = renderTemplateToHTML(processedTemplate, data);
 
     // Load HTML into window
     win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
@@ -102,6 +171,9 @@ async function generateTemplatePDF(template, invoiceData, company, customer) {
       win.close();
       reject(new Error(`Failed to load template: ${errorDescription}`));
     });
+    } catch (error) {
+      reject(error);
+    }
   });
 }
 
@@ -147,7 +219,9 @@ function renderTemplateToHTML(template, data) {
       <div class="page">
   `;
 
-  template.elements.forEach((element) => {
+  // Sort elements by z-index (lower z-index renders first/behind)
+  const sortedElements = [...template.elements].sort((a, b) => (a.zIndex ?? 1) - (b.zIndex ?? 1));
+  sortedElements.forEach((element) => {
     html += renderElement(element, data);
   });
 
@@ -176,6 +250,7 @@ function renderElement(element, data) {
     paddingRight: element.paddingRight ? `${element.paddingRight}px` : '0px',
     paddingBottom: element.paddingBottom ? `${element.paddingBottom}px` : '0px',
     paddingLeft: element.paddingLeft ? `${element.paddingLeft}px` : '0px',
+    zIndex: element.zIndex ?? 1,
   };
 
   // Build box shadow if any shadow properties are set
@@ -230,15 +305,26 @@ function renderElement(element, data) {
 
     case 'image':
       if (!element.src) return '';
-      // Convert relative paths to absolute file paths for Electron
+      // Images should already be converted to data URLs by processTemplateImages
+      // But handle any remaining file paths as fallback
       let imageSrc = element.src;
-      if (!imageSrc.startsWith('data:') && !imageSrc.startsWith('http') && !path.isAbsolute(imageSrc)) {
-        // It's a relative path, resolve it relative to templates directory
-        const { TemplateStorage } = require('../db/templateStorage');
-        const templateStorage = new TemplateStorage();
-        imageSrc = templateStorage.getImagePath(imageSrc);
-        // Convert to file:// URL for Electron
-        imageSrc = `file://${imageSrc}`;
+      if (!imageSrc.startsWith('data:') && !imageSrc.startsWith('http')) {
+        // This shouldn't happen if processTemplateImages worked correctly
+        // But as a fallback, try to convert it
+        if (!path.isAbsolute(imageSrc)) {
+          const { TemplateStorage } = require('../db/templateStorage');
+          const templateStorage = new TemplateStorage();
+          imageSrc = templateStorage.getImagePath(imageSrc);
+        }
+        // Convert to data URL
+        const dataURL = imagePathToDataURL(imageSrc);
+        if (dataURL) {
+          imageSrc = dataURL;
+        } else {
+          // If conversion failed, return empty (image won't display)
+          console.warn('Failed to load image:', imageSrc);
+          return '';
+        }
       }
       return `
         <img 
@@ -255,8 +341,53 @@ function renderElement(element, data) {
     case 'table':
       return renderTable(element, data, baseStyle);
 
+    case 'shape':
+      return renderShape(element, baseStyle);
+
     default:
       return '';
+  }
+}
+
+function renderShape(element, baseStyle) {
+  const shapeType = element.shapeType || 'rectangle';
+  
+  if (shapeType === 'line') {
+    // Horizontal or vertical line
+    const isHorizontal = element.width > element.height;
+    const lineStyle = {
+      ...baseStyle,
+      position: 'absolute',
+    };
+    if (isHorizontal) {
+      lineStyle.top = '50%';
+      lineStyle.left = '0';
+      lineStyle.width = '100%';
+      lineStyle.height = `${element.borderWidth || 1}px`;
+      lineStyle.transform = 'translateY(-50%)';
+    } else {
+      lineStyle.left = '50%';
+      lineStyle.top = '0';
+      lineStyle.height = '100%';
+      lineStyle.width = `${element.borderWidth || 1}px`;
+      lineStyle.transform = 'translateX(-50%)';
+    }
+    lineStyle.backgroundColor = element.borderColor || element.backgroundColor || '#0d3e51';
+    lineStyle.borderWidth = '0px';
+    return `<div class="el" style="${objectToStyleString(lineStyle)}"></div>`;
+  } else if (shapeType === 'circle') {
+    const circleStyle = {
+      ...baseStyle,
+      borderRadius: '50%',
+      backgroundColor: element.backgroundColor || '#f0f8f5',
+      borderWidth: element.borderWidth ? `${element.borderWidth}px` : '1px',
+      borderColor: element.borderColor || '#d5e7e6',
+      borderStyle: element.borderStyle || 'solid',
+    };
+    return `<div class="el" style="${objectToStyleString(circleStyle)}"></div>`;
+  } else {
+    // rectangle (default)
+    return `<div class="el" style="${objectToStyleString(baseStyle)}"></div>`;
   }
 }
 

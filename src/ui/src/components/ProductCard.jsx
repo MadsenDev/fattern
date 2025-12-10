@@ -1,8 +1,15 @@
+import { motion } from 'framer-motion';
 import { formatCurrency } from '../utils/formatCurrency';
 
-export function ProductCard({ product, formatCurrency: fmt, onEdit, onDelete }) {
+export function ProductCard({ product, formatCurrency: fmt, onEdit, onDelete, index = 0 }) {
   return (
-    <div className="group relative overflow-hidden rounded-3xl border border-sand/60 bg-white shadow-card transition hover:shadow-lg">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.05 }}
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
+      className="group relative overflow-hidden rounded-3xl border border-sand/60 bg-white shadow-card transition hover:shadow-lg"
+    >
       {product.image_path ? (
         <div className="aspect-square w-full overflow-hidden bg-cloud">
           <img
@@ -58,7 +65,7 @@ export function ProductCard({ product, formatCurrency: fmt, onEdit, onDelete }) 
           </button>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

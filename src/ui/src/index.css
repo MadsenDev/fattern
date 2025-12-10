@@ -4,15 +4,64 @@
 
 @layer base {
   :root {
+    /* Brand colors - default to light theme (RGB format for opacity support) */
+    --color-brand-50: #f0f8f5;
+    --color-brand-50-rgb: 240 248 245;
+    --color-brand-100: #e1f1eb;
+    --color-brand-100-rgb: 225 241 235;
+    --color-brand-200: #c2e3d6;
+    --color-brand-200-rgb: 194 227 214;
+    --color-brand-300: #a4d5c2;
+    --color-brand-300-rgb: 164 213 194;
+    --color-brand-400: #82b8b3;
+    --color-brand-400-rgb: 130 184 179;
+    --color-brand-500: #59a19a;
+    --color-brand-500-rgb: 89 161 154;
+    --color-brand-600: #2f8981;
+    --color-brand-600-rgb: 47 137 129;
+    --color-brand-700: #1b5c64;
+    --color-brand-700-rgb: 27 92 100;
+    --color-brand-800: #144d5b;
+    --color-brand-800-rgb: 20 77 91;
+    --color-brand-900: #0d3e51;
+    --color-brand-900-rgb: 13 62 81;
+    --color-brand-950: #041318;
+    --color-brand-950-rgb: 4 19 24;
+    
+    /* Semantic colors (RGB format for opacity support) */
+    --color-ink: #0d3e51;
+    --color-ink-rgb: 13 62 81;
+    --color-ink-soft: #3d6574;
+    --color-ink-soft-rgb: 61 101 116;
+    --color-ink-subtle: #6e8b97;
+    --color-ink-subtle-rgb: 110 139 151;
+    --color-accent: #2f8981;
+    --color-accent-rgb: 47 137 129;
+    --color-moss: #67b999;
+    --color-moss-rgb: 103 185 153;
+    --color-cloud: #f0f8f5;
+    --color-cloud-rgb: 240 248 245;
+    --color-mist: #e1f1eb;
+    --color-mist-rgb: 225 241 235;
+    --color-sand: #d5e7e6;
+    --color-sand-rgb: 213 231 230;
+    --color-foam: #a4d5c2;
+    --color-foam-rgb: 164 213 194;
+    --color-tide: #82b8b3;
+    --color-tide-rgb: 130 184 179;
+    --color-white: #ffffff;
+    --color-black: #000000;
+    
     color-scheme: light;
-    background-color: theme('colors.cloud');
-    color: theme('colors.ink');
+    background-color: var(--color-cloud);
+    color: var(--color-ink);
   }
 
   body {
     font-family: theme('fontFamily.sans');
-    background-color: theme('colors.cloud');
-    color: theme('colors.ink');
+    background-color: var(--color-cloud);
+    color: var(--color-ink);
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 }
 
@@ -21,7 +70,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: rgba(13, 62, 81, 0.18);
+  background-color: color-mix(in srgb, var(--color-ink) 18%, transparent);
   border-radius: 12px;
 }
 
@@ -31,7 +80,8 @@
 
 @layer components {
   .card {
-    @apply bg-white rounded-xl shadow-card border border-sand/60;
+    @apply rounded-xl shadow-card border border-sand/60;
+    background-color: var(--color-white);
   }
 
   .badge {

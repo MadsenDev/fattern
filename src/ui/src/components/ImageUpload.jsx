@@ -22,8 +22,8 @@ export function ImageUpload({ value, onChange, label = 'Bilde', maxSizeMB = 5, t
     }
 
     // If it's a file path, read it via IPC
-    if (window.fattern?.template?.readImage) {
-      window.fattern.template.readImage(value).then((dataURL) => {
+    if (window.fattern?.template?.readImage && templateId) {
+      window.fattern.template.readImage(templateId, value).then((dataURL) => {
         setPreview(dataURL);
       }).catch(() => {
         setPreview(null);

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 export function useExpenses(budgetYearId, options = {}) {
   const [data, setData] = useState(null);
   const [isLoading, setLoading] = useState(false);
-  const { limit } = options;
+  const { limit, refreshKey } = options;
 
   useEffect(() => {
     const api = typeof window !== 'undefined' ? window.fattern?.db : null;
@@ -32,7 +32,7 @@ export function useExpenses(budgetYearId, options = {}) {
     return () => {
       cancelled = true;
     };
-  }, [budgetYearId, limit]);
+  }, [budgetYearId, limit, refreshKey]);
 
   return { expenses: data, isLoading };
 }

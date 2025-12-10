@@ -25,7 +25,11 @@ function registerTemplateHandlers(ipcMain) {
   // Save a template
   ipcMain.handle('template:save', (event, template) => {
     const storage = getTemplateStorage();
-    return storage.saveTemplate(template);
+    // Get company name for default author if not set
+    const { FatternDatabase } = require('../db/fatternDatabase');
+    const database = new FatternDatabase();
+    const company = database.ensureCompany();
+    return storage.saveTemplate(template, { companyName: company?.name });
   });
 
   // Delete a template
@@ -46,6 +50,32 @@ function registerTemplateHandlers(ipcMain) {
     return storage.createDefaultTemplate();
   });
 
+  // Create preset templates
+  ipcMain.handle('template:create-presets', () => {
+    try {
+      const storage = getTemplateStorage();
+      const result = storage.createPresetTemplates();
+      console.log('createPresetTemplates returned:', result);
+      return result;
+    } catch (error) {
+      console.error('Error creating preset templates:', error);
+      throw error;
+    }
+  });
+
+  // Create premium templates
+  ipcMain.handle('template:create-premium', () => {
+    try {
+      const storage = getTemplateStorage();
+      const result = storage.createPremiumTemplates();
+      console.log('createPremiumTemplates returned:', result);
+      return result;
+    } catch (error) {
+      console.error('Error creating premium templates:', error);
+      throw error;
+    }
+  });
+
   // Save an image for a template element
   ipcMain.handle('template:save-image', (event, templateId, elementId, imageData) => {
     const storage = getTemplateStorage();
@@ -53,18 +83,18 @@ function registerTemplateHandlers(ipcMain) {
   });
 
   // Get absolute path for an image
-  ipcMain.handle('template:get-image-path', (event, imagePath) => {
+  ipcMain.handle('template:get-image-path', (event, templateId, imagePath) => {
     const storage = getTemplateStorage();
-    return storage.getImagePath(imagePath);
+    return storage.getImagePath(templateId, imagePath);
   });
 
   // Read image file and return as data URL
-  ipcMain.handle('template:read-image', async (event, imagePath) => {
+  ipcMain.handle('template:read-image', async (event, templateId, imagePath) => {
     const fs = require('fs');
     const storage = getTemplateStorage();
-    const absolutePath = storage.getImagePath(imagePath);
+    const absolutePath = storage.getImagePath(templateId, imagePath);
     
-    if (!fs.existsSync(absolutePath)) {
+    if (!absolutePath || !fs.existsSync(absolutePath)) {
       throw new Error('Image file not found');
     }
     
@@ -83,6 +113,50 @@ function registerTemplateHandlers(ipcMain) {
     const mimeType = mimeTypes[ext] || 'image/png';
     
     return `data:${mimeType};base64,${base64}`;
+  });
+
+  // Export template to package
+  ipcMain.handle('template:export-package', async (event, templateId, outputPath) => {
+    const { exportTemplateToPackage } = require('../db/templatePackage');
+    const storage = getTemplateStorage();
+    
+    await exportTemplateToPackage(
+      templateId,
+      outputPath,
+      (id) => storage.loadTemplate(id),
+      (id) => storage.getTemplateDir(id)
+    );
+    
+    return { success: true, filepath: outputPath };
+  });
+
+  // Import template from package
+  ipcMain.handle('template:import-package', async (event, packagePath) => {
+    const { importTemplateFromPackage } = require('../db/templatePackage');
+    const storage = getTemplateStorage();
+    
+    const result = await importTemplateFromPackage(
+      packagePath,
+      (id) => storage.getTemplateDir(id),
+      () => storage.listTemplates()
+    );
+    
+    return result;
+  });
+
+  // Validate template
+  ipcMain.handle('template:validate', (event, template) => {
+    const { validateTemplate } = require('../db/templateValidator');
+    const packageJson = require('../../package.json');
+    const currentVersion = packageJson.version || '1.0.0';
+    
+    return validateTemplate(template, currentVersion);
+  });
+
+  // Validate template package (without importing)
+  ipcMain.handle('template:validate-package', async (event, packagePath) => {
+    const { validateTemplatePackage } = require('../db/templatePackage');
+    return await validateTemplatePackage(packagePath);
   });
 }
 

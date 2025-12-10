@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { FiArrowLeft, FiSave, FiZoomIn, FiZoomOut, FiMaximize2, FiEye } from 'react-icons/fi';
+import { FiArrowLeft, FiSave, FiZoomIn, FiZoomOut, FiMaximize2, FiEye, FiSettings } from 'react-icons/fi';
 import { TemplateCanvas } from '../components/template/TemplateCanvas';
 import { TemplatePalette } from '../components/template/TemplatePalette';
 import { TemplateProperties } from '../components/template/TemplateProperties';
 import { TemplatePreview } from '../components/template/TemplatePreview';
+import { TemplateSettingsModal } from '../components/template/TemplateSettingsModal';
 import { useTemplateHistory } from '../hooks/useTemplateHistory';
 
 export function TemplateEditorPage({ templateId, onClose }) {
@@ -23,6 +24,7 @@ export function TemplateEditorPage({ templateId, onClose }) {
     // Check if templateId contains preview parameter
     return templateId?.includes('?preview=true') || false;
   });
+  const [showSettings, setShowSettings] = useState(false);
   const { history, pushToHistory, undo, redo, canUndo, canRedo } = useTemplateHistory();
   
   // Extract actual templateId if it contains query params
@@ -67,6 +69,13 @@ export function TemplateEditorPage({ templateId, onClose }) {
     } catch (error) {
       console.error('Failed to save template', error);
     }
+  };
+
+  const handleSaveSettings = (updatedTemplate) => {
+    setTemplate(updatedTemplate);
+    pushToHistory(updatedTemplate);
+    // Auto-save when settings are updated
+    handleSave();
   };
 
   const handleUpdateTemplate = useCallback((updater) => {
@@ -155,7 +164,7 @@ export function TemplateEditorPage({ templateId, onClose }) {
             Tilbake
           </button>
           <div className="h-6 w-px bg-sand/60" />
-          <h1 className="text-sm font-semibold text-ink">{template.name}</h1>
+          <h1 className="text-sm font-semibold text-ink">{template.meta?.name || template.name}</h1>
         </div>
 
         <div className="flex items-center gap-2">
@@ -223,6 +232,18 @@ export function TemplateEditorPage({ templateId, onClose }) {
 
           <div className="h-6 w-px bg-sand/60" />
 
+          {/* Settings */}
+          <button
+            onClick={() => setShowSettings(true)}
+            className="rounded-lg px-4 py-1.5 text-sm font-medium text-ink hover:bg-cloud"
+            title="Mal innstillinger"
+          >
+            <FiSettings className="mr-2 inline h-4 w-4" />
+            Innstillinger
+          </button>
+
+          <div className="h-6 w-px bg-sand/60" />
+
           {/* Save */}
           <button
             onClick={handleSave}
@@ -266,6 +287,14 @@ export function TemplateEditorPage({ templateId, onClose }) {
           />
         </div>
       )}
+
+      {/* Settings Modal */}
+      <TemplateSettingsModal
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+        template={template}
+        onSave={handleSaveSettings}
+      />
     </div>
   );
 }
@@ -292,6 +321,7 @@ function createElement(type) {
         fontWeight: 400,
         color: '#0d3e51',
         align: 'left',
+        zIndex: 1,
       };
     case 'field':
       return {
@@ -303,6 +333,7 @@ function createElement(type) {
         fontWeight: 400,
         color: '#0d3e51',
         align: 'left',
+        zIndex: 1,
       };
     case 'image':
       return {
@@ -312,6 +343,7 @@ function createElement(type) {
         width: 200,
         height: 100,
         preserveAspectRatio: true,
+        zIndex: 1,
       };
     case 'table':
       return {
@@ -328,6 +360,21 @@ function createElement(type) {
         ],
         rowHeight: 18,
         maxRows: 15,
+        zIndex: 1,
+      };
+    case 'shape':
+      return {
+        ...baseElement,
+        type: 'shape',
+        shapeType: 'rectangle', // 'rectangle' | 'line' | 'circle'
+        width: 200,
+        height: 100,
+        backgroundColor: '#f0f8f5',
+        borderWidth: 1,
+        borderColor: '#d5e7e6',
+        borderStyle: 'solid',
+        borderRadius: 0,
+        zIndex: 0, // Shapes default to lower z-index
       };
     default:
       return baseElement;

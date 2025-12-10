@@ -1,5 +1,5 @@
 const path = require('path');
-const { app, BrowserWindow, ipcMain, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, shell, dialog } = require('electron');
 const { FatternDatabase } = require('../db/fatternDatabase');
 const { registerDatabaseHandlers } = require('./dbHandlers');
 const { registerTemplateHandlers } = require('./templateHandlers');
@@ -9,11 +9,28 @@ const { generateTemplatePDF } = require('./templatePdfGenerator');
 const isDev = Boolean(process.env.VITE_DEV_SERVER_URL);
 let database;
 
+// Set app icon
+const iconPath = path.join(__dirname, '..', 'assets', 'icons', 'icon.png');
+const fs = require('fs');
+if (fs.existsSync(iconPath)) {
+  // Set icon for the app (affects dock/taskbar)
+  if (process.platform === 'darwin') {
+    // macOS dock icon
+    app.dock?.setIcon(iconPath);
+  }
+  // Windows/Linux will use the icon from BrowserWindow
+}
+
 function createWindow() {
+  // Use PNG icon if available, fallback to SVG
+  const iconPathSvg = path.join(__dirname, '..', 'ui', 'public', 'fattern-monogram.svg');
+  const icon = fs.existsSync(iconPath) ? iconPath : iconPathSvg;
+
   const win = new BrowserWindow({
     width: 1280,
     height: 800,
     title: 'Fattern',
+    icon: icon,
     frame: false,
     titleBarStyle: 'hidden',
     webPreferences: {
@@ -50,6 +67,19 @@ app.whenReady().then(() => {
   
   // Register template handlers
   registerTemplateHandlers(ipcMain);
+  
+  // File dialogs for template import/export
+  ipcMain.handle('dialog:show-open-dialog', async (event, options) => {
+    const win = BrowserWindow.getFocusedWindow();
+    const result = await dialog.showOpenDialog(win || BrowserWindow.getAllWindows()[0], options);
+    return result;
+  });
+
+  ipcMain.handle('dialog:show-save-dialog', async (event, options) => {
+    const win = BrowserWindow.getFocusedWindow();
+    const result = await dialog.showSaveDialog(win || BrowserWindow.getAllWindows()[0], options);
+    return result;
+  });
   
   // Window controls
   ipcMain.handle('window:minimize', () => {
@@ -116,19 +146,25 @@ app.whenReady().then(() => {
         ? database.db.prepare('SELECT * FROM customers WHERE id = ?').get(invoice.customer_id)
         : null;
 
-      // If templateId is provided, use template-based generation
+      // If templateId is provided, try template-based generation
       if (templateId) {
-        const { TemplateStorage } = require('../db/templateStorage');
-        const templateStorage = new TemplateStorage();
-        const template = templateStorage.loadTemplate(templateId);
-        if (!template) {
-          throw new Error('Template not found');
+        try {
+          const { TemplateStorage } = require('../db/templateStorage');
+          const templateStorage = new TemplateStorage();
+          const template = templateStorage.loadTemplate(templateId);
+          if (template) {
+            const filepath = await generateTemplatePDF(template, invoice, company, customer);
+            return { success: true, filepath };
+          }
+          // Template not found, fall back to default generator
+          console.warn(`Template ${templateId} not found, falling back to default PDF generator`);
+        } catch (error) {
+          // Template generation failed, fall back to default generator
+          console.warn(`Template-based PDF generation failed: ${error.message}, falling back to default PDF generator`);
         }
-        const filepath = await generateTemplatePDF(template, invoice, company, customer);
-        return { success: true, filepath };
       }
 
-      // Otherwise use the default PDF generator
+      // Use the default PDF generator (either no templateId provided, or template not found/failed)
       const filepath = await generateInvoicePDF(invoice, company, customer);
       return { success: true, filepath };
     } catch (error) {
@@ -143,6 +179,96 @@ app.whenReady().then(() => {
       return { success: true };
     } catch (error) {
       console.error('Error opening file:', error);
+      throw error;
+    }
+  });
+
+  // Expense attachment handlers
+  const fs = require('fs');
+  const os = require('os');
+  const attachmentsDir = path.join(os.homedir(), 'Fattern', 'data', 'attachments');
+  
+  // Ensure attachments directory exists
+  if (!fs.existsSync(attachmentsDir)) {
+    fs.mkdirSync(attachmentsDir, { recursive: true });
+  }
+
+  // Save expense attachment (receipt/image)
+  ipcMain.handle('expense:save-attachment', async (event, expenseId, imageData) => {
+    try {
+      // Extract image data from data URL if needed
+      let buffer;
+      let extension = 'png';
+      
+      if (typeof imageData === 'string') {
+        if (imageData.startsWith('data:')) {
+          // Parse data URL: data:image/png;base64,...
+          const matches = imageData.match(/^data:image\/(\w+);base64,(.+)$/);
+          if (matches) {
+            extension = matches[1];
+            const base64Data = matches[2];
+            buffer = Buffer.from(base64Data, 'base64');
+          } else {
+            throw new Error('Invalid image data URL format');
+          }
+        } else {
+          // Assume it's already a file path
+          return imageData;
+        }
+      } else {
+        throw new Error('Image data must be a string (data URL or file path)');
+      }
+
+      // Generate unique filename: expense_<expenseId>_<timestamp>.<extension>
+      const timestamp = Date.now();
+      const filename = `expense_${expenseId || 'new'}_${timestamp}.${extension}`;
+      const filepath = path.join(attachmentsDir, filename);
+      
+      // Save the file
+      fs.writeFileSync(filepath, buffer);
+      
+      // Return relative path from attachments directory
+      return filename;
+    } catch (error) {
+      console.error('Error saving expense attachment:', error);
+      throw error;
+    }
+  });
+
+  // Get absolute path for an expense attachment
+  ipcMain.handle('expense:get-attachment-path', (event, filename) => {
+    if (!filename) return null;
+    if (path.isAbsolute(filename)) return filename;
+    return path.join(attachmentsDir, filename);
+  });
+
+  // Read expense attachment and return as data URL
+  ipcMain.handle('expense:read-attachment', async (event, filename) => {
+    try {
+      const absolutePath = path.join(attachmentsDir, filename);
+      
+      if (!fs.existsSync(absolutePath)) {
+        throw new Error('Attachment file not found');
+      }
+      
+      const buffer = fs.readFileSync(absolutePath);
+      const base64 = buffer.toString('base64');
+      
+      // Determine MIME type from file extension
+      const ext = path.extname(absolutePath).toLowerCase();
+      const mimeTypes = {
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.png': 'image/png',
+        '.gif': 'image/gif',
+        '.webp': 'image/webp',
+        '.pdf': 'application/pdf',
+      };
+      const mimeType = mimeTypes[ext] || 'image/png';
+      
+      return `data:${mimeType};base64,${base64}`;
+    } catch (error) {
+      console.error('Error reading expense attachment:', error);
       throw error;
     }
   });

@@ -3,10 +3,11 @@ export function formatCurrency(amount, currency = 'NOK') {
     return new Intl.NumberFormat('nb-NO', {
       style: 'currency',
       currency,
-      maximumFractionDigits: 0,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(amount ?? 0);
   } catch {
-    return `${amount ?? 0}`;
+    return `${(amount ?? 0).toFixed(2)}`;
   }
 }
 

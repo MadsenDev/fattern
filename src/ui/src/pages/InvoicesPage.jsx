@@ -1,29 +1,40 @@
 import { useMemo, useState } from 'react';
-import { FiEdit2, FiTrash2, FiDownload } from 'react-icons/fi';
+import { FiEdit2, FiTrash2, FiDownload, FiEye } from 'react-icons/fi';
 import { DataTable } from '../components/DataTable';
 import { StatusBadge } from '../components/StatusBadge';
+import { InvoiceStatusSelector } from '../components/invoices/InvoiceStatusSelector';
 import { formatDate } from '../utils/formatDate';
 import { formatCurrency } from '../utils/formatCurrency';
+import { useSettings } from '../hooks/useSettings';
 
-export function InvoicesPage({ invoices, formatCurrency: fmt, onCreateInvoice, onEditInvoice, onDeleteInvoice, showToast }) {
+export function InvoicesPage({ invoices, formatCurrency: fmt, onCreateInvoice, onEditInvoice, onDeleteInvoice, onViewInvoice, onStatusChange, showStatusModal, showToast }) {
   const [generatingPdf, setGeneratingPdf] = useState(null);
+  const { getSetting } = useSettings();
 
   const handleGeneratePDF = async (invoice) => {
     if (!invoice?.dbId) return;
     
     setGeneratingPdf(invoice.dbId);
     try {
-      const api = typeof window !== 'undefined' ? window.fattern?.pdf : null;
-      if (!api?.generateInvoice) {
+      const api = typeof window !== 'undefined' ? window.fattern : null;
+      if (!api?.pdf?.generateInvoice) {
         throw new Error('PDF generation ikke tilgjengelig');
       }
 
-      const result = await api.generateInvoice(invoice.dbId);
+      // Ensure default template exists
+      if (api.template?.createDefault) {
+        await api.template.createDefault();
+      }
+
+      // Get default template ID from settings
+      const defaultTemplateId = getSetting('invoice.defaultTemplate', 'default_invoice');
+
+      const result = await api.pdf.generateInvoice(invoice.dbId, defaultTemplateId);
       if (result?.success && result?.filepath) {
         showToast?.success('PDF lastet ned');
         // Optionally open the file
-        if (api.openFile) {
-          await api.openFile(result.filepath);
+        if (api.pdf.openFile) {
+          await api.pdf.openFile(result.filepath);
         }
       }
     } catch (error) {
@@ -39,6 +50,14 @@ export function InvoicesPage({ invoices, formatCurrency: fmt, onCreateInvoice, o
         key: 'id',
         label: 'Faktura',
         className: 'font-semibold text-ink',
+        render: (id, invoice) => (
+          <button
+            onClick={() => onViewInvoice?.(invoice)}
+            className="hover:text-brand-700 hover:underline cursor-pointer text-left"
+          >
+            {invoice.invoice_number || id}
+          </button>
+        ),
       },
       {
         key: 'customer',
@@ -48,7 +67,13 @@ export function InvoicesPage({ invoices, formatCurrency: fmt, onCreateInvoice, o
       {
         key: 'status',
         label: 'Status',
-        render: (status) => <StatusBadge status={status} />,
+        render: (status, invoice) => (
+          <InvoiceStatusSelector
+            invoice={invoice}
+            onStatusChange={onStatusChange}
+            showModal={showStatusModal}
+          />
+        ),
         sortFn: (a, b) => {
           const statusOrder = { draft: 0, sent: 1, paid: 2, overdue: 3 };
           return (statusOrder[a] || 99) - (statusOrder[b] || 99);
@@ -57,7 +82,16 @@ export function InvoicesPage({ invoices, formatCurrency: fmt, onCreateInvoice, o
       {
         key: 'date',
         label: 'Dato',
-        render: (date) => (date ? formatDate(date) : '—'),
+        render: (date, invoice) => (
+          <div className="flex flex-col">
+            <span className="text-ink-subtle">{date ? formatDate(date) : '—'}</span>
+            {invoice.status === 'paid' && invoice.payment_date && (
+              <span className="text-xs text-brand-700 font-medium">
+                Betalt: {formatDate(invoice.payment_date)}
+              </span>
+            )}
+          </div>
+        ),
         className: 'text-ink-subtle',
         sortFn: (a, b) => {
           const aDate = a ? new Date(a).getTime() : 0;
@@ -84,6 +118,14 @@ export function InvoicesPage({ invoices, formatCurrency: fmt, onCreateInvoice, o
         render: (_, invoice) => (
           <div className="flex items-center justify-end gap-2">
             <button
+              onClick={() => onViewInvoice?.(invoice)}
+              className="rounded-lg p-1.5 text-ink-subtle hover:bg-brand-50 hover:text-brand-700"
+              aria-label="Vis faktura"
+              title="Vis faktura"
+            >
+              <FiEye className="h-4 w-4" />
+            </button>
+            <button
               onClick={() => handleGeneratePDF(invoice)}
               disabled={generatingPdf === invoice.dbId}
               className="rounded-lg p-1.5 text-ink-subtle hover:bg-brand-50 hover:text-brand-700 disabled:opacity-50"
@@ -96,6 +138,7 @@ export function InvoicesPage({ invoices, formatCurrency: fmt, onCreateInvoice, o
               onClick={() => onEditInvoice?.(invoice)}
               className="rounded-lg p-1.5 text-ink-subtle hover:bg-brand-50 hover:text-brand-700"
               aria-label="Rediger faktura"
+              title="Rediger faktura"
             >
               <FiEdit2 className="h-4 w-4" />
             </button>
@@ -103,6 +146,7 @@ export function InvoicesPage({ invoices, formatCurrency: fmt, onCreateInvoice, o
               onClick={() => onDeleteInvoice?.(invoice)}
               className="rounded-lg p-1.5 text-ink-subtle hover:bg-red-50 hover:text-red-600"
               aria-label="Slett faktura"
+              title="Slett faktura"
             >
               <FiTrash2 className="h-4 w-4" />
             </button>
@@ -110,7 +154,7 @@ export function InvoicesPage({ invoices, formatCurrency: fmt, onCreateInvoice, o
         ),
       },
     ],
-    [fmt, onEditInvoice, onDeleteInvoice]
+    [fmt, onEditInvoice, onDeleteInvoice, onViewInvoice]
   );
 
   return (

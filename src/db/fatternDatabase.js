@@ -326,6 +326,7 @@ class FatternDatabase {
             total = @total,
             notes = @notes,
             status = @status,
+            payment_date = @payment_date,
             your_reference = @your_reference,
             our_reference = @our_reference,
             start_date = @start_date,
@@ -348,6 +349,7 @@ class FatternDatabase {
         total,
         notes: invoice.notes || null,
         status: invoice.status || 'draft',
+        payment_date: invoice.paymentDate ? toDateOnlyString(invoice.paymentDate) : null,
         your_reference: invoice.yourReference || null,
         our_reference: invoice.ourReference || null,
         start_date: invoice.startDate ? toDateOnlyString(invoice.startDate) : null,
@@ -385,6 +387,29 @@ class FatternDatabase {
     return this.getInvoice(invoiceId);
   }
 
+  updateInvoiceStatus(invoiceId, status, paymentDate = null) {
+    const existing = this.db.prepare('SELECT * FROM invoices WHERE id = ?').get(invoiceId);
+    if (!existing) {
+      throw new Error('Invoice not found');
+    }
+
+    this.db
+      .prepare(
+        `UPDATE invoices
+         SET status = @status,
+             payment_date = @payment_date,
+             updated_at = CURRENT_TIMESTAMP
+         WHERE id = @id`
+      )
+      .run({
+        id: invoiceId,
+        status,
+        payment_date: paymentDate ? toDateOnlyString(paymentDate) : null,
+      });
+
+    return this.getInvoice(invoiceId);
+  }
+
   deleteInvoice(invoiceId) {
     const existing = this.db.prepare('SELECT * FROM invoices WHERE id = ?').get(invoiceId);
     if (!existing) {
@@ -397,22 +422,60 @@ class FatternDatabase {
   }
 
   addExpense(expense) {
-    const insert = this.db.prepare(`
-      INSERT INTO expenses (category_id, vendor, amount, currency, date, notes, attachment_path)
-      VALUES (@category_id, @vendor, @amount, @currency, @date, @notes, @attachment_path)
-    `);
+    const items = expense.items || [];
+    
+    // Calculate total from items if provided, otherwise use amount
+    let totalAmount = expense.amount || 0;
+    if (items.length > 0) {
+      totalAmount = items.reduce((sum, item) => {
+        const lineTotal = (item.quantity || 1) * (item.unitPrice || 0) * (1 + (item.vatRate || 0));
+        return sum + lineTotal;
+      }, 0);
+    }
 
-    const info = insert.run({
-      category_id: expense.categoryId || null,
-      vendor: expense.vendor || null,
-      amount: expense.amount,
-      currency: expense.currency || 'NOK',
-      date: toDateOnlyString(expense.date || new Date()),
-      notes: expense.notes || null,
-      attachment_path: expense.attachmentPath || null,
+    const transaction = this.db.transaction(() => {
+      const insert = this.db.prepare(`
+        INSERT INTO expenses (category_id, vendor, amount, currency, date, notes, attachment_path)
+        VALUES (@category_id, @vendor, @amount, @currency, @date, @notes, @attachment_path)
+      `);
+
+      const info = insert.run({
+        category_id: expense.categoryId || null,
+        vendor: expense.vendor || null,
+        amount: totalAmount,
+        currency: expense.currency || 'NOK',
+        date: toDateOnlyString(expense.date || new Date()),
+        notes: expense.notes || null,
+        attachment_path: expense.attachmentPath || null,
+      });
+
+      const expenseId = info.lastInsertRowid;
+
+      // Insert expense items if provided
+      if (items.length > 0) {
+        const insertItem = this.db.prepare(`
+          INSERT INTO expense_items (expense_id, description, quantity, unit_price, vat_rate, line_total)
+          VALUES (@expense_id, @description, @quantity, @unit_price, @vat_rate, @line_total)
+        `);
+
+        items.forEach((item) => {
+          const lineTotal = (item.quantity || 1) * (item.unitPrice || 0) * (1 + (item.vatRate || 0));
+          insertItem.run({
+            expense_id: expenseId,
+            description: item.description,
+            quantity: item.quantity || 1,
+            unit_price: item.unitPrice || 0,
+            vat_rate: item.vatRate ?? null,
+            line_total: lineTotal,
+          });
+        });
+      }
+
+      return expenseId;
     });
 
-    return this.db.prepare('SELECT * FROM expenses WHERE id = ?').get(info.lastInsertRowid);
+    const expenseId = transaction();
+    return this.getExpense(expenseId);
   }
 
   createExpenseCategory(category) {
@@ -431,6 +494,159 @@ class FatternDatabase {
 
   listExpenseCategories() {
     return this.db.prepare('SELECT * FROM expense_categories ORDER BY name').all();
+  }
+
+  getExpense(expenseId) {
+    const expense = this.db.prepare('SELECT * FROM expenses WHERE id = ?').get(expenseId);
+    if (!expense) return null;
+    
+    // Get category name if exists
+    if (expense.category_id) {
+      const category = this.db.prepare('SELECT * FROM expense_categories WHERE id = ?').get(expense.category_id);
+      if (category) {
+        expense.category_name = category.name;
+      }
+    }
+    
+    // Get expense items
+    const items = this.db.prepare('SELECT * FROM expense_items WHERE expense_id = ? ORDER BY id').all(expenseId);
+    expense.items = items.map((item) => ({
+      id: item.id,
+      description: item.description,
+      quantity: item.quantity,
+      unitPrice: item.unit_price,
+      vatRate: item.vat_rate,
+      lineTotal: item.line_total,
+    }));
+    
+    return expense;
+  }
+
+  updateExpense(expenseId, updates) {
+    const existing = this.db.prepare('SELECT * FROM expenses WHERE id = ?').get(expenseId);
+    if (!existing) {
+      throw new Error('Expense not found');
+    }
+
+    const items = updates.items || [];
+    
+    // Calculate total from items if provided, otherwise use amount
+    let totalAmount = updates.amount !== undefined ? updates.amount : existing.amount;
+    if (items.length > 0) {
+      totalAmount = items.reduce((sum, item) => {
+        const lineTotal = (item.quantity || 1) * (item.unitPrice || 0) * (1 + (item.vatRate || 0));
+        return sum + lineTotal;
+      }, 0);
+    }
+
+    const transaction = this.db.transaction(() => {
+      const payload = {
+        id: expenseId,
+        category_id: updates.categoryId !== undefined ? (updates.categoryId || null) : existing.category_id,
+        vendor: updates.vendor !== undefined ? (updates.vendor || null) : existing.vendor,
+        amount: totalAmount,
+        currency: updates.currency !== undefined ? updates.currency : existing.currency,
+        date: updates.date !== undefined ? toDateOnlyString(updates.date) : existing.date,
+        notes: updates.notes !== undefined ? (updates.notes || null) : existing.notes,
+        attachment_path: updates.attachmentPath !== undefined ? (updates.attachmentPath || null) : existing.attachment_path,
+      };
+
+      this.db
+        .prepare(
+          `UPDATE expenses
+           SET category_id = @category_id,
+               vendor = @vendor,
+               amount = @amount,
+               currency = @currency,
+               date = @date,
+               notes = @notes,
+               attachment_path = @attachment_path,
+               updated_at = CURRENT_TIMESTAMP
+           WHERE id = @id`
+        )
+        .run(payload);
+
+      // Delete existing items
+      this.db.prepare('DELETE FROM expense_items WHERE expense_id = ?').run(expenseId);
+
+      // Insert new items if provided
+      if (items.length > 0) {
+        const insertItem = this.db.prepare(`
+          INSERT INTO expense_items (expense_id, description, quantity, unit_price, vat_rate, line_total)
+          VALUES (@expense_id, @description, @quantity, @unit_price, @vat_rate, @line_total)
+        `);
+
+        items.forEach((item) => {
+          const lineTotal = (item.quantity || 1) * (item.unitPrice || 0) * (1 + (item.vatRate || 0));
+          insertItem.run({
+            expense_id: expenseId,
+            description: item.description,
+            quantity: item.quantity || 1,
+            unit_price: item.unitPrice || 0,
+            vat_rate: item.vatRate ?? null,
+            line_total: lineTotal,
+          });
+        });
+      }
+    });
+
+    transaction();
+    return this.getExpense(expenseId);
+  }
+
+  deleteExpense(expenseId) {
+    const existing = this.db.prepare('SELECT * FROM expenses WHERE id = ?').get(expenseId);
+    if (!existing) {
+      throw new Error('Expense not found');
+    }
+
+    this.db.prepare('DELETE FROM expenses WHERE id = ?').run(expenseId);
+    return true;
+  }
+
+  getExpenseCategory(categoryId) {
+    return this.db.prepare('SELECT * FROM expense_categories WHERE id = ?').get(categoryId);
+  }
+
+  updateExpenseCategory(categoryId, updates) {
+    const existing = this.db.prepare('SELECT * FROM expense_categories WHERE id = ?').get(categoryId);
+    if (!existing) {
+      throw new Error('Expense category not found');
+    }
+
+    const payload = {
+      id: categoryId,
+      name: updates.name !== undefined ? updates.name : existing.name,
+      parent_id: updates.parentId !== undefined ? (updates.parentId || null) : existing.parent_id,
+    };
+
+    this.db
+      .prepare(
+        `UPDATE expense_categories
+         SET name = @name,
+             parent_id = @parent_id,
+             updated_at = CURRENT_TIMESTAMP
+         WHERE id = @id`
+      )
+      .run(payload);
+
+    return this.db.prepare('SELECT * FROM expense_categories WHERE id = ?').get(categoryId);
+  }
+
+  deleteExpenseCategory(categoryId) {
+    const existing = this.db.prepare('SELECT * FROM expense_categories WHERE id = ?').get(categoryId);
+    if (!existing) {
+      throw new Error('Expense category not found');
+    }
+
+    // Check if category is used by any expenses
+    const expenseCount = this.db.prepare('SELECT COUNT(*) as count FROM expenses WHERE category_id = ?').get(categoryId);
+    if (expenseCount.count > 0) {
+      throw new Error('Cannot delete category that is used by expenses');
+    }
+
+    this.db.prepare('DELETE FROM expense_categories WHERE id = ?').run(categoryId);
+    return true;
   }
 
   getBudgetYearRange(budgetYearId) {
@@ -460,6 +676,7 @@ class FatternDatabase {
         invoices.invoice_date,
         invoices.total,
         invoices.status,
+        invoices.payment_date,
         customers.name as customer_name
       FROM invoices
       LEFT JOIN customers ON customers.id = invoices.customer_id
@@ -478,6 +695,7 @@ class FatternDatabase {
       amount: row.total ?? 0,
       status: row.status || 'draft',
       date: row.invoice_date,
+      payment_date: row.payment_date,
     }));
   }
 
@@ -502,8 +720,12 @@ class FatternDatabase {
       id: row.id,
       vendor: row.vendor || 'Ukjent leverandør',
       amount: row.amount ?? 0,
-      category: row.category_name || 'Ukjent kategori',
+      category_name: row.category_name || null,
       date: row.date,
+      currency: row.currency || 'NOK',
+      category_id: row.category_id,
+      notes: row.notes,
+      attachment_path: row.attachment_path,
     }));
   }
 

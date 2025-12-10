@@ -58,6 +58,7 @@ function renderElement(element, data) {
     paddingRight: element.paddingRight ? `${element.paddingRight}px` : '0px',
     paddingBottom: element.paddingBottom ? `${element.paddingBottom}px` : '0px',
     paddingLeft: element.paddingLeft ? `${element.paddingLeft}px` : '0px',
+    zIndex: element.zIndex ?? 1,
   };
 
   // Build box shadow if any shadow properties are set
@@ -136,8 +137,48 @@ function renderElement(element, data) {
     case 'table':
       return renderTable(element, data, baseStyle);
 
+    case 'shape':
+      return renderShape(element, baseStyle);
+
     default:
       return '';
+  }
+}
+
+/**
+ * Renders a shape element
+ */
+function renderShape(element, baseStyle) {
+  const shapeType = element.shapeType || 'rectangle';
+  
+  if (shapeType === 'line') {
+    // Horizontal or vertical line
+    const isHorizontal = element.width > element.height;
+    const lineStyle = {
+      ...baseStyle,
+      position: 'absolute',
+      [isHorizontal ? 'top' : 'left']: '50%',
+      [isHorizontal ? 'left' : 'top']: 0,
+      [isHorizontal ? 'width' : 'height']: '100%',
+      [isHorizontal ? 'height' : 'width']: `${element.borderWidth || 1}px`,
+      transform: isHorizontal ? 'translateY(-50%)' : 'translateX(-50%)',
+      backgroundColor: element.borderColor || element.backgroundColor || '#0d3e51',
+      borderWidth: '0px',
+    };
+    return `<div class="el" style="${objectToStyleString(lineStyle)}"></div>`;
+  } else if (shapeType === 'circle') {
+    const circleStyle = {
+      ...baseStyle,
+      borderRadius: '50%',
+      backgroundColor: element.backgroundColor || '#f0f8f5',
+      borderWidth: element.borderWidth ? `${element.borderWidth}px` : '1px',
+      borderColor: element.borderColor || '#d5e7e6',
+      borderStyle: element.borderStyle || 'solid',
+    };
+    return `<div class="el" style="${objectToStyleString(circleStyle)}"></div>`;
+  } else {
+    // rectangle (default)
+    return `<div class="el" style="${objectToStyleString(baseStyle)}"></div>`;
   }
 }
 
@@ -283,7 +324,9 @@ export function renderTemplateToHTML(template, data = {}) {
       <div class="page">
   `;
 
-  template.elements.forEach((element) => {
+  // Sort elements by z-index (lower z-index renders first/behind)
+  const sortedElements = [...template.elements].sort((a, b) => (a.zIndex ?? 1) - (b.zIndex ?? 1));
+  sortedElements.forEach((element) => {
     html += renderElement(element, data);
   });
 

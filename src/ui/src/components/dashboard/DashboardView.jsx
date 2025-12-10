@@ -1,6 +1,7 @@
 import { FiClock, FiTrendingUp } from 'react-icons/fi';
 import { StatCard } from '../StatCard';
 import { StatusBadge } from '../StatusBadge';
+import { InvoiceStatusSelector } from '../invoices/InvoiceStatusSelector';
 import { formatDate } from '../../utils/formatDate';
 
 export function DashboardView({
@@ -23,6 +24,9 @@ export function DashboardView({
   onCreateExpense,
   onNavigate,
   onOpenTimeline,
+  onInvoiceStatusChange,
+  showInvoiceStatusModal,
+  onViewInvoice,
 }) {
   const fmt = (value) => (typeof formatCurrency === 'function' ? formatCurrency(value) : value);
 
@@ -152,14 +156,30 @@ export function DashboardView({
                       invoices.map((invoice) => (
                         <tr key={invoice.id} className="hover:bg-cloud/60">
                           <td className="px-4 py-3 font-semibold text-ink">
-                            {invoice.invoice_number || invoice.id}
+                            <button
+                              onClick={() => onViewInvoice?.(invoice)}
+                              className="hover:text-brand-700 hover:underline cursor-pointer"
+                            >
+                              {invoice.invoice_number || invoice.id}
+                            </button>
                           </td>
                           <td className="px-4 py-3 text-ink-soft">{invoice.customer}</td>
                           <td className="px-4 py-3">
-                            <StatusBadge status={invoice.status} />
+                            <InvoiceStatusSelector
+                              invoice={invoice}
+                              onStatusChange={onInvoiceStatusChange}
+                              showModal={showInvoiceStatusModal}
+                            />
                           </td>
                           <td className="px-4 py-3 text-ink-subtle">
-                            {invoice.date ? formatDate(invoice.date) : '—'}
+                            <div className="flex flex-col">
+                              <span>{invoice.date ? formatDate(invoice.date) : '—'}</span>
+                              {invoice.status === 'paid' && invoice.payment_date && (
+                                <span className="text-xs text-brand-700 font-medium">
+                                  Betalt: {formatDate(invoice.payment_date)}
+                                </span>
+                              )}
+                            </div>
                           </td>
                           <td className="px-4 py-3 text-right font-medium text-ink">{fmt(invoice.amount)}</td>
                         </tr>

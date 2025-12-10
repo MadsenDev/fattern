@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { FiChevronUp, FiChevronDown } from 'react-icons/fi';
 
 export function DataTable({ columns, data, emptyMessage = 'Ingen data å vise', defaultSort = null }) {
@@ -115,7 +116,14 @@ export function DataTable({ columns, data, emptyMessage = 'Ingen data å vise', 
         </thead>
         <tbody className="divide-y divide-sand/60 bg-white">
           {sortedData.map((row, rowIndex) => (
-            <tr key={row.id || rowIndex} className="hover:bg-cloud/60">
+            <motion.tr
+              key={row.id || rowIndex}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.2, delay: rowIndex * 0.02 }}
+              whileHover={{ backgroundColor: 'rgba(var(--color-cloud-rgb), 0.6)' }}
+              className="hover:bg-cloud/60"
+            >
               {columns.map((column) => {
                 const cellValue = row[column.key];
                 const content = column.render ? column.render(cellValue, row) : cellValue ?? '—';
@@ -131,7 +139,7 @@ export function DataTable({ columns, data, emptyMessage = 'Ingen data å vise', 
                   </td>
                 );
               })}
-            </tr>
+            </motion.tr>
           ))}
         </tbody>
       </table>

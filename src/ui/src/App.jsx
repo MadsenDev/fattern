@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FiBarChart2, FiCalendar } from 'react-icons/fi';
 import { TbCoin, TbReceipt } from 'react-icons/tb';
 import { LoadingScreen } from './components/LoadingScreen';
@@ -10,12 +11,18 @@ import { InvoicesPage } from './pages/InvoicesPage';
 import { ExpensesPage } from './pages/ExpensesPage';
 import { CustomersPage } from './pages/CustomersPage';
 import { ProductsPage } from './pages/ProductsPage';
+import { BudgetYearsPage } from './pages/BudgetYearsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { TemplateEditorPage } from './pages/TemplateEditorPage';
 import { BudgetYearModal } from './components/budget/BudgetYearModal';
 import { ProductModal } from './components/products/ProductModal';
 import { CustomerModal } from './components/customers/CustomerModal';
 import { InvoiceModal } from './components/invoices/InvoiceModal';
+import { ExpenseModal } from './components/expenses/ExpenseModal';
+import { ExpenseCategoryModal } from './components/expenses/ExpenseCategoryModal';
+import { ExpenseCategoryManagementModal } from './components/expenses/ExpenseCategoryManagementModal';
+import { InvoiceStatusModal } from './components/invoices/InvoiceStatusModal';
+import { InvoiceViewModal } from './components/invoices/InvoiceViewModal';
 import { TimelineModal } from './components/events/TimelineModal';
 import { ConfirmModal } from './components/ConfirmModal';
 import { ToastContainer } from './components/Toast';
@@ -28,6 +35,8 @@ import { useInvoices } from './hooks/useInvoices';
 import { useExpenses } from './hooks/useExpenses';
 import { useCustomers } from './hooks/useCustomers';
 import { useProducts } from './hooks/useProducts';
+import { useTheme } from './hooks/useTheme';
+import { useSettings } from './hooks/useSettings';
 import i18n from './i18n/config';
 
 function hasCompletedOnboarding() {
@@ -36,6 +45,10 @@ function hasCompletedOnboarding() {
 }
 
 function App() {
+  // Initialize theme early
+  useTheme();
+  const { getSetting } = useSettings();
+  
   const [isLoading, setIsLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(() => !hasCompletedOnboarding());
@@ -51,6 +64,19 @@ function App() {
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState(null);
   const [invoiceModalMode, setInvoiceModalMode] = useState('create');
+  const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
+  const [editingExpense, setEditingExpense] = useState(null);
+  const [expenseModalMode, setExpenseModalMode] = useState('create');
+  const [expensesRefreshKey, setExpensesRefreshKey] = useState(0);
+  const [expenseCategories, setExpenseCategories] = useState([]);
+  const [isExpenseCategoryModalOpen, setIsExpenseCategoryModalOpen] = useState(false);
+  const [editingExpenseCategory, setEditingExpenseCategory] = useState(null);
+  const [expenseCategoryModalMode, setExpenseCategoryModalMode] = useState('create');
+  const [isInvoiceStatusModalOpen, setIsInvoiceStatusModalOpen] = useState(false);
+  const [editingInvoiceStatus, setEditingInvoiceStatus] = useState(null);
+  const [pendingStatus, setPendingStatus] = useState(null);
+  const [isInvoiceViewModalOpen, setIsInvoiceViewModalOpen] = useState(false);
+  const [viewingInvoice, setViewingInvoice] = useState(null);
   const [invoicesRefreshKey, setInvoicesRefreshKey] = useState(0);
   const [currentPage, setCurrentPage] = useState('Oversikt');
   const [templateEditorId, setTemplateEditorId] = useState(null);
@@ -67,6 +93,7 @@ function App() {
     selectedBudgetYearId,
     selectBudgetYear,
     refreshMetadata,
+    refreshSummary,
     createBudgetYear,
     updateBudgetYear,
     deleteBudgetYear,
@@ -74,8 +101,8 @@ function App() {
 
   const { invoices: liveInvoices } = useInvoices(selectedBudgetYearId, { limit: 10, refreshKey: invoicesRefreshKey });
   const { invoices: allInvoices } = useInvoices(selectedBudgetYearId, { limit: null, refreshKey: invoicesRefreshKey });
-  const { expenses: liveExpenses } = useExpenses(selectedBudgetYearId, { limit: 10 });
-  const { expenses: allExpenses } = useExpenses(selectedBudgetYearId, { limit: null });
+  const { expenses: liveExpenses } = useExpenses(selectedBudgetYearId, { limit: 10, refreshKey: expensesRefreshKey });
+  const { expenses: allExpenses } = useExpenses(selectedBudgetYearId, { limit: null, refreshKey: expensesRefreshKey });
   const { customers } = useCustomers(customersRefreshKey);
   const { products } = useProducts({ includeInactive: true, refreshKey: productsRefreshKey });
 
@@ -123,7 +150,13 @@ function App() {
     const minTimer = setTimeout(() => {
       if (isMounted) {
         setLoadingProgress(100);
-        setTimeout(() => setIsLoading(false), 150);
+        setTimeout(() => {
+          setIsLoading(false);
+          // Hide HTML loading screen once React loading is complete
+          if (typeof window.hideLoadingScreen === 'function') {
+            window.hideLoadingScreen();
+          }
+        }, 150);
       }
     }, 1400);
 
@@ -258,6 +291,21 @@ function App() {
     refreshMetadata();
     setShowOnboarding(false);
   };
+
+  // Load expense categories
+  useEffect(() => {
+    const api = typeof window !== 'undefined' ? window.fattern?.db : null;
+    if (!api?.listExpenseCategories) return;
+
+    api
+      .listExpenseCategories()
+      .then((categories) => {
+        setExpenseCategories(categories || []);
+      })
+      .catch((error) => {
+        console.error('Kunne ikke hente utgiftskategorier', error);
+      });
+  }, [expensesRefreshKey]);
 
   const openCreateBudgetYearModal = () => {
     setEditingBudgetYear(null);
@@ -442,6 +490,124 @@ function App() {
     }
   };
 
+  const openCreateExpenseModal = () => {
+    setEditingExpense(null);
+    setExpenseModalMode('create');
+    setIsExpenseModalOpen(true);
+  };
+
+  const openEditExpenseModal = async (expense) => {
+    if (!expense || !expense.id) return;
+    try {
+      const api = typeof window !== 'undefined' ? window.fattern?.db : null;
+      if (!api) return;
+      const fullExpense = await api.getExpense(expense.id);
+      setEditingExpense(fullExpense);
+      setExpenseModalMode('edit');
+      setIsExpenseModalOpen(true);
+    } catch (error) {
+      console.error('Kunne ikke hente utgift', error);
+      toast.error('Kunne ikke hente utgift');
+    }
+  };
+
+  const handleExpenseSubmit = async (payload) => {
+    try {
+      const api = typeof window !== 'undefined' ? window.fattern?.db : null;
+      if (!api) return;
+
+      if (expenseModalMode === 'edit' && payload.id) {
+        await api.updateExpense(payload.id, payload);
+      } else {
+        // Remove id from payload when creating
+        const { id, ...createPayload } = payload;
+        await api.createExpense(createPayload);
+      }
+      setExpensesRefreshKey((prev) => prev + 1);
+      toast.success(expenseModalMode === 'edit' ? 'Utgift oppdatert' : 'Utgift registrert');
+    } catch (error) {
+      console.error('Kunne ikke lagre utgift', error);
+      toast.error('Kunne ikke lagre utgift');
+      throw error;
+    }
+  };
+
+  const handleDeleteExpense = (expense) => {
+    if (!expense || !expense.id) return;
+
+    setDeleteConfirm({
+      isOpen: true,
+      item: expense,
+      type: 'expense',
+      title: 'Slett utgift',
+      description: `Er du sikker på at du vil slette utgiften "${expense.vendor || 'Ukjent leverandør'}"? Denne handlingen kan ikke angres.`,
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          const api = typeof window !== 'undefined' ? window.fattern?.db : null;
+          if (!api) return;
+          await api.deleteExpense(expense.id);
+          setExpensesRefreshKey((prev) => prev + 1);
+          toast.success('Utgift slettet');
+        } catch (error) {
+          console.error('Kunne ikke slette utgift', error);
+          toast.error('Kunne ikke slette utgift');
+        }
+      },
+    });
+  };
+
+  const openManageExpenseCategories = () => {
+    setIsExpenseCategoryModalOpen(true);
+  };
+
+  const handleExpenseCategorySubmit = async (payload) => {
+    try {
+      const api = typeof window !== 'undefined' ? window.fattern?.db : null;
+      if (!api) return;
+
+      if (payload.id) {
+        await api.updateExpenseCategory(payload.id, payload);
+        toast.success('Kategori oppdatert');
+      } else {
+        const { id, ...createPayload } = payload;
+        await api.createExpenseCategory(createPayload);
+        toast.success('Kategori opprettet');
+      }
+      setExpensesRefreshKey((k) => k + 1); // Refresh categories
+    } catch (error) {
+      console.error('Kunne ikke lagre kategori', error);
+      toast.error('Kunne ikke lagre kategori');
+      throw error;
+    }
+  };
+
+  const handleDeleteExpenseCategory = (category) => {
+    if (!category || !category.id) return;
+
+    setDeleteConfirm({
+      isOpen: true,
+      item: category,
+      type: 'expenseCategory',
+      title: 'Slett kategori',
+      description: `Er du sikker på at du vil slette kategorien "${category.name}"? Denne handlingen kan ikke angres.`,
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          const api = typeof window !== 'undefined' ? window.fattern?.db : null;
+          if (!api) return;
+          await api.deleteExpenseCategory(category.id);
+          toast.success('Kategori slettet');
+          setExpensesRefreshKey((k) => k + 1);
+        } catch (error) {
+          console.error('Kunne ikke slette kategori', error);
+          toast.error('Kunne ikke slette kategori');
+          throw error;
+        }
+      },
+    });
+  };
+
   const openCreateInvoiceModal = () => {
     setEditingInvoice(null);
     setInvoiceModalMode('create');
@@ -478,6 +644,10 @@ function App() {
           if (api?.deleteInvoice) {
             await api.deleteInvoice(invoice.dbId);
             setInvoicesRefreshKey((prev) => prev + 1);
+            // Refresh dashboard summary to update collection rate
+            if (selectedBudgetYearId) {
+              refreshSummary?.(selectedBudgetYearId);
+            }
           }
         } catch (error) {
           console.error('Kunne ikke slette faktura', error);
@@ -526,6 +696,10 @@ function App() {
         }
       }
       setInvoicesRefreshKey((prev) => prev + 1);
+      // Refresh dashboard summary to update collection rate
+      if (selectedBudgetYearId) {
+        refreshSummary?.(selectedBudgetYearId);
+      }
     } catch (error) {
       console.error('Kunne ikke lagre faktura', error);
       const errorMessage = error?.message || 'Kunne ikke lagre faktura';
@@ -534,8 +708,107 @@ function App() {
     }
   };
 
+  const handleInvoiceStatusChange = async (invoice, newStatus, paymentDate = null) => {
+    try {
+      const api = typeof window !== 'undefined' ? window.fattern?.db : null;
+      if (!api) return;
+      
+      const invoiceId = invoice?.dbId || invoice?.id;
+      if (!invoiceId) {
+        console.error('Invoice ID not found', invoice);
+        return;
+      }
+
+      await api.updateInvoiceStatus(invoiceId, newStatus, paymentDate);
+      toast.success('Status oppdatert');
+      setInvoicesRefreshKey((prev) => prev + 1);
+      // Refresh dashboard summary to update collection rate
+      if (selectedBudgetYearId) {
+        refreshSummary?.(selectedBudgetYearId);
+      }
+    } catch (error) {
+      console.error('Kunne ikke oppdatere status', error);
+      toast.error('Kunne ikke oppdatere status');
+      throw error;
+    }
+  };
+
+  const showInvoiceStatusModal = async (invoice, newStatus = null) => {
+    if (!invoice?.dbId) return;
+    try {
+      const api = typeof window !== 'undefined' ? window.fattern?.db : null;
+      if (!api?.getInvoice) return;
+      const fullInvoice = await api.getInvoice(invoice.dbId);
+      setEditingInvoiceStatus(fullInvoice);
+      setPendingStatus(newStatus);
+      setIsInvoiceStatusModalOpen(true);
+    } catch (error) {
+      console.error('Kunne ikke hente faktura', error);
+      // Fallback: use the invoice data we have
+      setEditingInvoiceStatus(invoice);
+      setPendingStatus(newStatus);
+      setIsInvoiceStatusModalOpen(true);
+    }
+  };
+
+  const handleInvoiceStatusModalSubmit = async (payload) => {
+    if (!editingInvoiceStatus?.id && !editingInvoiceStatus?.dbId) return;
+    const invoiceId = editingInvoiceStatus.id || editingInvoiceStatus.dbId;
+    await handleInvoiceStatusChange({ ...editingInvoiceStatus, dbId: invoiceId }, payload.status, payload.paymentDate);
+    setIsInvoiceStatusModalOpen(false);
+    setEditingInvoiceStatus(null);
+    setPendingStatus(null);
+  };
+
+  const openViewInvoiceModal = async (invoice) => {
+    if (!invoice?.dbId) return;
+    try {
+      const api = typeof window !== 'undefined' ? window.fattern?.db : null;
+      if (!api?.getInvoice) return;
+      const fullInvoice = await api.getInvoice(invoice.dbId);
+      setViewingInvoice(fullInvoice);
+      setIsInvoiceViewModalOpen(true);
+    } catch (error) {
+      console.error('Kunne ikke hente faktura', error);
+      toast.error('Kunne ikke laste faktura');
+    }
+  };
+
+  const handleViewInvoiceGeneratePDF = async (invoice) => {
+    if (!invoice?.id && !invoice?.dbId) return;
+    const invoiceId = invoice.id || invoice.dbId;
+    try {
+      const api = typeof window !== 'undefined' ? window.fattern : null;
+      if (!api?.pdf?.generateInvoice) {
+        throw new Error('PDF generation ikke tilgjengelig');
+      }
+
+      // Ensure default template exists
+      if (api.template?.createDefault) {
+        await api.template.createDefault();
+      }
+
+      // Get default template ID from settings
+      const defaultTemplateId = getSetting('invoice.defaultTemplate', 'default_invoice');
+
+      const result = await api.pdf.generateInvoice(invoiceId, defaultTemplateId);
+      if (result?.success && result?.filepath) {
+        toast.success('PDF lastet ned');
+        if (api.openFile) {
+          await api.openFile(result.filepath);
+        }
+      }
+    } catch (error) {
+      console.error('Kunne ikke generere PDF', error);
+      toast.error('Kunne ikke generere PDF');
+      throw error;
+    }
+  };
+
+  // Don't render LoadingScreen component - HTML loading screen handles it
+  // Just wait for loading to complete before showing the app
   if (isLoading) {
-    return <LoadingScreen progress={loadingProgress} />;
+    return null;
   }
 
   const renderPage = () => {
@@ -547,7 +820,10 @@ function App() {
             formatCurrency={formatCurrency}
             onCreateInvoice={openCreateInvoiceModal}
             onEditInvoice={openEditInvoiceModal}
+            onViewInvoice={openViewInvoiceModal}
             onDeleteInvoice={handleDeleteInvoice}
+            onStatusChange={handleInvoiceStatusChange}
+            showStatusModal={showInvoiceStatusModal}
             showToast={toast}
           />
         );
@@ -555,7 +831,12 @@ function App() {
         return (
           <ExpensesPage
             expenses={allExpenses || []}
+            expenseCategories={expenseCategories || []}
             formatCurrency={formatCurrency}
+            onCreateExpense={openCreateExpenseModal}
+            onEditExpense={openEditExpenseModal}
+            onDeleteExpense={handleDeleteExpense}
+            onManageCategories={openManageExpenseCategories}
           />
         );
       case 'Kunder':
@@ -575,6 +856,18 @@ function App() {
             onCreateProduct={openCreateProductModal}
             onEditProduct={openEditProductModal}
             onDeleteProduct={handleDeleteProduct}
+          />
+        );
+      case 'Budsjettår':
+        return (
+          <BudgetYearsPage
+            budgetYears={availableBudgetYears}
+            selectedYearId={selectedYear}
+            onSelectYear={handleSelectYear}
+            onCreateYear={openCreateBudgetYearModal}
+            onEditYear={openEditBudgetYearModal}
+            onDeleteYear={handleDeleteBudgetYear}
+            formatCurrency={formatCurrency}
           />
         );
       case 'Innstillinger':
@@ -612,6 +905,9 @@ function App() {
             onCreateExpense={() => setCurrentPage('Utgifter')}
             onNavigate={setCurrentPage}
             onOpenTimeline={() => setIsTimelineModalOpen(true)}
+            onInvoiceStatusChange={handleInvoiceStatusChange}
+            showInvoiceStatusModal={showInvoiceStatusModal}
+            onViewInvoice={openViewInvoiceModal}
           />
         );
     }
@@ -634,7 +930,17 @@ function App() {
             activeNavItem={currentPage}
             onNavigate={setCurrentPage}
           >
-            {renderPage()}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentPage}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+              >
+                {renderPage()}
+              </motion.div>
+            </AnimatePresence>
           </Layout>
         </div>
       )}
@@ -684,6 +990,54 @@ function App() {
         onSubmit={handleInvoiceSubmit}
         customers={customers || []}
         products={products || []}
+      />
+      <ExpenseModal
+        isOpen={isExpenseModalOpen}
+        mode={expenseModalMode}
+        initialExpense={editingExpense}
+        onClose={() => setIsExpenseModalOpen(false)}
+        onSubmit={handleExpenseSubmit}
+        categories={expenseCategories || []}
+      />
+      <ExpenseCategoryManagementModal
+        isOpen={isExpenseCategoryModalOpen}
+        onClose={() => setIsExpenseCategoryModalOpen(false)}
+        categories={expenseCategories || []}
+        onCreateCategory={handleExpenseCategorySubmit}
+        onEditCategory={async (payload) => {
+          const api = typeof window !== 'undefined' ? window.fattern?.db : null;
+          if (!api || !payload.id) return;
+          await api.updateExpenseCategory(payload.id, payload);
+          toast.success('Kategori oppdatert');
+          setExpensesRefreshKey((k) => k + 1);
+        }}
+        onDeleteCategory={handleDeleteExpenseCategory}
+      />
+      <InvoiceStatusModal
+        isOpen={isInvoiceStatusModalOpen}
+        invoice={editingInvoiceStatus}
+        initialStatus={pendingStatus}
+        onClose={() => {
+          setIsInvoiceStatusModalOpen(false);
+          setEditingInvoiceStatus(null);
+          setPendingStatus(null);
+        }}
+        onSubmit={handleInvoiceStatusModalSubmit}
+      />
+      <InvoiceViewModal
+        isOpen={isInvoiceViewModalOpen}
+        invoice={viewingInvoice}
+        formatCurrency={formatCurrency}
+        onClose={() => {
+          setIsInvoiceViewModalOpen(false);
+          setViewingInvoice(null);
+        }}
+        onEdit={(invoice) => {
+          setIsInvoiceViewModalOpen(false);
+          setViewingInvoice(null);
+          openEditInvoiceModal(invoice);
+        }}
+        onGeneratePDF={handleViewInvoiceGeneratePDF}
       />
       <ConfirmModal
         isOpen={deleteConfirm.isOpen}

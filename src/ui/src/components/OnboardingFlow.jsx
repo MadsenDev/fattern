@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const defaultCompanyValues = {
   name: '',
@@ -93,9 +94,20 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
 
   if (stepIndex === 0) {
     return (
-      <div className="fixed inset-0 z-50 bg-ink/80 backdrop-blur-sm">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }}
+        className="fixed inset-0 z-[100] bg-ink/80 backdrop-blur-sm"
+      >
         <div className="flex h-full items-center justify-center px-4">
-          <div className="w-full max-w-xl rounded-3xl bg-white/95 p-8 shadow-2xl">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="w-full max-w-xl rounded-3xl bg-white p-8 shadow-2xl"
+          >
             <div className="flex items-center gap-4">
               <img src="/fattern-monogram.svg" alt="Fattern" className="h-12 w-12 drop-shadow-xl" />
               <div>
@@ -112,16 +124,29 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
                 {current.actionLabel}
               </button>
             </div>
-          </div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-ink/80 backdrop-blur-sm">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+      className="fixed inset-0 z-[100] bg-ink/80 backdrop-blur-sm"
+    >
       <div className="flex h-full items-center justify-center px-4">
-        <div className="w-full max-w-3xl rounded-3xl bg-white/95 p-8 shadow-2xl">
+        <motion.div
+          key={stepIndex}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+          className="w-full max-w-3xl rounded-3xl bg-white p-8 shadow-2xl"
+        >
           <div className="flex items-center gap-4">
             <img src="/fattern-monogram.svg" alt="Fattern" className="h-12 w-12 drop-shadow-xl" />
             <div>
@@ -241,8 +266,8 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
               </button>
             </div>
           </form>
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -47,6 +47,33 @@ function applyMigrations(db) {
       console.warn('Migration warning (customers.image_path):', error.message);
     }
   }
+
+  // Create expense_items table if it doesn't exist (migration for existing databases)
+  try {
+    db.prepare(`
+      CREATE TABLE IF NOT EXISTS expense_items (
+        id INTEGER PRIMARY KEY,
+        expense_id INTEGER NOT NULL REFERENCES expenses(id) ON DELETE CASCADE,
+        description TEXT NOT NULL,
+        quantity REAL NOT NULL DEFAULT 1,
+        unit_price REAL NOT NULL,
+        vat_rate REAL,
+        line_total REAL
+      )
+    `).run();
+  } catch (error) {
+    console.warn('Migration warning (expense_items):', error.message);
+  }
+
+  // Add payment_date column to invoices if it doesn't exist
+  try {
+    db.prepare('ALTER TABLE invoices ADD COLUMN payment_date DATE').run();
+  } catch (error) {
+    // Column already exists, ignore
+    if (!error.message.includes('duplicate column')) {
+      console.warn('Migration warning (invoices.payment_date):', error.message);
+    }
+  }
 }
 
 function initializeDatabase() {

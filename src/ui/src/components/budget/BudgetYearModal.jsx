@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Modal } from '../Modal';
+import { DatePicker } from '../DatePicker';
 import { formatDate } from '../../utils/formatDate';
 
 export function BudgetYearModal({ isOpen, mode = 'create', initialYear, onSubmit, onClose }) {
@@ -11,16 +12,6 @@ export function BudgetYearModal({ isOpen, mode = 'create', initialYear, onSubmit
   const [error, setError] = useState('');
 
   const isEdit = mode === 'edit';
-
-  const formatDateInput = (raw) => {
-    if (!raw) return '';
-    // keep only digits
-    const digits = raw.replace(/\D/g, '').slice(0, 8); // ddmmåååå
-    const len = digits.length;
-    if (len <= 2) return digits;
-    if (len <= 4) return `${digits.slice(0, 2)}.${digits.slice(2)}`;
-    return `${digits.slice(0, 2)}.${digits.slice(2, 4)}.${digits.slice(4)}`;
-  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -49,20 +40,9 @@ export function BudgetYearModal({ isOpen, mode = 'create', initialYear, onSubmit
       return;
     }
 
-    // Convert dd.mm.yyyy to ISO yyyy-mm-dd before sending to backend
-    const toIso = (value) => {
-      if (!value) return value;
-      if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
-      const match = value.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
-      if (match) {
-        const [, d, m, y] = match;
-        return `${y}-${m}-${d}`;
-      }
-      return value;
-    };
-
-    const normalizedStart = toIso(startDate);
-    const normalizedEnd = toIso(endDate);
+    // DatePicker already returns yyyy-mm-dd format, so no conversion needed
+    const normalizedStart = startDate || null;
+    const normalizedEnd = endDate || null;
 
     setSaving(true);
     try {
@@ -128,24 +108,20 @@ export function BudgetYearModal({ isOpen, mode = 'create', initialYear, onSubmit
         <div className="grid gap-4 md:grid-cols-2">
           <div>
             <label className="text-sm font-medium text-ink">Startdato</label>
-            <input
-              type="text"
-              inputMode="numeric"
-              placeholder="dd.mm.åååå"
-              className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+            <DatePicker
               value={startDate}
-              onChange={(e) => setStartDate(formatDateInput(e.target.value))}
+              onChange={setStartDate}
+              placeholder="dd.mm.yyyy"
+              className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
             />
           </div>
           <div>
             <label className="text-sm font-medium text-ink">Sluttdato</label>
-            <input
-              type="text"
-              inputMode="numeric"
-              placeholder="dd.mm.åååå"
-              className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+            <DatePicker
               value={endDate}
-              onChange={(e) => setEndDate(formatDateInput(e.target.value))}
+              onChange={setEndDate}
+              placeholder="dd.mm.yyyy"
+              className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
             />
           </div>
         </div>

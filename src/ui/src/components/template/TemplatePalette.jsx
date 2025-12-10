@@ -1,10 +1,11 @@
-import { FiType, FiImage, FiDatabase, FiGrid } from 'react-icons/fi';
+import { FiType, FiImage, FiDatabase, FiGrid, FiSquare } from 'react-icons/fi';
 
 const paletteItems = [
   { type: 'text', label: 'Tekst', icon: FiType },
   { type: 'field', label: 'Felt', icon: FiDatabase },
   { type: 'image', label: 'Bilde', icon: FiImage },
   { type: 'table', label: 'Tabell', icon: FiGrid },
+  { type: 'shape', label: 'Form', icon: FiSquare },
 ];
 
 export function TemplatePalette({ onAddElement }) {

@@ -59,9 +59,9 @@ export function TemplatePreview({ template, zoom = 100, pan = { x: 0, y: 0 }, on
         template.elements.map(async (element) => {
           if (element.type === 'image' && element.src && !element.src.startsWith('data:') && !element.src.startsWith('http')) {
             // Convert file path to data URL
-            if (window.fattern?.template?.readImage) {
+            if (window.fattern?.template?.readImage && template.meta?.id) {
               try {
-                const dataURL = await window.fattern.template.readImage(element.src);
+                const dataURL = await window.fattern.template.readImage(template.meta.id, element.src);
                 return { ...element, src: dataURL };
               } catch (error) {
                 console.error('Failed to read image:', error);

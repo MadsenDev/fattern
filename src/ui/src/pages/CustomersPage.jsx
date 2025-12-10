@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { DataTable } from '../components/DataTable';
 import { CustomerCard } from '../components/CustomerCard';
 import { useSettings } from '../hooks/useSettings';
@@ -136,12 +137,13 @@ export function CustomersPage({ customers, onEditCustomer, onDeleteCustomer, onC
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {customers && customers.length > 0 ? (
-              customers.map((customer) => (
+              customers.map((customer, index) => (
                 <CustomerCard
                   key={customer.id}
                   customer={customer}
                   onEdit={onEditCustomer}
                   onDelete={onDeleteCustomer}
+                  index={index}
                 />
               ))
             ) : (

@@ -57,6 +57,7 @@ function registerDatabaseHandlers(database) {
   handle('db:create-invoice', (invoice) => database.createInvoice(invoice));
   handle('db:get-invoice', (invoiceId) => database.getInvoice(invoiceId));
   handle('db:update-invoice', (invoiceId, invoice) => database.updateInvoice(invoiceId, invoice));
+  handle('db:update-invoice-status', (invoiceId, status, paymentDate) => database.updateInvoiceStatus(invoiceId, status, paymentDate));
   handle('db:delete-invoice', (invoiceId) => database.deleteInvoice(invoiceId));
 
   handle('db:create-expense', (expense = {}) =>
@@ -65,7 +66,18 @@ function registerDatabaseHandlers(database) {
       date: toDate(expense.date),
     })
   );
+  handle('db:get-expense', (expenseId) => database.getExpense(expenseId));
+  handle('db:update-expense', (expenseId, expense = {}) =>
+    database.updateExpense(expenseId, {
+      ...expense,
+      date: expense.date ? toDate(expense.date) : undefined,
+    })
+  );
+  handle('db:delete-expense', (expenseId) => database.deleteExpense(expenseId));
   handle('db:create-expense-category', (category) => database.createExpenseCategory(category));
+  handle('db:get-expense-category', (categoryId) => database.getExpenseCategory(categoryId));
+  handle('db:update-expense-category', (categoryId, category) => database.updateExpenseCategory(categoryId, category));
+  handle('db:delete-expense-category', (categoryId) => database.deleteExpenseCategory(categoryId));
   handle('db:list-expense-categories', () => database.listExpenseCategories());
   handle('db:list-invoices', ({ budgetYearId, limit } = {}) =>
     database.listInvoicesForBudgetYear(budgetYearId, limit)

@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 
 // Component to load images from file paths or data URLs
-function ImageLoader({ src, elementId }) {
+function ImageLoader({ src, elementId, templateId }) {
   const [imageSrc, setImageSrc] = useState(null);
   const [error, setError] = useState(false);
 
@@ -18,8 +18,8 @@ function ImageLoader({ src, elementId }) {
     }
 
     // If it's a file path, read the file via IPC and convert to data URL
-    if (window.fattern?.template?.readImage) {
-      window.fattern.template.readImage(src).then((dataURL) => {
+    if (window.fattern?.template?.readImage && templateId) {
+      window.fattern.template.readImage(templateId, src).then((dataURL) => {
         setImageSrc(dataURL);
       }).catch(() => {
         setError(true);
@@ -28,7 +28,7 @@ function ImageLoader({ src, elementId }) {
       // Fallback: try to use the path as-is
       setImageSrc(src);
     }
-  }, [src]);
+  }, [src, templateId]);
 
   if (error || !imageSrc) {
     return <span className="text-xs text-ink-subtle">Bilde</span>;
@@ -53,6 +53,7 @@ export function TemplateElement({
   onSelect,
   onUpdate,
   onDelete,
+  templateId,
 }) {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
@@ -97,9 +98,11 @@ export function TemplateElement({
     } else if (isResizing) {
       const deltaX = (e.clientX - resizeStart.x) / zoom;
       const deltaY = (e.clientY - resizeStart.y) / zoom;
+      const newWidth = Math.max(50, resizeStart.width + deltaX);
+      const newHeight = Math.max(20, resizeStart.height + deltaY);
       onUpdate({
-        width: Math.max(50, resizeStart.width + deltaX),
-        height: Math.max(20, resizeStart.height + deltaY),
+        width: snapToGrid(newWidth),
+        height: snapToGrid(newHeight),
       });
     }
   }, [isDragging, isResizing, dragStart, resizeStart, zoom, onUpdate]);
@@ -197,7 +200,7 @@ export function TemplateElement({
         return (
           <div className="flex h-full w-full items-center justify-center border-2 border-dashed border-sand/60 bg-cloud/50" style={{ contain: 'layout style paint' }}>
             {element.src ? (
-              <ImageLoader src={element.src} elementId={element.id} />
+              <ImageLoader src={element.src} elementId={element.id} templateId={templateId} />
             ) : (
               <span className="text-xs text-ink-subtle">Bilde</span>
             )}
@@ -231,6 +234,73 @@ export function TemplateElement({
             </div>
           </div>
         );
+      case 'shape':
+        const shapeType = element.shapeType || 'rectangle';
+        if (shapeType === 'line') {
+          // Horizontal or vertical line
+          const isHorizontal = element.width > element.height;
+          return (
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                position: 'relative',
+                backgroundColor: element.backgroundColor || 'transparent',
+                opacity: element.opacity !== undefined ? element.opacity : 1,
+              }}
+            >
+              <div
+                style={{
+                  position: 'absolute',
+                  [isHorizontal ? 'top' : 'left']: '50%',
+                  [isHorizontal ? 'left' : 'top']: 0,
+                  [isHorizontal ? 'width' : 'height']: '100%',
+                  [isHorizontal ? 'height' : 'width']: `${element.borderWidth || 1}px`,
+                  transform: isHorizontal ? 'translateY(-50%)' : 'translateX(-50%)',
+                  backgroundColor: element.borderColor || element.backgroundColor || '#0d3e51',
+                  opacity: element.opacity !== undefined ? element.opacity : 1,
+                }}
+              />
+            </div>
+          );
+        } else if (shapeType === 'circle') {
+          return (
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                borderRadius: '50%',
+                backgroundColor: element.backgroundColor || '#f0f8f5',
+                borderWidth: element.borderWidth ? `${element.borderWidth}px` : '1px',
+                borderColor: element.borderColor || '#d5e7e6',
+                borderStyle: element.borderStyle || 'solid',
+                opacity: element.opacity !== undefined ? element.opacity : 1,
+                boxShadow: (element.boxShadowX || element.boxShadowY || element.boxShadowBlur)
+                  ? `${element.boxShadowX || 0}px ${element.boxShadowY || 0}px ${element.boxShadowBlur || 0}px ${element.boxShadowColor || 'rgba(0, 0, 0, 0.1)'}`
+                  : 'none',
+              }}
+            />
+          );
+        } else {
+          // rectangle (default)
+          return (
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                backgroundColor: element.backgroundColor || '#f0f8f5',
+                borderWidth: element.borderWidth ? `${element.borderWidth}px` : '1px',
+                borderColor: element.borderColor || '#d5e7e6',
+                borderStyle: element.borderStyle || 'solid',
+                borderRadius: element.borderRadius ? `${element.borderRadius}px` : '0px',
+                opacity: element.opacity !== undefined ? element.opacity : 1,
+                boxShadow: (element.boxShadowX || element.boxShadowY || element.boxShadowBlur)
+                  ? `${element.boxShadowX || 0}px ${element.boxShadowY || 0}px ${element.boxShadowBlur || 0}px ${element.boxShadowColor || 'rgba(0, 0, 0, 0.1)'}`
+                  : 'none',
+              }}
+            />
+          );
+        }
       default:
         return <div className="text-xs text-ink-subtle">Ukjent element</div>;
     }
@@ -249,6 +319,7 @@ export function TemplateElement({
         height: `${element.height}px`,
         boxSizing: 'border-box',
         overflow: 'hidden',
+        zIndex: element.zIndex ?? 1,
         // No per-element scaling - canvas handles all scaling
       }}
       onMouseDown={handleMouseDown}

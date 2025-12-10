@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FiX, FiCheckCircle, FiAlertCircle, FiInfo, FiAlertTriangle } from 'react-icons/fi';
 
 const variants = {
@@ -39,26 +40,33 @@ const variants = {
 export function Toast({ id, message, variant = 'info', duration = 4000, onClose }) {
   const style = variants[variant] || variants.info;
   const Icon = style.icon;
-  const [isExiting, setIsExiting] = useState(false);
+  const [progress, setProgress] = useState(100);
 
   useEffect(() => {
     if (duration > 0) {
-      const timer = setTimeout(() => {
-        setIsExiting(true);
-        // Wait for exit animation before removing
-        setTimeout(() => {
+      const startTime = Date.now();
+      const interval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(0, 100 - (elapsed / duration) * 100);
+        setProgress(remaining);
+        
+        if (remaining === 0) {
+          clearInterval(interval);
           onClose?.(id);
-        }, 300);
-      }, duration);
-      return () => clearTimeout(timer);
+        }
+      }, 16); // ~60fps
+      
+      return () => clearInterval(interval);
     }
   }, [id, duration, onClose]);
 
   return (
-    <div
-      className={`flex items-start gap-3 rounded-xl border ${style.bg} ${style.border} ${style.text} p-4 shadow-xl min-w-[320px] max-w-md transition-all duration-300 ease-out ${
-        isExiting ? 'opacity-0 translate-x-full' : 'opacity-100 translate-x-0'
-      }`}
+    <motion.div
+      initial={{ opacity: 0, x: 100, scale: 0.9 }}
+      animate={{ opacity: 1, x: 0, scale: 1 }}
+      exit={{ opacity: 0, x: 100, scale: 0.9 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      className={`flex items-start gap-3 rounded-xl border ${style.bg} ${style.border} ${style.text} p-4 shadow-xl min-w-[320px] max-w-md`}
       role="alert"
     >
       <div className="flex-shrink-0">
@@ -70,40 +78,38 @@ export function Toast({ id, message, variant = 'info', duration = 4000, onClose 
         <div className="text-sm font-medium leading-snug">{message}</div>
         {duration > 0 && (
           <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-white/50">
-            <div
-              className={`h-full ${style.progress} transition-all ease-linear`}
-              style={{
-                width: isExiting ? '0%' : '100%',
-                transitionDuration: `${duration}ms`,
-              }}
+            <motion.div
+              className={`h-full ${style.progress}`}
+              initial={{ width: '100%' }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.1, ease: 'linear' }}
             />
           </div>
         )}
       </div>
-      <button
-        onClick={() => {
-          setIsExiting(true);
-          setTimeout(() => onClose?.(id), 300);
-        }}
+      <motion.button
+        onClick={() => onClose?.(id)}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
         className={`flex-shrink-0 rounded-lg p-1 ${style.iconColor} hover:bg-white/50 transition-colors`}
         aria-label="Lukk"
       >
         <FiX className="h-4 w-4" />
-      </button>
-    </div>
+      </motion.button>
+    </motion.div>
   );
 }
 
 export function ToastContainer({ toasts, onClose }) {
-  if (toasts.length === 0) return null;
-
   return (
     <div className="fixed top-20 right-4 z-50 flex flex-col gap-3 pointer-events-none">
-      {toasts.map((toast) => (
-        <div key={toast.id} className="pointer-events-auto animate-in slide-in-from-right">
-          <Toast {...toast} onClose={onClose} />
-        </div>
-      ))}
+      <AnimatePresence mode="popLayout">
+        {toasts.map((toast) => (
+          <div key={toast.id} className="pointer-events-auto">
+            <Toast {...toast} onClose={onClose} />
+          </div>
+        ))}
+      </AnimatePresence>
     </div>
   );
 }

@@ -2,19 +2,13 @@ import { useEffect, useState, useMemo } from 'react';
 import { QuantityInput } from '../QuantityInput';
 import { Select } from '../Select';
 import { Checkbox } from '../Checkbox';
+import { DatePicker } from '../DatePicker';
 import { formatDate } from '../../utils/formatDate';
 import { formatCurrency } from '../../utils/formatCurrency';
+import { useSettings } from '../../hooks/useSettings';
 import { FiPlus, FiTrash2, FiCheck, FiCheckCircle, FiSend, FiFileText, FiAlertCircle, FiX } from 'react-icons/fi';
 
-// Auto-format date input to dd.mm.yyyy
-function formatDateInput(value) {
-  const digits = value.replace(/\D/g, '');
-  if (digits.length <= 2) return digits;
-  if (digits.length <= 4) return `${digits.slice(0, 2)}.${digits.slice(2)}`;
-  return `${digits.slice(0, 2)}.${digits.slice(2, 4)}.${digits.slice(4, 8)}`;
-}
-
-// Convert dd.mm.yyyy to yyyy-mm-dd
+// Convert dd.mm.yyyy to yyyy-mm-dd (kept for backward compatibility)
 function parseDateInput(value) {
   const parts = value.split('.');
   if (parts.length !== 3) return null;
@@ -24,8 +18,6 @@ function parseDateInput(value) {
   // Handle 2-digit years: convert to 4-digit
   if (year.length === 2) {
     const yearNum = parseInt(year, 10);
-    // If year is <= 50, assume 20xx (e.g., 25 -> 2025)
-    // If year is > 50, assume 19xx (e.g., 89 -> 1989)
     if (yearNum <= 50) {
       year = `20${year.padStart(2, '0')}`;
     } else {
@@ -36,32 +28,55 @@ function parseDateInput(value) {
   // Validate year is reasonable (1900-2100)
   const yearNum = parseInt(year, 10);
   if (yearNum < 1900 || yearNum > 2100) {
-    console.warn('Invalid year:', yearNum, 'from input:', value);
     return null;
   }
   
-  const result = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-  console.log('Parsed date:', value, '->', result);
-  return result;
+  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
 }
 
 export function InvoiceModal({ isOpen, mode = 'create', initialInvoice, onSubmit, onClose, customers = [], products = [] }) {
+  const { getSetting } = useSettings();
+  const isEdit = mode === 'edit';
+
+  // Get default settings
+  const defaultPaymentTerms = parseInt(getSetting('invoice.defaultPaymentTerms', '14'), 10);
+  const autoCalculateDueDate = getSetting('invoice.autoCalculateDueDate', 'true') === 'true';
+  const defaultStatus = getSetting('invoice.defaultStatus', 'draft');
+
+  // Calculate default due date if auto-calculate is enabled
+  const getDefaultDueDate = (invoiceDateStr) => {
+    if (!invoiceDateStr || !autoCalculateDueDate) return '';
+    try {
+      const invoiceDate = new Date(invoiceDateStr);
+      const dueDate = new Date(invoiceDate);
+      dueDate.setDate(dueDate.getDate() + defaultPaymentTerms);
+      return dueDate.toISOString().split('T')[0];
+    } catch {
+      return '';
+    }
+  };
+
+  // Get default invoice date (today)
+  const getDefaultInvoiceDate = () => {
+    return new Date().toISOString().split('T')[0];
+  };
+
   const [customerId, setCustomerId] = useState(initialInvoice?.customer_id || '');
   const [invoiceDate, setInvoiceDate] = useState(
-    initialInvoice?.invoice_date ? formatDate(initialInvoice.invoice_date) : ''
+    initialInvoice?.invoice_date || (isEdit ? '' : getDefaultInvoiceDate())
   );
   const [dueDate, setDueDate] = useState(
-    initialInvoice?.due_date ? formatDate(initialInvoice.due_date) : ''
+    initialInvoice?.due_date || (isEdit ? '' : getDefaultDueDate(getDefaultInvoiceDate()))
   );
-  const [status, setStatus] = useState(initialInvoice?.status || 'draft');
+  const [status, setStatus] = useState(initialInvoice?.status || (isEdit ? 'draft' : defaultStatus));
   const [notes, setNotes] = useState(initialInvoice?.notes || '');
   const [yourReference, setYourReference] = useState(initialInvoice?.your_reference || '');
   const [ourReference, setOurReference] = useState(initialInvoice?.our_reference || '');
   const [startDate, setStartDate] = useState(
-    initialInvoice?.start_date ? formatDate(initialInvoice.start_date) : ''
+    initialInvoice?.start_date || ''
   );
   const [endDate, setEndDate] = useState(
-    initialInvoice?.end_date ? formatDate(initialInvoice.end_date) : ''
+    initialInvoice?.end_date || ''
   );
   const [deliveryReference, setDeliveryReference] = useState(initialInvoice?.delivery_reference || '');
   const [reference, setReference] = useState(initialInvoice?.reference || '');
@@ -79,19 +94,37 @@ export function InvoiceModal({ isOpen, mode = 'create', initialInvoice, onSubmit
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  const isEdit = mode === 'edit';
+  // Auto-calculate due date when invoice date changes (if enabled)
+  useEffect(() => {
+    if (!isOpen || isEdit || !autoCalculateDueDate || !invoiceDate) return;
+    const calculatedDueDate = getDefaultDueDate(invoiceDate);
+    if (calculatedDueDate) {
+      setDueDate(calculatedDueDate);
+    }
+  }, [invoiceDate, isOpen, isEdit, autoCalculateDueDate, defaultPaymentTerms]);
 
   useEffect(() => {
     if (!isOpen) return;
-    setCustomerId(initialInvoice?.customer_id || '');
-    setInvoiceDate(initialInvoice?.invoice_date ? formatDate(initialInvoice.invoice_date) : '');
-    setDueDate(initialInvoice?.due_date ? formatDate(initialInvoice.due_date) : '');
-    setStatus(initialInvoice?.status || 'draft');
+    
+    if (isEdit && initialInvoice) {
+      // Edit mode: use existing invoice values
+      setCustomerId(initialInvoice?.customer_id || '');
+      setInvoiceDate(initialInvoice?.invoice_date || '');
+      setDueDate(initialInvoice?.due_date || '');
+      setStatus(initialInvoice?.status || 'draft');
+    } else {
+      // Create mode: use defaults from settings
+      const defaultInvDate = getDefaultInvoiceDate();
+      setCustomerId('');
+      setInvoiceDate(defaultInvDate);
+      setDueDate(getDefaultDueDate(defaultInvDate));
+      setStatus(defaultStatus);
+    }
     setNotes(initialInvoice?.notes || '');
     setYourReference(initialInvoice?.your_reference || '');
     setOurReference(initialInvoice?.our_reference || '');
-    setStartDate(initialInvoice?.start_date ? formatDate(initialInvoice.start_date) : '');
-    setEndDate(initialInvoice?.end_date ? formatDate(initialInvoice.end_date) : '');
+    setStartDate(initialInvoice?.start_date || '');
+    setEndDate(initialInvoice?.end_date || '');
     setDeliveryReference(initialInvoice?.delivery_reference || '');
     setReference(initialInvoice?.reference || '');
     setCredited(initialInvoice?.credited === 1 || initialInvoice?.credited === true);
@@ -168,13 +201,13 @@ export function InvoiceModal({ isOpen, mode = 'create', initialInvoice, onSubmit
       return;
     }
 
-    if (!invoiceDate || !parseDateInput(invoiceDate)) {
-      setError('Fakturadato må fylles ut (dd.mm.yyyy).');
+    if (!invoiceDate) {
+      setError('Fakturadato må fylles ut.');
       return;
     }
 
-    if (!dueDate || !parseDateInput(dueDate)) {
-      setError('Forfallsdato må fylles ut (dd.mm.yyyy).');
+    if (!dueDate) {
+      setError('Forfallsdato må fylles ut.');
       return;
     }
 
@@ -188,14 +221,14 @@ export function InvoiceModal({ isOpen, mode = 'create', initialInvoice, onSubmit
     try {
       const payload = {
         customerId: parseInt(customerId),
-        invoiceDate: parseDateInput(invoiceDate),
-        dueDate: parseDateInput(dueDate),
+        invoiceDate,
+        dueDate,
         status,
         notes: notes.trim() || null,
         yourReference: yourReference.trim() || null,
         ourReference: ourReference.trim() || null,
-        startDate: startDate && parseDateInput(startDate) ? parseDateInput(startDate) : null,
-        endDate: endDate && parseDateInput(endDate) ? parseDateInput(endDate) : null,
+        startDate: startDate || null,
+        endDate: endDate || null,
         deliveryReference: deliveryReference.trim() || null,
         reference: reference.trim() || null,
         credited: credited,
@@ -229,7 +262,7 @@ export function InvoiceModal({ isOpen, mode = 'create', initialInvoice, onSubmit
 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-ink/70 backdrop-blur-sm px-4 py-8">
-      <div className="relative flex h-full max-h-[90vh] w-full max-w-7xl rounded-3xl border border-sand/70 bg-white/95 shadow-2xl overflow-hidden">
+      <div className="relative flex h-full max-h-[90vh] w-full max-w-7xl rounded-3xl border border-sand/70 bg-white shadow-2xl overflow-hidden">
         <button
           type="button"
           onClick={onClose}
@@ -333,48 +366,42 @@ export function InvoiceModal({ isOpen, mode = 'create', initialInvoice, onSubmit
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
                     <label className="block text-sm font-medium text-ink">Fakturadato *</label>
-                    <input
-                      type="text"
+                    <DatePicker
                       value={invoiceDate}
-                      onChange={(e) => setInvoiceDate(formatDateInput(e.target.value))}
+                      onChange={setInvoiceDate}
                       placeholder="dd.mm.yyyy"
-                      inputMode="numeric"
+                      required
                       className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-ink">Forfallsdato *</label>
-                    <input
-                      type="text"
+                    <DatePicker
                       value={dueDate}
-                      onChange={(e) => setDueDate(formatDateInput(e.target.value))}
+                      onChange={setDueDate}
                       placeholder="dd.mm.yyyy"
-                      inputMode="numeric"
+                      required
                       className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-ink">Startdato</label>
-                    <input
-                      type="text"
+                    <DatePicker
                       value={startDate}
-                      onChange={(e) => setStartDate(formatDateInput(e.target.value))}
+                      onChange={setStartDate}
                       placeholder="dd.mm.yyyy"
-                      inputMode="numeric"
                       className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-ink">Sluttdato</label>
-                    <input
-                      type="text"
+                    <DatePicker
                       value={endDate}
-                      onChange={(e) => setEndDate(formatDateInput(e.target.value))}
+                      onChange={setEndDate}
                       placeholder="dd.mm.yyyy"
-                      inputMode="numeric"
                       className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
                     />
                   </div>

@@ -3,16 +3,198 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fattern UI Preview</title>
+    <title>Fattern</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <style>
+      /* Loading screen styles - matches React LoadingScreen component */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+      #loading-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 99999;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        background: linear-gradient(to bottom right, #0d3e51, #2f8981, #0d3e51);
+        color: white;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      }
+      #loading-screen .titlebar {
+        height: 40px;
+        background: rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-app-region: drag;
+      }
+      #loading-screen .titlebar-title {
+        font-size: 13px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.9);
+      }
+      #loading-screen .content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      #loading-screen .logo-section {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2.5rem;
+      }
+      #loading-screen .logo-container {
+        position: relative;
+      }
+      #loading-screen .logo-glow {
+        position: absolute;
+        inset: 0;
+        border-radius: 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        filter: blur(24px);
+      }
+      #loading-screen .logo-box {
+        position: relative;
+        border-radius: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 0.75rem;
+        backdrop-filter: blur(4px);
+      }
+      #loading-screen .logo {
+        height: 4rem;
+        width: 4rem;
+        display: block;
+        filter: brightness(1.1) contrast(1.1) drop-shadow(0 25px 50px -12px rgba(0, 0, 0, 0.5));
+      }
+      #loading-screen .text-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+      #loading-screen .text-subtitle {
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3em;
+        color: rgba(255, 255, 255, 0.7);
+      }
+      #loading-screen .text-title {
+        font-size: 1.875rem;
+        font-weight: 600;
+        margin-top: 0;
+      }
+      #loading-screen .progress-container {
+        width: 18rem;
+      }
+      #loading-screen .progress-bar {
+        height: 0.5rem;
+        border-radius: 9999px;
+        background: rgba(255, 255, 255, 0.3);
+      }
+      #loading-screen .progress-fill {
+        height: 100%;
+        border-radius: 9999px;
+        background: white;
+        width: 0%;
+        transition: width 0.2s ease;
+      }
+      #loading-screen .progress-text {
+        margin-top: 0.75rem;
+        text-align: center;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: rgba(255, 255, 255, 0.7);
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+      /* Hide when React is ready */
+      #loading-screen.hidden {
+        display: none;
+      }
+      /* Ensure root is hidden until React takes over */
+      #root {
+        display: none;
+      }
+      #root.ready {
+        display: block;
+      }
+    </style>
   </head>
   <body class="bg-cloud text-ink">
+    <!-- Loading screen - appears immediately and stays until React is ready -->
+    <div id="loading-screen">
+      <div class="titlebar">
+        <div class="titlebar-title">Fattern</div>
+      </div>
+      <div class="content">
+        <div class="logo-section">
+          <div class="logo-container">
+            <div class="logo-glow"></div>
+            <div class="logo-box">
+              <img src="/fattern-monogram.svg" alt="Fattern" class="logo" />
+            </div>
+          </div>
+          <div class="text-container">
+            <p class="text-subtitle">Starter opp</p>
+            <p class="text-title">Fattern</p>
+          </div>
+        </div>
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+          <p class="progress-text" id="progress-text">Initialiserer · 0%</p>
+        </div>
+      </div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      // Animate progress bar immediately
+      let progress = 0;
+      const progressFill = document.getElementById('progress-fill');
+      const progressText = document.getElementById('progress-text');
+      
+      const progressInterval = setInterval(() => {
+        progress = Math.min(progress + Math.random() * 15, 95);
+        if (progressFill) progressFill.style.width = progress + '%';
+        if (progressText) progressText.textContent = 'Initialiserer · ' + Math.round(progress) + '%';
+      }, 150);
+      
+      // Hide loading screen when React is ready
+      window.hideLoadingScreen = function() {
+        const loadingScreen = document.getElementById('loading-screen');
+        const root = document.getElementById('root');
+        if (loadingScreen) {
+          loadingScreen.classList.add('hidden');
+          clearInterval(progressInterval);
+        }
+        if (root) {
+          root.classList.add('ready');
+        }
+      };
+    </script>
   </body>
 </html>

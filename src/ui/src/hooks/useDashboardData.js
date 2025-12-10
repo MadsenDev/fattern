@@ -164,6 +164,7 @@ export function useDashboardData() {
     updateBudgetYear,
     deleteBudgetYear,
     refreshMetadata,
+    refreshSummary,
     isLoading,
   };
 }

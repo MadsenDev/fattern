@@ -8,12 +8,15 @@
 - [x] Create fixed sidebar
 - [x] Integrate monogram into sidebar
 - [x] Design and implement loading screen
+- [x] HTML-based immediate loading screen (no white screen delay)
 - [x] Create onboarding flow
 - [x] Build dashboard with statistics
-- [x] Implement reusable components (Modal, DataTable, StatCard, etc.)
+- [x] Implement reusable components (Modal, DataTable, StatCard, DatePicker, etc.)
 - [x] Add list/card view toggle for products and customers
 - [x] Create custom select components
 - [x] Replace native prompts with custom modals
+- [x] Redesign About section
+- [x] Improve Dev section design
 
 ### Products
 - [x] Database schema with image support
@@ -42,11 +45,13 @@
 - [x] Delete budget year functionality
 - [x] Set active budget year
 - [x] Budget year modal with date pickers
+- [x] DatePicker component for budget year dates
 - [x] Prevent deletion of active year
 
 ### Data Management
 - [x] Date formatting (`dd.mm.yyyy`)
 - [x] Auto-formatting date inputs
+- [x] DatePicker component with calendar dropdown
 - [x] Currency formatting
 - [x] Image upload and storage
 - [x] Database migrations for schema updates
@@ -86,17 +91,25 @@
 - [x] Invoice calculations (subtotal, VAT, total)
 - [x] Invoice status management
 - [x] PDF generation/export
+- [x] PDF generation using default template
+- [x] Template images loading in PDFs
 - [x] Invoice numbering system
 - [x] Due date tracking
-- [ ] Invoice preview
-- [ ] Payment tracking
+- [x] Invoice view modal
+- [x] Quick status changes from lists
+- [x] Payment date tracking
+- [x] DatePicker component for invoice dates
+- [ ] Invoice preview before PDF export
 
 ### Expenses
-- [ ] Create expense functionality
-- [ ] Edit expense functionality
-- [ ] Delete expense functionality
-- [ ] Expense categories management
-- [ ] Receipt/attachment upload
+- [x] Create expense functionality
+- [x] Edit expense functionality
+- [x] Delete expense functionality
+- [x] Expense categories management
+- [x] Receipt/attachment upload
+- [x] Expense line items support
+- [x] Expense page redesign (sidebar + cards)
+- [x] DatePicker component for expense dates
 - [ ] Link expenses to invoices
 - [ ] Expense reporting
 
@@ -132,6 +145,9 @@
 
 ### Settings & Configuration
 - [x] Company settings editor
+- [x] About section redesign
+- [x] Dev section improvements
+- [x] Supporter pack toggle in dev section
 - [ ] Invoice number format configuration
 - [ ] Default VAT rates
 - [ ] Tax settings
@@ -139,8 +155,13 @@
 - [x] Export settings (import section added)
 - [x] Appearance settings
 - [x] Supporter Pack system (local storage, feature flags)
+- [x] Secure credit system (cryptographic ledger)
 
 ### Technical Improvements
+- [x] App icon from monogram SVG
+- [x] PDF template image support (data URL conversion)
+- [x] Immediate loading screen (HTML-based)
+- [x] Secure credit system (cryptographic ledger)
 - [ ] Error boundaries
 - [ ] Better error handling
 - [ ] Loading states for all operations

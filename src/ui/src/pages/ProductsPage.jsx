@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { DataTable } from '../components/DataTable';
 import { ProductCard } from '../components/ProductCard';
 import { formatCurrency } from '../utils/formatCurrency';
@@ -156,13 +157,14 @@ export function ProductsPage({ products, formatCurrency: fmt, onEditProduct, onD
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {products && products.length > 0 ? (
-              products.map((product) => (
+              products.map((product, index) => (
                 <ProductCard
                   key={product.id}
                   product={product}
                   formatCurrency={fmt}
                   onEdit={onEditProduct}
                   onDelete={onDeleteProduct}
+                  index={index}
                 />
               ))
             ) : (
