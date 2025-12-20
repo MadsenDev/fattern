@@ -81,7 +81,7 @@ Route example:
 
 ```
 /templates/:templateId/edit
-```
+```Y
 
 ## 3.1 Layout Structure
 
