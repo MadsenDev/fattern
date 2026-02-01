@@ -1,5 +1,5 @@
-const Database = require('better-sqlite3');
 const { initializeDatabase, DB_PATH } = require('./initDatabase');
+const { loadBetterSqlite3 } = require('./loadBetterSqlite3');
 
 function toDateOnlyString(dateLike) {
   const date = dateLike instanceof Date ? dateLike : new Date(dateLike);
@@ -1012,6 +1012,7 @@ function openFatternDatabase() {
   // initializeDatabase already applies the schema and opens the same DB path.
   // This helper mirrors better-sqlite3's API for advanced usage when the class is not needed.
   initializeDatabase();
+  const Database = loadBetterSqlite3();
   return new Database(DB_PATH);
 }
 

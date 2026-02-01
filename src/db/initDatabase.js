@@ -1,16 +1,15 @@
 const fs = require('fs');
-const os = require('os');
 const path = require('path');
-const Database = require('better-sqlite3');
+const { loadBetterSqlite3 } = require('./loadBetterSqlite3');
 const { schemaStatements } = require('./schema');
+const { DATA_ROOT, EXPORT_ROOT, LOG_ROOT } = require('./paths');
 
-const DATA_ROOT = path.join(os.homedir(), 'Fattern', 'data');
 const DB_PATH = path.join(DATA_ROOT, 'fattern.db');
 
 function ensureDataDirectories() {
   const attachmentDir = path.join(DATA_ROOT, 'attachments');
-  const exportDir = path.join(os.homedir(), 'Fattern', 'exports');
-  const logDir = path.join(os.homedir(), 'Fattern', 'logs');
+  const exportDir = EXPORT_ROOT;
+  const logDir = LOG_ROOT;
 
   [DATA_ROOT, attachmentDir, exportDir, logDir].forEach((dirPath) => {
     fs.mkdirSync(dirPath, { recursive: true });
@@ -79,6 +78,7 @@ function applyMigrations(db) {
 function initializeDatabase() {
   ensureDataDirectories();
 
+  const Database = loadBetterSqlite3();
   const db = new Database(DB_PATH);
   applySchema(db);
   applyMigrations(db);

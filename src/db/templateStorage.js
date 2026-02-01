@@ -1,12 +1,12 @@
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
 const templateDefinitions = require('./templates');
 const { migrateTemplateToNewFormat, isOldFormat } = require('./templateMigration');
+const { DATA_ROOT } = require('./paths');
 
 class TemplateStorage {
   constructor() {
-    this.templatesDir = path.join(os.homedir(), 'Fattern', 'data', 'templates');
+    this.templatesDir = path.join(DATA_ROOT, 'templates');
     // Legacy: keep imagesDir for backward compatibility during migration
     this.imagesDir = path.join(this.templatesDir, 'images');
     this.ensureTemplatesDir();
@@ -189,6 +189,9 @@ class TemplateStorage {
     if (!templateToSave.meta) {
       throw new Error('Template must have meta property');
     }
+    if (!templateToSave.meta.id) {
+      throw new Error('Template must have meta.id property');
+    }
 
     // Ensure required meta fields
     if (!templateToSave.meta.version) {
@@ -201,9 +204,16 @@ class TemplateStorage {
       templateToSave.meta.author = options.companyName;
     }
 
+    const templateId = templateToSave.meta.id;
+
     // Ensure all metadata fields are preserved when saving
     // This ensures that when templates are edited and saved, metadata is not lost
-    const existingTemplate = this.loadTemplate(templateId);
+    let existingTemplate = null;
+    if (this.existsInNewFormat(templateId)) {
+      const filepath = this.getTemplateJsonPath(templateId);
+      const content = fs.readFileSync(filepath, 'utf8');
+      existingTemplate = JSON.parse(content);
+    }
     if (existingTemplate && existingTemplate.meta) {
       // Preserve existing metadata that might not be in the updated template
       templateToSave.meta = {
@@ -215,7 +225,6 @@ class TemplateStorage {
       };
     }
 
-    const templateId = templateToSave.meta.id;
     const templateDir = this.getTemplateDir(templateId);
     const assetsDir = path.join(templateDir, 'assets');
 

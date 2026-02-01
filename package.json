@@ -4,14 +4,16 @@
   "description": "Local-first desktop invoicing/expense app groundwork",
   "main": "src/electron/main.js",
   "scripts": {
-    "init-db": "node scripts/init-db.js",
+    "init-db": "node scripts/run-with-electron-node.js scripts/init-db.js",
     "lint": "echo \"No linters configured yet\"",
     "ui:dev": "vite",
     "ui:build": "vite build",
     "ui:preview": "vite preview",
+    "electron:rebuild": "node scripts/rebuild-electron-native.js",
     "electron:dev": "VITE_DEV_SERVER_URL=http://localhost:4173 electron .",
     "desktop:dev": "concurrently -k \"npm:ui:dev\" \"npm:electron:dev\"",
-    "desktop:start": "npm run ui:build && electron ."
+    "desktop:start": "npm run ui:build && electron .",
+    "postinstall": "npm run electron:rebuild"
   },
   "keywords": [],
   "author": "",

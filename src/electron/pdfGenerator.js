@@ -2,6 +2,7 @@ const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const { EXPORT_ROOT } = require('../db/paths');
 
 function formatCurrency(amount) {
   return new Intl.NumberFormat('no-NO', {
@@ -23,7 +24,7 @@ function formatDate(dateString) {
 
 function generateInvoicePDF(invoice, company, customer) {
   const doc = new PDFDocument({ size: 'A4', margin: 0 });
-  const exportDir = path.join(os.homedir(), 'Fattern', 'exports');
+  const exportDir = EXPORT_ROOT;
   
   // Ensure exports directory exists
   if (!fs.existsSync(exportDir)) {

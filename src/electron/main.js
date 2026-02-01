@@ -1,6 +1,7 @@
 const path = require('path');
 const { app, BrowserWindow, ipcMain, shell, dialog } = require('electron');
 const { FatternDatabase } = require('../db/fatternDatabase');
+const { DATA_ROOT } = require('../db/paths');
 const { registerDatabaseHandlers } = require('./dbHandlers');
 const { registerTemplateHandlers } = require('./templateHandlers');
 const { generateInvoicePDF } = require('./pdfGenerator');
@@ -49,8 +50,14 @@ function createWindow() {
 }
 
 function setupDatabase() {
-  database = new FatternDatabase();
-  registerDatabaseHandlers(database);
+  try {
+    database = new FatternDatabase();
+    registerDatabaseHandlers(database);
+  } catch (error) {
+    console.error('Failed to initialize database:', error);
+    dialog.showErrorBox('Fattern failed to start', error.message || String(error));
+    app.exit(1);
+  }
 }
 
 function disposeDatabase() {
@@ -185,8 +192,7 @@ app.whenReady().then(() => {
 
   // Expense attachment handlers
   const fs = require('fs');
-  const os = require('os');
-  const attachmentsDir = path.join(os.homedir(), 'Fattern', 'data', 'attachments');
+  const attachmentsDir = path.join(DATA_ROOT, 'attachments');
   
   // Ensure attachments directory exists
   if (!fs.existsSync(attachmentsDir)) {
@@ -278,6 +284,24 @@ app.whenReady().then(() => {
       createWindow();
     }
   });
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled promise rejection:', reason);
+  try {
+    dialog.showErrorBox('Unhandled Error', reason?.message || String(reason));
+  } finally {
+    app.exit(1);
+  }
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught exception:', error);
+  try {
+    dialog.showErrorBox('Unhandled Error', error?.message || String(error));
+  } finally {
+    app.exit(1);
+  }
 });
 
 app.on('window-all-closed', () => {

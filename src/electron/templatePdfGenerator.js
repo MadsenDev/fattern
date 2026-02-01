@@ -2,6 +2,7 @@ const { BrowserWindow } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const { EXPORT_ROOT } = require('../db/paths');
 
 /**
  * Converts an image file path to a data URL
@@ -148,7 +149,7 @@ async function generateTemplatePDF(template, invoiceData, company, customer) {
           })
           .then((buffer) => {
             // Save PDF
-            const exportDir = path.join(os.homedir(), 'Fattern', 'exports');
+            const exportDir = EXPORT_ROOT;
             if (!fs.existsSync(exportDir)) {
               fs.mkdirSync(exportDir, { recursive: true });
             }
@@ -529,4 +530,3 @@ function escapeHtml(text) {
 }
 
 module.exports = { generateTemplatePDF };
-

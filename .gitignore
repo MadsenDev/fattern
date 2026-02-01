@@ -1,5 +1,7 @@
 node_modules
 npm-debug.log*
+.npm-cache
+.npm-logs
 .DS_Store
 /dist
 /build
