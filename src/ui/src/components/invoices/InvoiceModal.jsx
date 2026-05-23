@@ -3,36 +3,10 @@ import { QuantityInput } from '../QuantityInput';
 import { Select } from '../Select';
 import { Checkbox } from '../Checkbox';
 import { DatePicker } from '../DatePicker';
-import { formatDate } from '../../utils/formatDate';
+import { formatDate, parseDateInput } from '../../utils/formatDate';
 import { formatCurrency } from '../../utils/formatCurrency';
 import { useSettings } from '../../hooks/useSettings';
 import { FiPlus, FiTrash2, FiCheck, FiCheckCircle, FiSend, FiFileText, FiAlertCircle, FiX } from 'react-icons/fi';
-
-// Convert dd.mm.yyyy to yyyy-mm-dd (kept for backward compatibility)
-function parseDateInput(value) {
-  const parts = value.split('.');
-  if (parts.length !== 3) return null;
-  let [day, month, year] = parts;
-  if (!day || !month || !year) return null;
-  
-  // Handle 2-digit years: convert to 4-digit
-  if (year.length === 2) {
-    const yearNum = parseInt(year, 10);
-    if (yearNum <= 50) {
-      year = `20${year.padStart(2, '0')}`;
-    } else {
-      year = `19${year.padStart(2, '0')}`;
-    }
-  }
-  
-  // Validate year is reasonable (1900-2100)
-  const yearNum = parseInt(year, 10);
-  if (yearNum < 1900 || yearNum > 2100) {
-    return null;
-  }
-  
-  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-}
 
 export function InvoiceModal({ isOpen, mode = 'create', initialInvoice, onSubmit, onClose, customers = [], products = [] }) {
   const { getSetting } = useSettings();

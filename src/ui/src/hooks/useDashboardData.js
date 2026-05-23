@@ -12,6 +12,7 @@ export function useDashboardData() {
   const [summary, setSummary] = useState(null);
   const [invoices, setInvoices] = useState(null);
   const [expenses, setExpenses] = useState(null);
+  const [monthlyBreakdown, setMonthlyBreakdown] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const refreshMetadata = useCallback(async () => {
@@ -86,6 +87,17 @@ export function useDashboardData() {
     []
   );
 
+  const refreshBreakdown = useCallback(async (yearId) => {
+    const api = getDbApi();
+    if (!api?.getMonthlyBreakdown || !yearId) return;
+    try {
+      const data = await api.getMonthlyBreakdown(yearId);
+      setMonthlyBreakdown(data || []);
+    } catch (error) {
+      console.error('Kunne ikke hente månedlig oversikt', error);
+    }
+  }, []);
+
   useEffect(() => {
     refreshMetadata();
   }, [refreshMetadata]);
@@ -95,8 +107,9 @@ export function useDashboardData() {
       refreshSummary(selectedBudgetYearId);
       refreshInvoices(selectedBudgetYearId);
       refreshExpenses(selectedBudgetYearId);
+      refreshBreakdown(selectedBudgetYearId);
     }
-  }, [selectedBudgetYearId, refreshSummary, refreshInvoices, refreshExpenses]);
+  }, [selectedBudgetYearId, refreshSummary, refreshInvoices, refreshExpenses, refreshBreakdown]);
 
   const selectBudgetYear = useCallback(async (yearId) => {
     setSelectedBudgetYearId(yearId);
@@ -158,6 +171,7 @@ export function useDashboardData() {
     summary,
     invoices,
     expenses,
+    monthlyBreakdown,
     selectedBudgetYearId,
     selectBudgetYear,
     createBudgetYear,

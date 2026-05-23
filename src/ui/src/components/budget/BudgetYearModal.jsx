@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Modal } from '../Modal';
 import { DatePicker } from '../DatePicker';
-import { formatDate } from '../../utils/formatDate';
+// formatDate removed — DatePicker expects raw yyyy-mm-dd ISO strings
 
 export function BudgetYearModal({ isOpen, mode = 'create', initialYear, onSubmit, onClose }) {
   const [label, setLabel] = useState(initialYear?.label || '');
@@ -16,16 +16,9 @@ export function BudgetYearModal({ isOpen, mode = 'create', initialYear, onSubmit
   useEffect(() => {
     if (!isOpen) return;
     setLabel(initialYear?.label || '');
-    setStartDate(
-      initialYear?.start_date || initialYear?.start
-        ? formatDate(initialYear.start_date || initialYear.start)
-        : ''
-    );
-    setEndDate(
-      initialYear?.end_date || initialYear?.end
-        ? formatDate(initialYear.end_date || initialYear.end)
-        : ''
-    );
+    // Pass raw ISO yyyy-mm-dd strings — DatePicker handles display formatting
+    setStartDate(initialYear?.start_date || initialYear?.start || '');
+    setEndDate(initialYear?.end_date || initialYear?.end || '');
     setIsCurrent(Boolean(initialYear?.is_current));
     setError('');
     setSaving(false);

@@ -1,54 +1,72 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FiEdit2, FiTrash2, FiDownload, FiEye } from 'react-icons/fi';
 import { DataTable } from '../components/DataTable';
 import { StatusBadge } from '../components/StatusBadge';
+import { SearchBar } from '../components/SearchBar';
 import { InvoiceStatusSelector } from '../components/invoices/InvoiceStatusSelector';
 import { formatDate } from '../utils/formatDate';
 import { formatCurrency } from '../utils/formatCurrency';
 import { useSettings } from '../hooks/useSettings';
+import { useSearch } from '../hooks/useSearch';
+
+const STATUS_OPTIONS = [
+  { value: 'all', labelKey: 'invoice.status_filter' },
+  { value: 'draft', labelKey: 'status.draft' },
+  { value: 'sent', labelKey: 'status.sent' },
+  { value: 'paid', labelKey: 'status.paid' },
+  { value: 'overdue', labelKey: 'status.overdue' },
+  { value: 'cancelled', labelKey: 'status.cancelled' },
+];
 
 export function InvoicesPage({ invoices, formatCurrency: fmt, onCreateInvoice, onEditInvoice, onDeleteInvoice, onViewInvoice, onStatusChange, showStatusModal, showToast }) {
+  const { t } = useTranslation();
   const [generatingPdf, setGeneratingPdf] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('all');
   const { getSetting } = useSettings();
+
+  const { query, setQuery, results: searched } = useSearch(invoices, ['id', 'invoice_number', 'customer']);
+
+  const filtered = useMemo(() => {
+    if (statusFilter === 'all') return searched;
+    return searched.filter((inv) => inv.status === statusFilter);
+  }, [searched, statusFilter]);
 
   const handleGeneratePDF = async (invoice) => {
     if (!invoice?.dbId) return;
-    
+
     setGeneratingPdf(invoice.dbId);
     try {
       const api = typeof window !== 'undefined' ? window.fattern : null;
       if (!api?.pdf?.generateInvoice) {
-        throw new Error('PDF generation ikke tilgjengelig');
+        throw new Error(t('errors.pdf_unavailable'));
       }
 
-      // Ensure default template exists
       if (api.template?.createDefault) {
         await api.template.createDefault();
       }
 
-      // Get default template ID from settings
       const defaultTemplateId = getSetting('invoice.defaultTemplate', 'default_invoice');
-
       const result = await api.pdf.generateInvoice(invoice.dbId, defaultTemplateId);
       if (result?.success && result?.filepath) {
-        showToast?.success('PDF lastet ned');
-        // Optionally open the file
+        showToast?.success(t('invoice.pdf_downloaded'));
         if (api.pdf.openFile) {
           await api.pdf.openFile(result.filepath);
         }
       }
     } catch (error) {
       console.error('Kunne ikke generere PDF', error);
-      showToast?.error('Kunne ikke generere PDF');
+      showToast?.error(t('invoice.pdf_error'));
     } finally {
       setGeneratingPdf(null);
     }
   };
+
   const columns = useMemo(
     () => [
       {
         key: 'id',
-        label: 'Faktura',
+        label: t('invoice.invoice_number'),
         className: 'font-semibold text-ink',
         render: (id, invoice) => (
           <button
@@ -61,12 +79,12 @@ export function InvoicesPage({ invoices, formatCurrency: fmt, onCreateInvoice, o
       },
       {
         key: 'customer',
-        label: 'Kunde',
+        label: t('invoice.customer'),
         className: 'text-ink-soft',
       },
       {
         key: 'status',
-        label: 'Status',
+        label: t('invoice.status'),
         render: (status, invoice) => (
           <InvoiceStatusSelector
             invoice={invoice}
@@ -81,13 +99,13 @@ export function InvoicesPage({ invoices, formatCurrency: fmt, onCreateInvoice, o
       },
       {
         key: 'date',
-        label: 'Dato',
+        label: t('invoice.date'),
         render: (date, invoice) => (
           <div className="flex flex-col">
             <span className="text-ink-subtle">{date ? formatDate(date) : '—'}</span>
             {invoice.status === 'paid' && invoice.payment_date && (
               <span className="text-xs text-brand-700 font-medium">
-                Betalt: {formatDate(invoice.payment_date)}
+                {t('invoice.paid_date')} {formatDate(invoice.payment_date)}
               </span>
             )}
           </div>
@@ -101,7 +119,7 @@ export function InvoicesPage({ invoices, formatCurrency: fmt, onCreateInvoice, o
       },
       {
         key: 'amount',
-        label: 'Beløp',
+        label: t('invoice.amount'),
         align: 'right',
         render: (amount) => (typeof amount === 'number' ? fmt(amount) : '—'),
         className: 'font-medium text-ink',
@@ -120,8 +138,8 @@ export function InvoicesPage({ invoices, formatCurrency: fmt, onCreateInvoice, o
             <button
               onClick={() => onViewInvoice?.(invoice)}
               className="rounded-lg p-1.5 text-ink-subtle hover:bg-brand-50 hover:text-brand-700"
-              aria-label="Vis faktura"
-              title="Vis faktura"
+              aria-label={t('invoice.view')}
+              title={t('invoice.view')}
             >
               <FiEye className="h-4 w-4" />
             </button>
@@ -129,24 +147,24 @@ export function InvoicesPage({ invoices, formatCurrency: fmt, onCreateInvoice, o
               onClick={() => handleGeneratePDF(invoice)}
               disabled={generatingPdf === invoice.dbId}
               className="rounded-lg p-1.5 text-ink-subtle hover:bg-brand-50 hover:text-brand-700 disabled:opacity-50"
-              aria-label="Generer PDF"
-              title="Generer PDF"
+              aria-label={t('invoice.generate_pdf')}
+              title={t('invoice.generate_pdf')}
             >
               <FiDownload className="h-4 w-4" />
             </button>
             <button
               onClick={() => onEditInvoice?.(invoice)}
               className="rounded-lg p-1.5 text-ink-subtle hover:bg-brand-50 hover:text-brand-700"
-              aria-label="Rediger faktura"
-              title="Rediger faktura"
+              aria-label={t('invoice.edit')}
+              title={t('invoice.edit')}
             >
               <FiEdit2 className="h-4 w-4" />
             </button>
             <button
               onClick={() => onDeleteInvoice?.(invoice)}
               className="rounded-lg p-1.5 text-ink-subtle hover:bg-red-50 hover:text-red-600"
-              aria-label="Slett faktura"
-              title="Slett faktura"
+              aria-label={t('invoice.delete')}
+              title={t('invoice.delete')}
             >
               <FiTrash2 className="h-4 w-4" />
             </button>
@@ -154,8 +172,12 @@ export function InvoicesPage({ invoices, formatCurrency: fmt, onCreateInvoice, o
         ),
       },
     ],
-    [fmt, onEditInvoice, onDeleteInvoice, onViewInvoice]
+    [t, fmt, onEditInvoice, onDeleteInvoice, onViewInvoice, generatingPdf]
   );
+
+  const emptyMessage = query
+    ? t('invoice.no_results', { query })
+    : t('invoice.empty');
 
   return (
     <div className="space-y-6">
@@ -164,24 +186,47 @@ export function InvoicesPage({ invoices, formatCurrency: fmt, onCreateInvoice, o
         <div className="relative z-10 p-6 lg:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-ink-subtle">Fakturaer</p>
-              <h1 className="mt-3 text-3xl font-semibold text-ink">Alle fakturaer</h1>
-              <p className="mt-2 text-sm text-ink-soft">Oversikt over alle fakturaer i systemet</p>
+              <p className="text-xs uppercase tracking-[0.3em] text-ink-subtle">{t('invoice.title')}</p>
+              <h1 className="mt-3 text-3xl font-semibold text-ink">{t('invoice.all_invoices')}</h1>
+              <p className="mt-2 text-sm text-ink-soft">{t('invoice.overview')}</p>
             </div>
             <button
               onClick={() => onCreateInvoice?.()}
               className="rounded-2xl bg-brand-700 px-5 py-2 text-sm font-semibold text-white shadow-card transition hover:-translate-y-0.5"
             >
-              Ny faktura
+              {t('invoice.new')}
             </button>
           </div>
         </div>
       </header>
 
       <section className="rounded-3xl border border-sand/60 bg-white p-6 shadow-card">
-        <DataTable columns={columns} data={invoices || []} emptyMessage="Ingen fakturaer funnet" defaultSort={{ column: 'date', direction: 'desc' }} />
+        {/* Toolbar: search + status filter + count */}
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex-1">
+            <SearchBar value={query} onChange={setQuery} />
+          </div>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+          >
+            {STATUS_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>{t(opt.labelKey)}</option>
+            ))}
+          </select>
+          <span className="whitespace-nowrap text-xs text-ink-subtle">
+            {t('invoice.showing', { count: filtered.length, total: (invoices || []).length })}
+          </span>
+        </div>
+
+        <DataTable
+          columns={columns}
+          data={filtered}
+          emptyMessage={emptyMessage}
+          defaultSort={{ column: 'date', direction: 'desc' }}
+        />
       </section>
     </div>
   );
 }
-

@@ -1,7 +1,9 @@
+import { useTranslation } from 'react-i18next';
 import { FiClock, FiTrendingUp } from 'react-icons/fi';
 import { StatCard } from '../StatCard';
 import { StatusBadge } from '../StatusBadge';
 import { InvoiceStatusSelector } from '../invoices/InvoiceStatusSelector';
+import { IncomeExpenseChart } from './IncomeExpenseChart';
 import { formatDate } from '../../utils/formatDate';
 
 export function DashboardView({
@@ -17,6 +19,7 @@ export function DashboardView({
   utilization,
   collectionRate,
   formatCurrency,
+  monthlyBreakdown,
   onOpenBudgetYearModal,
   onEditBudgetYear,
   onDeleteBudgetYear,
@@ -28,6 +31,7 @@ export function DashboardView({
   showInvoiceStatusModal,
   onViewInvoice,
 }) {
+  const { t } = useTranslation();
   const fmt = (value) => (typeof formatCurrency === 'function' ? formatCurrency(value) : value);
 
   return (
@@ -119,6 +123,15 @@ export function DashboardView({
               <StatCard key={stat.title} {...stat} />
             ))}
           </div>
+
+          {/* Income vs Expenses chart */}
+          <section className="rounded-3xl border border-sand/60 bg-white p-6 shadow-card">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-ink">{t('dashboard_view.income_vs_expenses')}</h3>
+              <p className="mt-1 text-sm text-ink-subtle">{t('dashboard_view.monthly_overview')}</p>
+            </div>
+            <IncomeExpenseChart data={monthlyBreakdown || []} />
+          </section>
 
           <div className="grid gap-4 xl:grid-cols-3">
             <section className="xl:col-span-2 rounded-3xl border border-sand/60 bg-white p-6 shadow-card">

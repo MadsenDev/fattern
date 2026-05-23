@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '../Modal';
 import { Select } from '../Select';
 import { DatePicker } from '../DatePicker';
-import { formatDate } from '../../utils/formatDate';
 import { ExpenseAttachmentUpload } from './ExpenseAttachmentUpload';
 
 export function ExpenseModal({ isOpen, mode = 'create', initialExpense, onSubmit, onClose, categories = [] }) {
+  const { t } = useTranslation();
   const [vendor, setVendor] = useState(initialExpense?.vendor || '');
   const [categoryId, setCategoryId] = useState(initialExpense?.category_id?.toString() || '');
   const [amount, setAmount] = useState(initialExpense?.amount?.toString() || '');
   const [currency, setCurrency] = useState(initialExpense?.currency || 'NOK');
-  const [date, setDate] = useState(initialExpense?.date ? formatDate(initialExpense.date) : '');
+  // DatePicker expects and returns yyyy-mm-dd — store raw ISO date
+  const [date, setDate] = useState(initialExpense?.date || '');
   const [notes, setNotes] = useState(initialExpense?.notes || '');
   const [attachmentPath, setAttachmentPath] = useState(initialExpense?.attachment_path || '');
   const [items, setItems] = useState(initialExpense?.items || []);
@@ -25,7 +27,7 @@ export function ExpenseModal({ isOpen, mode = 'create', initialExpense, onSubmit
     setCategoryId(initialExpense?.category_id?.toString() || '');
     setAmount(initialExpense?.amount?.toString() || '');
     setCurrency(initialExpense?.currency || 'NOK');
-    setDate(initialExpense?.date ? formatDate(initialExpense.date) : '');
+    setDate(initialExpense?.date || '');
     setNotes(initialExpense?.notes || '');
     setAttachmentPath(initialExpense?.attachment_path || '');
     setItems(initialExpense?.items || []);
@@ -85,18 +87,18 @@ export function ExpenseModal({ isOpen, mode = 'create', initialExpense, onSubmit
     if (items.length > 0) {
       const validItems = items.filter((item) => item.description.trim() && item.quantity > 0 && item.unitPrice > 0);
       if (validItems.length === 0) {
-        setError('Hvis du bruker linjeelementer, må minst én linje ha beskrivelse, antall og pris.');
+        setError(t('expense.form.validation_items'));
         return;
       }
     } else {
       if (!amount || parseFloat(amount) <= 0) {
-        setError('Beløp må være et gyldig tall større enn 0, eller legg til linjeelementer.');
+        setError(t('expense.form.validation_amount'));
         return;
       }
     }
 
-    if (!date || !parseDateInput(date)) {
-      setError('Dato må fylles ut (dd.mm.yyyy).');
+    if (!date) {
+      setError(t('expense.form.validation_date'));
       return;
     }
 
@@ -127,17 +129,17 @@ export function ExpenseModal({ isOpen, mode = 'create', initialExpense, onSubmit
       onClose?.();
     } catch (err) {
       console.error('Kunne ikke lagre utgift', err);
-      const errorMessage = err?.message || 'Noe gikk galt under lagring. Prøv igjen.';
+      const errorMessage = err?.message || t('errors.save_failed');
       setError(errorMessage);
     } finally {
       setSaving(false);
     }
   };
 
-  const title = isEdit ? 'Rediger utgift' : 'Ny utgift';
+  const title = isEdit ? t('expense.form.title_edit') : t('expense.form.title_create');
   const modalDescription = isEdit
-    ? 'Oppdater utgiftsinformasjon.'
-    : 'Registrer en ny utgift i systemet.';
+    ? t('expense.form.description_edit', 'Oppdater utgiftsinformasjon.')
+    : t('expense.form.description_create', 'Registrer en ny utgift i systemet.');
 
   // Build category hierarchy for display
   const buildCategoryOptions = (cats, parentId = null, level = 0) => {

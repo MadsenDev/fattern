@@ -1,22 +1,34 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ExpenseCard } from '../components/expenses/ExpenseCard';
 import { ExpenseCategorySidebar } from '../components/expenses/ExpenseCategorySidebar';
-import { formatCurrency } from '../utils/formatCurrency';
+import { SearchBar } from '../components/SearchBar';
+import { useSearch } from '../hooks/useSearch';
 
 export function ExpensesPage({ expenses, expenseCategories = [], formatCurrency: fmt, onCreateExpense, onEditExpense, onDeleteExpense, onManageCategories }) {
+  const { t } = useTranslation();
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
-  // Filter expenses by selected category
-  const filteredExpenses = useMemo(() => {
+
+  // Filter by category first
+  const filteredByCategory = useMemo(() => {
     if (!selectedCategoryId) return expenses || [];
     return (expenses || []).filter((expense) => expense.category_id === selectedCategoryId);
   }, [expenses, selectedCategoryId]);
 
-  // Get category name for display
+  // Then search within the category result
+  const { query, setQuery, results: filteredExpenses } = useSearch(filteredByCategory, ['vendor', 'notes']);
+
   const selectedCategoryName = useMemo(() => {
-    if (!selectedCategoryId) return 'Alle utgifter';
+    if (!selectedCategoryId) return t('expense.all_expenses_label');
     const category = expenseCategories.find((c) => c.id === selectedCategoryId);
-    return category?.name || 'Ukjent kategori';
-  }, [selectedCategoryId, expenseCategories]);
+    return category?.name || t('expense.unknown_category');
+  }, [selectedCategoryId, expenseCategories, t]);
+
+  const emptyMessage = query
+    ? t('expense.no_results', { query })
+    : selectedCategoryId
+      ? t('expense.try_other_category')
+      : t('expense.register_first');
 
   return (
     <div className="space-y-6">
@@ -25,10 +37,13 @@ export function ExpensesPage({ expenses, expenseCategories = [], formatCurrency:
         <div className="relative z-10 p-6 lg:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-ink-subtle">Utgifter</p>
+              <p className="text-xs uppercase tracking-[0.3em] text-ink-subtle">{t('expense.title')}</p>
               <h1 className="mt-3 text-3xl font-semibold text-ink">{selectedCategoryName}</h1>
               <p className="mt-2 text-sm text-ink-soft">
-                {filteredExpenses.length} {filteredExpenses.length === 1 ? 'utgift' : 'utgifter'}
+                {filteredExpenses.length}{' '}
+                {filteredExpenses.length === 1
+                  ? t('expense.expense_singular')
+                  : t('expense.expense_plural')}
               </p>
             </div>
             <div className="flex gap-3">
@@ -37,14 +52,14 @@ export function ExpensesPage({ expenses, expenseCategories = [], formatCurrency:
                 onClick={() => onCreateExpense?.()}
                 className="rounded-2xl bg-brand-700 px-5 py-2 text-sm font-semibold text-white shadow-card transition hover:-translate-y-0.5"
               >
-                Registrer utgift
+                {t('expense.new')}
               </button>
               <button
                 type="button"
                 onClick={() => onManageCategories?.()}
                 className="rounded-2xl border border-sand/60 bg-white px-5 py-2 text-sm font-semibold text-ink shadow-card transition hover:-translate-y-0.5"
               >
-                Behandle kategorier
+                {t('expense.manage_categories')}
               </button>
             </div>
           </div>
@@ -66,13 +81,16 @@ export function ExpensesPage({ expenses, expenseCategories = [], formatCurrency:
         {/* Expenses Grid */}
         <div className="flex-1 min-w-0">
           <div className="rounded-3xl border border-sand/60 bg-white shadow-card p-6">
+            {/* Search bar above grid */}
+            <div className="mb-4">
+              <SearchBar value={query} onChange={setQuery} />
+            </div>
+
             {filteredExpenses.length === 0 ? (
               <div className="flex items-center justify-center py-12">
                 <div className="text-center">
-                  <p className="text-sm font-medium text-ink-soft">Ingen utgifter funnet</p>
-                  <p className="mt-1 text-xs text-ink-subtle">
-                    {selectedCategoryId ? 'Prøv å velge en annen kategori' : 'Registrer din første utgift'}
-                  </p>
+                  <p className="text-sm font-medium text-ink-soft">{t('expense.empty')}</p>
+                  <p className="mt-1 text-xs text-ink-subtle">{emptyMessage}</p>
                 </div>
               </div>
             ) : (
@@ -94,4 +112,3 @@ export function ExpensesPage({ expenses, expenseCategories = [], formatCurrency:
     </div>
   );
 }
-

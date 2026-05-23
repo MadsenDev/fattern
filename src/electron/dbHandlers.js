@@ -98,6 +98,23 @@ function registerDatabaseHandlers(database) {
   // Import handlers
   handle('db:bulk-create-customers', (customers) => database.bulkCreateCustomers(customers));
   handle('db:bulk-create-products', (products) => database.bulkCreateProducts(products));
+
+  // Task 03 — Monthly breakdown + expense-invoice linking
+  handle('db:get-monthly-breakdown', (budgetYearId) =>
+    database.getMonthlyBreakdown(budgetYearId)
+  );
+  handle('db:get-expenses-for-invoice', (invoiceId) =>
+    database.getExpensesForInvoice(invoiceId)
+  );
+  handle('db:get-unlinked-expenses', (budgetYearId) =>
+    database.getUnlinkedExpenses(budgetYearId)
+  );
+  handle('db:link-expense-to-invoice', (invoiceId, expenseId) =>
+    database.linkExpenseToInvoice(invoiceId, expenseId)
+  );
+  handle('db:unlink-expense-from-invoice', (invoiceId, expenseId) =>
+    database.unlinkExpenseFromInvoice(invoiceId, expenseId)
+  );
 }
 
 module.exports = {

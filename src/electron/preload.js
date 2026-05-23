@@ -46,6 +46,12 @@ contextBridge.exposeInMainWorld('fattern', {
     getAllSettings: () => invoke('db:get-all-settings'),
     bulkCreateCustomers: (customers) => invoke('db:bulk-create-customers', customers),
     bulkCreateProducts: (products) => invoke('db:bulk-create-products', products),
+    // Task 03 — Monthly breakdown + expense-invoice linking
+    getMonthlyBreakdown: (budgetYearId) => invoke('db:get-monthly-breakdown', budgetYearId),
+    getExpensesForInvoice: (invoiceId) => invoke('db:get-expenses-for-invoice', invoiceId),
+    getUnlinkedExpenses: (budgetYearId) => invoke('db:get-unlinked-expenses', budgetYearId),
+    linkExpenseToInvoice: (invoiceId, expenseId) => invoke('db:link-expense-to-invoice', invoiceId, expenseId),
+    unlinkExpenseFromInvoice: (invoiceId, expenseId) => invoke('db:unlink-expense-from-invoice', invoiceId, expenseId),
   },
   system: {
     getLocale: () => invoke('system:get-locale'),
@@ -86,5 +92,10 @@ contextBridge.exposeInMainWorld('fattern', {
     saveAttachment: (expenseId, imageData) => invoke('expense:save-attachment', expenseId, imageData),
     getAttachmentPath: (filename) => invoke('expense:get-attachment-path', filename),
     readAttachment: (filename) => invoke('expense:read-attachment', filename),
+  },
+  // Task 04 — SAF-T import
+  saft: {
+    parsePreview: (filepath) => invoke('saft:parse-preview', filepath),
+    import: (filepath, options) => invoke('saft:import', filepath, options),
   },
 });

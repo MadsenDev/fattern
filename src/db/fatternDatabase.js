@@ -941,6 +941,98 @@ class FatternDatabase {
     return this.getSetting(key);
   }
 
+  // ──────────────────────────────────────────────────
+  // Monthly breakdown (Task 03)
+  // ──────────────────────────────────────────────────
+
+  getMonthlyBreakdown(budgetYearId) {
+    const budgetYear = budgetYearId
+      ? this.db.prepare('SELECT * FROM budget_years WHERE id = ?').get(budgetYearId)
+      : this.ensureCurrentBudgetYear();
+
+    const startDate = toDateOnlyString(budgetYear.start_date);
+    const endDate = toDateOnlyString(budgetYear.end_date);
+
+    const invoiceRows = this.db.prepare(`
+      SELECT
+        strftime('%Y-%m', invoice_date) as month,
+        SUM(total) as total
+      FROM invoices
+      WHERE invoice_date BETWEEN ? AND ?
+        AND status IN ('paid', 'sent', 'overdue')
+      GROUP BY month
+      ORDER BY month
+    `).all(startDate, endDate);
+
+    const expenseRows = this.db.prepare(`
+      SELECT
+        strftime('%Y-%m', date) as month,
+        SUM(amount) as total
+      FROM expenses
+      WHERE date BETWEEN ? AND ?
+      GROUP BY month
+      ORDER BY month
+    `).all(startDate, endDate);
+
+    // Build full month list for the budget year range
+    const months = [];
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    let current = new Date(start.getFullYear(), start.getMonth(), 1);
+
+    while (current <= end) {
+      const key = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}`;
+      months.push(key);
+      current.setMonth(current.getMonth() + 1);
+    }
+
+    const incomeByMonth = Object.fromEntries(invoiceRows.map((r) => [r.month, r.total]));
+    const expenseByMonth = Object.fromEntries(expenseRows.map((r) => [r.month, r.total]));
+
+    return months.map((month) => ({
+      month,
+      label: new Date(month + '-01').toLocaleDateString('nb-NO', { month: 'short', year: '2-digit' }),
+      income: incomeByMonth[month] || 0,
+      expenses: expenseByMonth[month] || 0,
+      net: (incomeByMonth[month] || 0) - (expenseByMonth[month] || 0),
+    }));
+  }
+
+  // ──────────────────────────────────────────────────
+  // Expense-invoice linking (Task 03)
+  // ──────────────────────────────────────────────────
+
+  getExpensesForInvoice(invoiceId) {
+    return this.db.prepare(`
+      SELECT expenses.*, expense_categories.name as category_name
+      FROM expenses
+      JOIN invoice_expense_links ON invoice_expense_links.expense_id = expenses.id
+      LEFT JOIN expense_categories ON expense_categories.id = expenses.category_id
+      WHERE invoice_expense_links.invoice_id = ?
+      ORDER BY expenses.date DESC
+    `).all(invoiceId);
+  }
+
+  getUnlinkedExpenses(budgetYearId) {
+    const { start, end } = this.getBudgetYearRange(budgetYearId);
+    return this.db.prepare(`
+      SELECT expenses.*, expense_categories.name as category_name
+      FROM expenses
+      LEFT JOIN invoice_expense_links ON invoice_expense_links.expense_id = expenses.id
+      LEFT JOIN expense_categories ON expense_categories.id = expenses.category_id
+      WHERE invoice_expense_links.invoice_id IS NULL
+        AND expenses.date BETWEEN ? AND ?
+      ORDER BY expenses.date DESC
+    `).all(start, end);
+  }
+
+  unlinkExpenseFromInvoice(invoiceId, expenseId) {
+    this.db.prepare(
+      'DELETE FROM invoice_expense_links WHERE invoice_id = ? AND expense_id = ?'
+    ).run(invoiceId, expenseId);
+    return true;
+  }
+
   getAllSettings() {
     const rows = this.db.prepare('SELECT key, value FROM settings').all();
     return rows.reduce((acc, row) => {

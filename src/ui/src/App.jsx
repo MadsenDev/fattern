@@ -91,6 +91,7 @@ function App() {
     budgetYears,
     summary: dbSummary,
     selectedBudgetYearId,
+    monthlyBreakdown,
     selectBudgetYear,
     refreshMetadata,
     refreshSummary,
@@ -186,7 +187,9 @@ function App() {
       .then((locale) => {
         if (!locale) return;
         const normalized = locale.split?.('-')[0] || locale;
-        i18n.changeLanguage(normalized);
+        // Map Norwegian variants to 'nb'; everything else falls back to 'en'
+        const lang = ['nb', 'nn', 'no'].includes(normalized) ? 'nb' : 'en';
+        i18n.changeLanguage(lang);
       })
       .catch((err) => {
         console.error('Unable to detect locale', err);
@@ -898,6 +901,7 @@ function App() {
             utilization={utilization}
             collectionRate={collectionRate}
             formatCurrency={formatCurrency}
+            monthlyBreakdown={monthlyBreakdown}
             onOpenBudgetYearModal={openCreateBudgetYearModal}
             onEditBudgetYear={openEditBudgetYearModal}
             onDeleteBudgetYear={handleDeleteBudgetYear}
@@ -1028,6 +1032,7 @@ function App() {
         isOpen={isInvoiceViewModalOpen}
         invoice={viewingInvoice}
         formatCurrency={formatCurrency}
+        budgetYearId={selectedBudgetYearId}
         onClose={() => {
           setIsInvoiceViewModalOpen(false);
           setViewingInvoice(null);

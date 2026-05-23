@@ -322,7 +322,7 @@ export function TemplateProperties({ element, onUpdate, template }) {
                     applyUpdate({ src: imagePath });
                   }
                 }}
-                templateId={template?.id}
+                templateId={template?.meta?.id || template?.id}
                 elementId={element.id}
                 label="Bilde"
                 maxSizeMB={10}

@@ -1,40 +1,55 @@
 import { useMemo, useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { DataTable } from '../components/DataTable';
 import { ProductCard } from '../components/ProductCard';
-import { formatCurrency } from '../utils/formatCurrency';
+import { SearchBar } from '../components/SearchBar';
 import { useSettings } from '../hooks/useSettings';
+import { useSearch } from '../hooks/useSearch';
+
+const ACTIVE_OPTIONS = [
+  { value: 'all', labelKey: 'product.active_filter' },
+  { value: 'active', labelKey: 'product.active' },
+  { value: 'inactive', labelKey: 'product.inactive' },
+];
 
 export function ProductsPage({ products, formatCurrency: fmt, onEditProduct, onDeleteProduct, onCreateProduct }) {
+  const { t } = useTranslation();
   const { getSetting, updateSetting } = useSettings();
   const defaultView = getSetting('products.defaultView', 'table');
-  const [viewMode, setViewMode] = useState(defaultView); // 'table' | 'card'
+  const [viewMode, setViewMode] = useState(defaultView);
+  const [activeFilter, setActiveFilter] = useState('all');
 
   useEffect(() => {
-    if (defaultView) {
-      setViewMode(defaultView);
-    }
+    if (defaultView) setViewMode(defaultView);
   }, [defaultView]);
 
   const handleViewModeChange = (mode) => {
     setViewMode(mode);
     updateSetting('products.defaultView', mode);
   };
+
+  const { query, setQuery, results: searched } = useSearch(products, ['name', 'sku', 'description']);
+
+  const filtered = useMemo(() => {
+    if (activeFilter === 'all') return searched;
+    return searched.filter((p) => activeFilter === 'active' ? p.active : !p.active);
+  }, [searched, activeFilter]);
+
   const columns = useMemo(
     () => [
       {
         key: 'name',
-        label: 'Navn',
+        label: t('product.name'),
         className: 'font-semibold text-ink',
       },
       {
         key: 'sku',
-        label: 'SKU',
+        label: t('product.sku'),
         className: 'text-ink-soft',
       },
       {
         key: 'unit_price',
-        label: 'Pris',
+        label: t('product.price'),
         align: 'right',
         render: (price) => (typeof price === 'number' ? fmt(price) : '—'),
         className: 'font-medium text-ink',
@@ -46,7 +61,7 @@ export function ProductsPage({ products, formatCurrency: fmt, onEditProduct, onD
       },
       {
         key: 'vat_rate',
-        label: 'MVA',
+        label: t('product.vat'),
         align: 'right',
         render: (rate) => (rate != null ? `${(rate * 100).toFixed(0)}%` : '—'),
         className: 'text-ink-subtle',
@@ -58,21 +73,20 @@ export function ProductsPage({ products, formatCurrency: fmt, onEditProduct, onD
       },
       {
         key: 'unit',
-        label: 'Enhet',
+        label: t('product.unit'),
         className: 'text-ink-subtle',
       },
       {
         key: 'active',
-        label: 'Status',
+        label: t('product.status'),
         render: (active) => (
           <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
             active ? 'bg-brand-50 text-brand-700' : 'bg-cloud text-ink-soft'
           }`}>
-            {active ? 'Aktiv' : 'Inaktiv'}
+            {active ? t('common.active') : t('common.inactive')}
           </span>
         ),
         sortFn: (a, b) => {
-          // Sort active first
           if (a === b) return 0;
           return a ? -1 : 1;
         },
@@ -87,21 +101,25 @@ export function ProductsPage({ products, formatCurrency: fmt, onEditProduct, onD
               className="text-sm font-medium text-accent hover:underline"
               onClick={() => onEditProduct?.(product)}
             >
-              Rediger
+              {t('product.edit')}
             </button>
             <button
               type="button"
               className="text-sm font-medium text-rose-600 hover:underline"
               onClick={() => onDeleteProduct?.(product)}
             >
-              Slett
+              {t('product.delete')}
             </button>
           </div>
         ),
       },
     ],
-    [fmt, onEditProduct, onDeleteProduct]
+    [t, fmt, onEditProduct, onDeleteProduct]
   );
+
+  const emptyMessage = query
+    ? t('product.no_results', { query })
+    : t('product.empty');
 
   return (
     <div className="space-y-6">
@@ -110,9 +128,9 @@ export function ProductsPage({ products, formatCurrency: fmt, onEditProduct, onD
         <div className="relative z-10 p-6 lg:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-ink-subtle">Produkter</p>
-              <h1 className="mt-3 text-3xl font-semibold text-ink">Alle produkter</h1>
-              <p className="mt-2 text-sm text-ink-soft">Oversikt over alle produkter i systemet</p>
+              <p className="text-xs uppercase tracking-[0.3em] text-ink-subtle">{t('product.title')}</p>
+              <h1 className="mt-3 text-3xl font-semibold text-ink">{t('product.all_products')}</h1>
+              <p className="mt-2 text-sm text-ink-soft">{t('product.overview')}</p>
             </div>
             <div className="flex items-center gap-3">
               <div className="flex rounded-xl border border-sand bg-white p-1">
@@ -120,23 +138,19 @@ export function ProductsPage({ products, formatCurrency: fmt, onEditProduct, onD
                   type="button"
                   onClick={() => handleViewModeChange('table')}
                   className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
-                    viewMode === 'table'
-                      ? 'bg-brand-700 text-white'
-                      : 'text-ink-soft hover:text-ink'
+                    viewMode === 'table' ? 'bg-brand-700 text-white' : 'text-ink-soft hover:text-ink'
                   }`}
                 >
-                  Liste
+                  {t('common.list')}
                 </button>
                 <button
                   type="button"
                   onClick={() => handleViewModeChange('card')}
                   className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
-                    viewMode === 'card'
-                      ? 'bg-brand-700 text-white'
-                      : 'text-ink-soft hover:text-ink'
+                    viewMode === 'card' ? 'bg-brand-700 text-white' : 'text-ink-soft hover:text-ink'
                   }`}
                 >
-                  Kort
+                  {t('common.card')}
                 </button>
               </div>
               <button
@@ -144,7 +158,7 @@ export function ProductsPage({ products, formatCurrency: fmt, onEditProduct, onD
                 onClick={() => onCreateProduct?.()}
                 className="rounded-2xl bg-brand-700 px-5 py-2 text-sm font-semibold text-white shadow-card transition hover:-translate-y-0.5"
               >
-                Nytt produkt
+                {t('product.new')}
               </button>
             </div>
           </div>
@@ -152,12 +166,31 @@ export function ProductsPage({ products, formatCurrency: fmt, onEditProduct, onD
       </header>
 
       <section className="rounded-3xl border border-sand/60 bg-white p-6 shadow-card">
+        {/* Toolbar */}
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex-1">
+            <SearchBar value={query} onChange={setQuery} />
+          </div>
+          <select
+            value={activeFilter}
+            onChange={(e) => setActiveFilter(e.target.value)}
+            className="rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+          >
+            {ACTIVE_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>{t(opt.labelKey)}</option>
+            ))}
+          </select>
+          <span className="whitespace-nowrap text-xs text-ink-subtle">
+            {t('product.showing', { count: filtered.length, total: (products || []).length })}
+          </span>
+        </div>
+
         {viewMode === 'table' ? (
-          <DataTable columns={columns} data={products || []} emptyMessage="Ingen produkter funnet" />
+          <DataTable columns={columns} data={filtered} emptyMessage={emptyMessage} />
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {products && products.length > 0 ? (
-              products.map((product, index) => (
+            {filtered && filtered.length > 0 ? (
+              filtered.map((product, index) => (
                 <ProductCard
                   key={product.id}
                   product={product}
@@ -168,7 +201,7 @@ export function ProductsPage({ products, formatCurrency: fmt, onEditProduct, onD
                 />
               ))
             ) : (
-              <div className="col-span-full py-12 text-center text-ink-subtle">Ingen produkter funnet</div>
+              <div className="col-span-full py-12 text-center text-ink-subtle">{emptyMessage}</div>
             )}
           </div>
         )}
@@ -176,4 +209,3 @@ export function ProductsPage({ products, formatCurrency: fmt, onEditProduct, onD
     </div>
   );
 }
-

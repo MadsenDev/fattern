@@ -279,6 +279,19 @@ app.whenReady().then(() => {
     }
   });
 
+  // Task 04 — SAF-T import handlers
+  const { parseSAFT } = require('./saftImporter');
+  const { importSAFT } = require('./saftImportHandler');
+
+  ipcMain.handle('saft:parse-preview', async (event, filepath) => {
+    const parsed = await parseSAFT(filepath);
+    return parsed.summary;
+  });
+
+  ipcMain.handle('saft:import', async (event, filepath, options) => {
+    return await importSAFT(filepath, database, options);
+  });
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
