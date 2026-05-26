@@ -3,65 +3,7 @@
  */
 import { lightTheme } from './light';
 import { darkTheme } from './dark';
-
-/**
- * Default --f-* design tokens for dark/ambient themes.
- * These mirror the :root defaults in index.css so that switching away
- * from the light theme always restores the correct dark ambient look.
- */
-const darkTokens = {
-  '--f-bg-base':     '#0d1a14',
-  '--f-bg-mid':      '#111820',
-  '--f-bg-dark':     '#0e1118',
-  '--f-bg-gradient': 'linear-gradient(160deg, #0d1a14 0%, #111820 50%, #0e1118 100%)',
-  '--f-bg-radial':   [
-    'radial-gradient(ellipse 80% 60% at 15% 20%,  rgba(45,180,130,0.28) 0%, transparent 60%)',
-    'radial-gradient(ellipse 60% 50% at 85% 80%,  rgba(80,140,220,0.22) 0%, transparent 55%)',
-    'radial-gradient(ellipse 50% 40% at 60% 10%,  rgba(160,100,220,0.12) 0%, transparent 50%)',
-  ].join(',\n      '),
-
-  '--f-surface':          'rgba(255,255,255,0.05)',
-  '--f-surface-hover':    'rgba(255,255,255,0.08)',
-  '--f-surface-elevated': 'rgba(10,18,14,0.65)',
-  '--f-surface-topbar':   'rgba(10,18,14,0.6)',
-  '--f-surface-rail':     'rgba(8,15,11,0.5)',
-  '--f-surface-bottom':   'rgba(8,14,10,0.55)',
-
-  '--f-border':            'rgba(255,255,255,0.08)',
-  '--f-border-subtle':     'rgba(255,255,255,0.06)',
-  '--f-border-faint':      'rgba(255,255,255,0.04)',
-  '--f-border-top':        'rgba(255,255,255,0.07)',
-  // (--f-green* and --f-border-green* are always derived from colors.accent
-  //  by computeAccentTokens() in applyTheme — no static values needed here)
-
-  '--f-blue':        'rgba(80,140,220,0.9)',
-  '--f-blue-bg':     'rgba(80,140,220,0.14)',
-  '--f-blue-border': 'rgba(80,140,220,0.2)',
-  '--f-blue-text':   'rgba(100,160,240,0.9)',
-
-  '--f-text':        'rgba(255,255,255,0.9)',
-  '--f-text-body':   'rgba(255,255,255,0.82)',
-  '--f-text-soft':   'rgba(255,255,255,0.45)',
-  '--f-text-subtle': 'rgba(255,255,255,0.28)',
-  '--f-text-muted':  'rgba(255,255,255,0.20)',
-  '--f-text-label':  'rgba(255,255,255,0.35)',
-
-  '--f-warn':          '#f0b840',
-  '--f-warn-bg':       'rgba(240,184,64,0.14)',
-  '--f-warn-border':   'rgba(240,184,64,0.2)',
-  '--f-danger':        '#f07860',
-  '--f-danger-bg':     'rgba(240,120,96,0.14)',
-  '--f-danger-border': 'rgba(240,120,96,0.2)',
-  '--f-danger-text':   'rgba(250,140,110,0.9)',
-
-  '--f-glass-hero-bg':           'rgba(255,255,255,0.05)',
-  '--f-glass-hero-border':       'rgba(255,255,255,0.1)',
-  '--f-glass-hero-inner-shadow': 'rgba(255,255,255,0.1)',
-  '--f-glass-hero-outer-shadow': 'rgba(0,0,0,0.25)',
-
-  '--f-scrollbar-thumb':       'rgba(255,255,255,0.12)',
-  '--f-scrollbar-thumb-hover': 'rgba(255,255,255,0.22)',
-};
+import { makeDarkTokens, defaultDarkBg } from './tokens';
 import { oceanTheme } from './ocean';
 import { forestTheme } from './forest';
 import { sunsetTheme } from './sunset';
@@ -304,8 +246,9 @@ export function applyTheme(theme) {
   root.style.setProperty('--color-white', colors.white);
   root.style.setProperty('--color-black', colors.black);
 
-  // Apply --f-* design tokens (theme-specific or dark defaults)
-  const tokens = theme.tokens || darkTokens;
+  // Apply --f-* design tokens (theme-specific or fallback dark ambient)
+  const fallbackTokens = makeDarkTokens(defaultDarkBg);
+  const tokens = theme.tokens || fallbackTokens;
   Object.entries(tokens).forEach(([prop, value]) => {
     root.style.setProperty(prop, value);
   });
@@ -313,7 +256,7 @@ export function applyTheme(theme) {
   // Derive --f-green* / --f-border-green* from the theme's actual accent color.
   // These are what every UI component reads — the static token object sets a
   // reasonable default but accent picker changes must override it here.
-  const isLight = !!theme.tokens; // themes with custom tokens are light-scheme
+  const isLight = !theme.dark; // dark: true on dark-scheme themes
   const accentTokens = computeAccentTokens(colors.accent, isLight);
   Object.entries(accentTokens).forEach(([prop, value]) => {
     root.style.setProperty(prop, value);

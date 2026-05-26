@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 
 const commonUnits = ['timer', 'stk', 'm²', 'kg', 'l', 'm', 'km', 'dag', 'uke', 'måned', 'år'];
 
-export function Select({ value, onChange, options = [], placeholder = 'Velg...', allowCustom = false, customLabel = 'Tilpasset' }) {
+export function Select({ value, onChange, options = [], placeholder = 'Velg...', allowCustom = false, customLabel = 'Tilpasset', noMargin = false }) {
   const [isOpen, setIsOpen] = useState(false);
   const [customValue, setCustomValue] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);
@@ -163,7 +163,7 @@ export function Select({ value, onChange, options = [], placeholder = 'Velg...',
           ref={buttonRef}
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="mt-2 w-full rounded-xl px-4 py-2 text-left text-sm f-input"
+          className={`${noMargin ? '' : 'mt-2 '}w-full rounded-xl px-4 py-2 text-left text-sm f-input`}
           style={{ cursor: 'pointer' }}
         >
           <span className="flex items-center gap-2" style={{ color: selectedOption ? 'var(--f-text-body)' : 'var(--f-text-subtle)' }}>

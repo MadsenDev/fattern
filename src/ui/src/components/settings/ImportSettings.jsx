@@ -14,6 +14,7 @@ export function ImportSettings({ onRefreshData }) {
   const [saftFilePath, setSaftFilePath] = useState(null);
   const [saftOptions, setSaftOptions] = useState({
     importCustomers: true,
+    importInvoices: true,
     importExpenses: true,
     skipDuplicates: true,
   });
@@ -73,14 +74,20 @@ export function ImportSettings({ onRefreshData }) {
       const results = await window.fattern.saft.import(saftFilePath, saftOptions);
 
       const messages = [];
+      if (results.budgetYears?.created?.length > 0)
+        messages.push(`Budsjettår opprettet: ${results.budgetYears.created.join(', ')}`);
       if (results.customers.imported > 0)
         messages.push(`${results.customers.imported} kunder importert`);
       if (results.customers.skipped > 0)
         messages.push(`${results.customers.skipped} kunder hoppet over (duplikater)`);
+      if (results.invoices?.imported > 0)
+        messages.push(`${results.invoices.imported} fakturaer importert`);
+      if (results.invoices?.skipped > 0)
+        messages.push(`${results.invoices.skipped} fakturaer hoppet over`);
       if (results.expenses.imported > 0)
         messages.push(`${results.expenses.imported} utgifter importert`);
 
-      toast.success(messages.join(', ') || t('settings.import.success'));
+      toast.success(messages.join(' · ') || t('settings.import.success'));
       setSaftPreview(null);
       setSaftFilePath(null);
       onRefreshData?.();
@@ -164,9 +171,15 @@ export function ImportSettings({ onRefreshData }) {
                     <span className="font-medium" style={{ color: 'var(--f-text-body)' }}>{saftPreview.customerCount ?? 0}</span>
                   </div>
                   <div className="flex justify-between">
+                    <span style={{ color: 'var(--f-text-subtle)' }}>Fakturaer:</span>
+                    <span className="font-medium" style={{ color: 'var(--f-text-body)' }}>
+                      {(saftPreview.invoiceCount ?? saftPreview.transactionCount ?? 0)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
                     <span style={{ color: 'var(--f-text-subtle)' }}>{t('settings.import.preview_expenses')}:</span>
                     <span className="font-medium" style={{ color: 'var(--f-text-body)' }}>
-                      {(saftPreview.transactionCount ?? 0)} ({t('settings.import.preview_expenses')} etter filtrering)
+                      {(saftPreview.expenseCount ?? 0)}
                     </span>
                   </div>
                 </div>
@@ -175,8 +188,9 @@ export function ImportSettings({ onRefreshData }) {
                 <div className="space-y-2">
                   {[
                     { key: 'importCustomers', label: t('settings.import.import_customers') },
-                    { key: 'importExpenses', label: t('settings.import.import_expenses') },
-                    { key: 'skipDuplicates', label: t('settings.import.skip_duplicates') },
+                    { key: 'importInvoices',  label: t('settings.import.import_invoices') },
+                    { key: 'importExpenses',  label: t('settings.import.import_expenses') },
+                    { key: 'skipDuplicates',  label: t('settings.import.skip_duplicates') },
                   ].map(({ key, label }) => (
                     <label key={key} className="flex items-center gap-2 text-sm cursor-pointer" style={{ color: 'var(--f-text-body)' }}>
                       <input

@@ -41,6 +41,8 @@ async function parseSAFT(filepath) {
       customerCount: customers.length,
       supplierCount: suppliers.length,
       transactionCount: transactions.length,
+      invoiceCount: transactions.filter((t) => t.isInvoice).length,
+      expenseCount: transactions.filter((t) => t.isExpense).length,
       dateRange: {
         start: header.startDate,
         end: header.endDate,

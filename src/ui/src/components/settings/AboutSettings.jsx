@@ -18,7 +18,7 @@ export function AboutSettings() {
                 <div className="absolute inset-0 rounded-2xl blur-xl" style={{ background: 'rgba(45,180,130,0.15)' }} />
                 <div className="relative rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid var(--f-border)', backdropFilter: 'blur(12px)' }}>
                   <img
-                    src="/fattern-monogram.svg"
+                    src="/logo.png"
                     alt="Fattern"
                     className="h-16 w-16 md:h-20 md:w-20"
                   />

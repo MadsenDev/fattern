@@ -4,6 +4,7 @@ import { IconEdit, IconTrash, IconDownload, IconEye } from '@tabler/icons-react'
 import { DataTable } from '../components/DataTable';
 import { StatusBadge } from '../components/StatusBadge';
 import { SearchBar } from '../components/SearchBar';
+import { Select } from '../components/Select';
 import { InvoiceStatusSelector } from '../components/invoices/InvoiceStatusSelector';
 import { formatDate } from '../utils/formatDate';
 import { formatCurrency } from '../utils/formatCurrency';
@@ -85,6 +86,7 @@ export function InvoicesPage({ invoices, formatCurrency: fmt, onCreateInvoice, o
       {
         key: 'status',
         label: t('invoice.status'),
+        style: { width: 140, minWidth: 140 },
         render: (status, invoice) => (
           <InvoiceStatusSelector
             invoice={invoice}
@@ -121,6 +123,7 @@ export function InvoicesPage({ invoices, formatCurrency: fmt, onCreateInvoice, o
         key: 'amount',
         label: t('invoice.amount'),
         align: 'right',
+        style: { whiteSpace: 'nowrap', width: 1 },
         render: (amount) => (typeof amount === 'number' ? fmt(amount) : '—'),
         className: 'font-medium text-ink',
         sortFn: (a, b) => {
@@ -133,6 +136,7 @@ export function InvoicesPage({ invoices, formatCurrency: fmt, onCreateInvoice, o
         key: 'actions',
         label: '',
         align: 'right',
+        style: { whiteSpace: 'nowrap', width: 1 },
         render: (_, invoice) => (
           <div className="flex items-center justify-end gap-2">
             <button
@@ -206,15 +210,14 @@ export function InvoicesPage({ invoices, formatCurrency: fmt, onCreateInvoice, o
           <div className="flex-1">
             <SearchBar value={query} onChange={setQuery} />
           </div>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="f-input rounded-xl px-4 py-2 text-sm"
-          >
-            {STATUS_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>{t(opt.labelKey)}</option>
-            ))}
-          </select>
+          <div style={{ width: 160 }}>
+            <Select
+              value={statusFilter}
+              onChange={setStatusFilter}
+              options={STATUS_OPTIONS.map((opt) => ({ value: opt.value, label: t(opt.labelKey) }))}
+              noMargin
+            />
+          </div>
           <span className="whitespace-nowrap text-xs" style={{ color: 'var(--f-text-subtle)' }}>
             {t('invoice.showing', { count: filtered.length, total: (invoices || []).length })}
           </span>

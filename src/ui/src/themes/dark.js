@@ -6,6 +6,7 @@ export const darkTheme = {
   id: 'dark',
   name: 'Mørk',
   premium: false,
+  dark: true,
   accentOptions: [
     { name: 'Turkis', color: '#2dd4bf' }, // Standard
     { name: 'Blå', color: '#60a5fa' },

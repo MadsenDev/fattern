@@ -147,7 +147,7 @@ export function SettingsPage({ company, onCompanyUpdate, onOpenTemplateEditor, o
   const renderContent = () => {
     switch (activeCategory) {
       case 'general':
-        return <GeneralSettings />;
+        return <GeneralSettings onRefreshData={onRefreshData} />;
       case 'defaults':
         return <DefaultsSettings />;
       case 'invoice':
@@ -172,7 +172,7 @@ export function SettingsPage({ company, onCompanyUpdate, onOpenTemplateEditor, o
       case 'dev':
         return <DevSettings />;
       default:
-        return <GeneralSettings />;
+        return <GeneralSettings onRefreshData={onRefreshData} />;
     }
   };
 

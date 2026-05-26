@@ -110,7 +110,7 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
             className="f-glass-hero w-full max-w-xl rounded-3xl p-8 shadow-2xl"
           >
             <div className="flex items-center gap-4">
-              <img src="/fattern-monogram.svg" alt="Fattern" className="h-12 w-12 drop-shadow-xl" />
+              <img src="/logo.png" alt="Fattern" className="h-12 w-12 drop-shadow-xl" />
               <div>
                 <p className="text-xs uppercase tracking-[0.4em]" style={{ color: 'var(--f-text-subtle)' }}>Oppstart</p>
                 <h2 className="text-2xl font-semibold" style={{ color: 'var(--f-text-body)' }}>{current.title}</h2>
@@ -150,7 +150,7 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
           className="f-glass-hero w-full max-w-3xl rounded-3xl p-8 shadow-2xl"
         >
           <div className="flex items-center gap-4">
-            <img src="/fattern-monogram.svg" alt="Fattern" className="h-12 w-12 drop-shadow-xl" />
+            <img src="/logo.png" alt="Fattern" className="h-12 w-12 drop-shadow-xl" />
             <div>
               <p className="text-xs uppercase tracking-[0.4em]" style={{ color: 'var(--f-text-subtle)' }}>Oppstart</p>
               <h2 className="text-2xl font-semibold" style={{ color: 'var(--f-text-body)' }}>{current.title}</h2>

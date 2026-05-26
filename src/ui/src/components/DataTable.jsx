@@ -82,7 +82,7 @@ export function DataTable({ columns, data, emptyMessage = 'Ingen data å vise', 
                   className={`px-4 py-3 font-medium ${column.align === 'right' ? 'text-right' : 'text-left'} ${
                     isSortable ? 'cursor-pointer select-none transition-colors' : ''
                   }`}
-                  style={{ color: 'var(--f-text-subtle)' }}
+                  style={{ color: 'var(--f-text-subtle)', ...(column.headerStyle || column.style || {}) }}
                   onClick={() => isSortable && handleSort(column.key)}
                   onMouseEnter={e => { if (isSortable) e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
                   onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
@@ -128,6 +128,7 @@ export function DataTable({ columns, data, emptyMessage = 'Ingen data å vise', 
                     className={`px-4 py-3 ${column.align === 'right' ? 'text-right' : 'text-left'} ${
                       column.className || ''
                     }`}
+                    style={column.style || {}}
                   >
                     {content}
                   </td>

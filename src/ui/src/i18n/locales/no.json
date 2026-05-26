@@ -351,6 +351,7 @@
       "preview_customers": "Kunder funnet",
       "preview_expenses": "Leverandørtransaksjoner funnet",
       "import_customers": "Importer kunder",
+      "import_invoices": "Importer fakturaer (salgsjournal)",
       "import_expenses": "Importer utgifter (leverandørtransaksjoner)",
       "skip_duplicates": "Hopp over duplikater",
       "import_button": "Importer",

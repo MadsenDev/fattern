@@ -292,6 +292,12 @@ app.whenReady().then(() => {
     return await importSAFT(filepath, database, options);
   });
 
+  // Wipe all data — nukes every table and re-initialises the database
+  ipcMain.handle('app:wipe-all-data', async () => {
+    database.wipeAllData();
+    return { ok: true };
+  });
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();

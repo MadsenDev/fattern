@@ -63,12 +63,19 @@ function Sparkline({ monthlyBreakdown }) {
     if (!monthlyBreakdown?.length) {
       return [34, 26, 46, 30, 50, 40].map((h, i) => ({ h, label: MONTH_LABELS_NO[i], isNow: i === 5 }));
     }
-    const last6 = monthlyBreakdown.slice(-6);
-    const max = Math.max(...last6.map(m => m.income || 0), 1);
-    return last6.map((m, i) => ({
+    // Prefer months that contain data; fall back to last 6 if all are empty.
+    const withData = monthlyBreakdown.filter(m => (m.income || 0) + (m.expenses || 0) > 0);
+    const source = withData.length >= 2
+      ? monthlyBreakdown.slice(
+          Math.max(0, monthlyBreakdown.indexOf(withData[0])),
+          monthlyBreakdown.indexOf(withData[withData.length - 1]) + 1
+        ).slice(-6)
+      : monthlyBreakdown.slice(-6);
+    const max = Math.max(...source.map(m => m.income || 0), 1);
+    return source.map((m, i) => ({
       h: Math.max(4, Math.round(((m.income || 0) / max) * 40)),
       label: m.label || MONTH_LABELS_NO[i],
-      isNow: i === last6.length - 1,
+      isNow: i === source.length - 1,
     }));
   }, [monthlyBreakdown]);
 
@@ -349,9 +356,19 @@ export function DashboardView({
 
   const activeBudgetYear = budgetYears?.find(y => y.id === selectedYear);
   const yearLabel = activeBudgetYear?.label || '—';
+
+  // Show the current month when viewing the current year; otherwise show the year label.
   const now = new Date();
-  const monthName = now.toLocaleString('nb-NO', { month: 'long' });
-  const heroLabel = `Nettoinntekt · ${monthName.charAt(0).toUpperCase() + monthName.slice(1)} ${now.getFullYear()}`;
+  const budgetYearNum = activeBudgetYear
+    ? new Date(activeBudgetYear.start_date).getFullYear()
+    : null;
+  const isCurrentYear = budgetYearNum === now.getFullYear();
+  const heroLabel = isCurrentYear
+    ? (() => {
+        const monthName = now.toLocaleString('nb-NO', { month: 'long' });
+        return `Nettoinntekt · ${monthName.charAt(0).toUpperCase() + monthName.slice(1)} ${now.getFullYear()}`;
+      })()
+    : `Nettoinntekt · ${yearLabel}`;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>

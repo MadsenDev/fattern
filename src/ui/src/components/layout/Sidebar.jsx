@@ -30,8 +30,7 @@ const NAV_GROUPS = [
 ];
 const BOTTOM_ITEMS = ['Innstillinger'];
 
-/* Label that gets a notification badge */
-const BADGE_LABELS = new Set(['Fakturaer']);
+/* Badges are now driven by live data passed as props — no hardcoded set */
 
 function Divider() {
   return (
@@ -139,7 +138,7 @@ function RailItem({ label, isActive, onClick, badge }) {
   );
 }
 
-export function Sidebar({ navItems, activeNavItem, onNavigate }) {
+export function Sidebar({ navItems, activeNavItem, onNavigate, badges = {} }) {
   const allLabels = (navItems || []).map(n => n.label);
 
   const renderGroup = (group) =>
@@ -151,7 +150,7 @@ export function Sidebar({ navItems, activeNavItem, onNavigate }) {
           label={label}
           isActive={activeNavItem === label}
           onClick={onNavigate}
-          badge={BADGE_LABELS.has(label)}
+          badge={!!badges[label]}
         />
       ));
 

@@ -41,17 +41,11 @@ export function TitleBar({ title = 'Fattern' }) {
     >
       {/* Brand */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-        <div
-          style={{
-            width: 22, height: 22, borderRadius: 6,
-            background: 'linear-gradient(135deg, rgba(45,180,130,0.9), rgba(30,140,100,0.7))',
-            border: '1px solid rgba(80,220,160,0.4)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 0 12px rgba(45,180,130,0.3)',
-          }}
-        >
-          <span style={{ fontSize: 11, fontWeight: 700, color: '#fff' }}>F</span>
-        </div>
+        <img
+          src="/logo.png"
+          alt="Fattern"
+          style={{ width: 20, height: 20, objectFit: 'contain', display: 'block' }}
+        />
         <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--f-text)', letterSpacing: '-0.01em' }}>
           {title}
         </span>

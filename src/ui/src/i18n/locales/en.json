@@ -351,6 +351,7 @@
       "preview_customers": "Customers found",
       "preview_expenses": "Supplier transactions found",
       "import_customers": "Import customers",
+      "import_invoices": "Import invoices (sales journal)",
       "import_expenses": "Import expenses (supplier transactions)",
       "skip_duplicates": "Skip duplicates",
       "import_button": "Import",
