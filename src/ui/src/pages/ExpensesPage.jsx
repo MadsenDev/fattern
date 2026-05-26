@@ -9,7 +9,6 @@ import { ExpenseDetailPanel } from '../components/expenses/ExpenseDetailPanel';
 export function ExpensesPage({
   expenses = [],
   breakdown = [],
-  expenseCategories = [],
   formatCurrency: fmt,
   onCreateExpense,
   onEditExpense,
