@@ -97,6 +97,8 @@ export function ExpenseCategoryChips({ breakdown = [], activeCategory, onSelectC
             outline: 'none',
             width: 160,
           }}
+          onFocus={(e) => { e.target.style.borderColor = 'var(--f-accent)'; }}
+          onBlur={(e) => { e.target.style.borderColor = 'var(--f-border)'; }}
         />
       </div>
     </div>

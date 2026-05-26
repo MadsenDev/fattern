@@ -1,4 +1,5 @@
 // src/ui/src/components/expenses/ExpenseTimelineRow.jsx
+import { IconPaperclip } from '@tabler/icons-react';
 
 export function ExpenseTimelineRow({ expense, formatCurrency, isSelected, onClick }) {
   const accentColor = expense.category_color || '#555555';
@@ -61,7 +62,7 @@ export function ExpenseTimelineRow({ expense, formatCurrency, isSelected, onClic
       {/* Right side: amount + attachment indicator */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
         {expense.attachment_path && (
-          <span style={{ fontSize: 14 }} title="Har kvittering">📎</span>
+          <IconPaperclip size={14} stroke={1.5} title="Har kvittering" aria-label="Har kvittering" style={{ color: 'var(--f-text-subtle)', flexShrink: 0 }} />
         )}
         <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--f-text)' }}>
           {formatCurrency ? formatCurrency(expense.amount) : expense.amount}

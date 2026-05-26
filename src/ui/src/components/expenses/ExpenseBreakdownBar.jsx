@@ -1,6 +1,7 @@
 // src/ui/src/components/expenses/ExpenseBreakdownBar.jsx
-export function ExpenseBreakdownBar({ breakdown = [], totalAmount = 0, activeCategory, onSelectCategory }) {
+export function ExpenseBreakdownBar({ breakdown = [], activeCategory, onSelectCategory }) {
   const grandTotal = breakdown.reduce((sum, c) => sum + c.total, 0) || 1;
+  const DEFAULT_COLOR = '#555555';
 
   return (
     <div style={{ marginBottom: 16 }}>
@@ -16,15 +17,19 @@ export function ExpenseBreakdownBar({ breakdown = [], totalAmount = 0, activeCat
         }}
       >
         {breakdown.map((cat) => (
-          <div
+          <button
             key={cat.id ?? 'uncategorised'}
+            type="button"
             title={cat.name}
+            aria-label={`Filter by ${cat.name}`}
             style={{
               flex: cat.total / grandTotal,
-              background: cat.color || '#555',
+              background: cat.color || DEFAULT_COLOR,
               cursor: 'pointer',
               transition: 'opacity 150ms',
               opacity: activeCategory === null || activeCategory === cat.id ? 1 : 0.35,
+              border: 'none',
+              padding: 0,
             }}
             onClick={() => onSelectCategory?.(activeCategory === cat.id ? null : cat.id)}
           />
@@ -36,10 +41,12 @@ export function ExpenseBreakdownBar({ breakdown = [], totalAmount = 0, activeCat
         {breakdown.map((cat) => {
           const pct = ((cat.total / grandTotal) * 100).toFixed(1);
           const isActive = activeCategory === cat.id;
+          const color = cat.color || DEFAULT_COLOR;
           return (
             <button
               key={cat.id ?? 'uncategorised'}
               type="button"
+              aria-label={`Filter by ${cat.name}: ${pct}%`}
               onClick={() => onSelectCategory?.(activeCategory === cat.id ? null : cat.id)}
               style={{
                 display: 'flex',
@@ -57,9 +64,9 @@ export function ExpenseBreakdownBar({ breakdown = [], totalAmount = 0, activeCat
                   width: 10,
                   height: 10,
                   borderRadius: '50%',
-                  background: cat.color || '#555',
+                  background: color,
                   flexShrink: 0,
-                  outline: isActive ? `2px solid ${cat.color || '#555'}` : 'none',
+                  outline: isActive ? `2px solid ${color}` : 'none',
                   outlineOffset: 2,
                 }}
               />
