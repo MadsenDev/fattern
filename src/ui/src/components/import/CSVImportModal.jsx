@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { FiUpload, FiX, FiFile, FiCheck } from 'react-icons/fi';
+import { IconUpload, IconX, IconFile, IconCheck } from '@tabler/icons-react';
 import { parseCSV, validateCSV } from '../../utils/csvParser';
 import { useSupporterPack } from '../../hooks/useSupporterPack';
 
@@ -126,17 +126,20 @@ export function CSVImportModal({ isOpen, onClose, onImport, type = 'customer' })
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-4xl rounded-2xl bg-white shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(4,10,8,0.75)', backdropFilter: 'blur(6px)' }}>
+      <div className="f-glass-hero w-full max-w-4xl rounded-2xl shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-sand/60 p-6">
-          <h2 className="text-xl font-semibold text-ink">Importer {type === 'customer' ? 'kunder' : 'produkter'} fra CSV</h2>
+        <div className="flex items-center justify-between p-6" style={{ borderBottom: '1px solid var(--f-border-subtle)' }}>
+          <h2 className="text-xl font-semibold" style={{ color: 'var(--f-text-body)' }}>Importer {type === 'customer' ? 'kunder' : 'produkter'} fra CSV</h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-2 text-ink-subtle hover:bg-cloud"
+            className="rounded-lg p-2 transition"
+            style={{ color: 'var(--f-text-subtle)' }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
             aria-label="Lukk"
           >
-            <FiX className="h-5 w-5" />
+            <IconX className="h-5 w-5" />
           </button>
         </div>
 
@@ -144,7 +147,7 @@ export function CSVImportModal({ isOpen, onClose, onImport, type = 'customer' })
         <div className="p-6">
           {step === 'upload' && (
             <div className="space-y-4">
-              <div className="rounded-xl border-2 border-dashed border-sand/60 bg-cloud/30 p-12 text-center">
+              <div className="rounded-xl border-2 border-dashed p-12 text-center" style={{ borderColor: 'var(--f-border)', background: 'rgba(255,255,255,0.02)' }}>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -152,20 +155,20 @@ export function CSVImportModal({ isOpen, onClose, onImport, type = 'customer' })
                   onChange={handleFileSelect}
                   className="hidden"
                 />
-                <FiUpload className="mx-auto h-12 w-12 text-ink-subtle" />
-                <p className="mt-4 text-sm font-medium text-ink">Last opp CSV-fil</p>
-                <p className="mt-2 text-xs text-ink-subtle">Støttet format: CSV (komma, semikolon eller tab-separert)</p>
+                <IconUpload className="mx-auto h-12 w-12" style={{ color: 'var(--f-text-subtle)' }} />
+                <p className="mt-4 text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Last opp CSV-fil</p>
+                <p className="mt-2 text-xs" style={{ color: 'var(--f-text-subtle)' }}>Støttet format: CSV (komma, semikolon eller tab-separert)</p>
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="mt-4 rounded-lg bg-brand-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-800"
+                  className="f-btn-primary mt-4 rounded-lg px-4 py-2 text-sm font-medium"
                 >
                   Velg fil
                 </button>
               </div>
               {errors.length > 0 && (
-                <div className="rounded-lg bg-red-50 border border-red-200 p-4">
+                <div className="rounded-lg p-4" style={{ background: 'var(--f-danger-bg)', border: '1px solid var(--f-danger-border)' }}>
                   {errors.map((error, i) => (
-                    <p key={i} className="text-sm text-red-800">{error}</p>
+                    <p key={i} className="text-sm" style={{ color: 'var(--f-danger-text)' }}>{error}</p>
                   ))}
                 </div>
               )}
@@ -175,25 +178,25 @@ export function CSVImportModal({ isOpen, onClose, onImport, type = 'customer' })
           {step === 'mapping' && csvData && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-sm font-semibold text-ink mb-2">Kartlegg kolonner</h3>
-                <p className="text-xs text-ink-subtle mb-4">
+                <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--f-text-body)' }}>Kartlegg kolonner</h3>
+                <p className="text-xs mb-4" style={{ color: 'var(--f-text-subtle)' }}>
                   Velg hvilken CSV-kolonne som skal mappes til hvert felt. {csvData.rows.length} rader funnet.
                 </p>
               </div>
 
               <div className="space-y-3 max-h-96 overflow-y-auto">
                 {csvData.headers.map((header) => (
-                  <div key={header} className="flex items-center gap-4 rounded-lg border border-sand/60 bg-white p-4">
+                  <div key={header} className="flex items-center gap-4 rounded-lg p-4" style={{ border: '1px solid var(--f-border-subtle)', background: 'rgba(255,255,255,0.02)' }}>
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-ink">{header}</p>
-                      <p className="text-xs text-ink-subtle mt-1">
+                      <p className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{header}</p>
+                      <p className="text-xs mt-1" style={{ color: 'var(--f-text-subtle)' }}>
                         Eksempel: {csvData.rows[0]?.[header] || '(tom)'}
                       </p>
                     </div>
                     <select
                       value={mapping[header] || ''}
                       onChange={(e) => handleMappingChange(header, e.target.value || null)}
-                      className="rounded-lg border border-sand/60 bg-white px-3 py-2 text-sm text-ink min-w-[200px]"
+                      className="f-input rounded-lg px-3 py-2 text-sm min-w-[200px]"
                     >
                       <option value="">-- Ikke bruk --</option>
                       {availableFields
@@ -209,9 +212,9 @@ export function CSVImportModal({ isOpen, onClose, onImport, type = 'customer' })
               </div>
 
               {!hasFeature('ai_csv_mapping') && (
-                <div className="rounded-lg bg-brand-50 border border-brand-200 p-4">
-                  <p className="text-sm text-brand-800">
-                    <strong>Supporter Pack:</strong> Aktiver AI-auto-mapping for automatisk kolonnemapping.
+                <div className="rounded-lg p-4" style={{ background: 'var(--f-green-bg)', border: '1px solid var(--f-border-green)' }}>
+                  <p className="text-sm" style={{ color: 'var(--f-green-text)' }}>
+                    <strong>Supporter-pakken:</strong> Aktiver automatisk AI-kolonnemapping.
                   </p>
                 </div>
               )}
@@ -219,14 +222,14 @@ export function CSVImportModal({ isOpen, onClose, onImport, type = 'customer' })
               <div className="flex justify-end gap-3">
                 <button
                   onClick={() => setStep('upload')}
-                  className="rounded-lg px-4 py-2 text-sm font-medium text-ink hover:bg-cloud"
+                  className="f-btn-ghost rounded-lg px-4 py-2 text-sm font-medium"
                 >
                   Tilbake
                 </button>
                 <button
                   onClick={handlePreview}
                   disabled={Object.keys(mapping).length === 0}
-                  className="rounded-lg bg-brand-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="f-btn-primary rounded-lg px-4 py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Forhåndsvis
                 </button>
@@ -237,28 +240,28 @@ export function CSVImportModal({ isOpen, onClose, onImport, type = 'customer' })
           {step === 'preview' && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-sm font-semibold text-ink mb-2">Forhåndsvisning</h3>
-                <p className="text-xs text-ink-subtle">
+                <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--f-text-body)' }}>Forhåndsvisning</h3>
+                <p className="text-xs" style={{ color: 'var(--f-text-subtle)' }}>
                   Dette er hvordan de første 5 radene vil se ut etter import.
                 </p>
               </div>
 
-              <div className="rounded-lg border border-sand/60 overflow-hidden">
+              <div className="rounded-lg overflow-hidden" style={{ border: '1px solid var(--f-border-subtle)' }}>
                 <table className="min-w-full text-sm">
-                  <thead className="bg-cloud/80">
+                  <thead style={{ background: 'rgba(255,255,255,0.04)', borderBottom: '1px solid var(--f-border-subtle)' }}>
                     <tr>
                       {availableFields.filter((f) => mappedFields.has(f.value)).map((field) => (
-                        <th key={field.value} className="px-4 py-2 text-left text-xs font-medium text-ink-subtle">
+                        <th key={field.value} className="px-4 py-2 text-left text-xs font-medium" style={{ color: 'var(--f-text-subtle)' }}>
                           {field.label}
                         </th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-sand/60">
+                  <tbody>
                     {previewData.map((row, i) => (
-                      <tr key={i}>
+                      <tr key={i} style={{ borderBottom: '1px solid var(--f-border-faint)' }}>
                         {availableFields.filter((f) => mappedFields.has(f.value)).map((field) => (
-                          <td key={field.value} className="px-4 py-2 text-ink">
+                          <td key={field.value} className="px-4 py-2" style={{ color: 'var(--f-text-body)' }}>
                             {row[field.value] ?? '—'}
                           </td>
                         ))}
@@ -269,9 +272,9 @@ export function CSVImportModal({ isOpen, onClose, onImport, type = 'customer' })
               </div>
 
               {errors.length > 0 && (
-                <div className="rounded-lg bg-red-50 border border-red-200 p-4">
+                <div className="rounded-lg p-4" style={{ background: 'var(--f-danger-bg)', border: '1px solid var(--f-danger-border)' }}>
                   {errors.map((error, i) => (
-                    <p key={i} className="text-sm text-red-800">{error}</p>
+                    <p key={i} className="text-sm" style={{ color: 'var(--f-danger-text)' }}>{error}</p>
                   ))}
                 </div>
               )}
@@ -279,13 +282,13 @@ export function CSVImportModal({ isOpen, onClose, onImport, type = 'customer' })
               <div className="flex justify-end gap-3">
                 <button
                   onClick={() => setStep('mapping')}
-                  className="rounded-lg px-4 py-2 text-sm font-medium text-ink hover:bg-cloud"
+                  className="f-btn-ghost rounded-lg px-4 py-2 text-sm font-medium"
                 >
                   Tilbake
                 </button>
                 <button
                   onClick={handleImport}
-                  className="rounded-lg bg-brand-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-800"
+                  className="f-btn-primary rounded-lg px-4 py-2 text-sm font-medium"
                 >
                   Importer {csvData.rows.length} {type === 'customer' ? 'kunder' : 'produkter'}
                 </button>
@@ -295,8 +298,8 @@ export function CSVImportModal({ isOpen, onClose, onImport, type = 'customer' })
 
           {step === 'importing' && (
             <div className="py-12 text-center">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-brand-700"></div>
-              <p className="mt-4 text-sm text-ink-subtle">Importerer...</p>
+              <div className="inline-block animate-spin rounded-full h-8 w-8" style={{ border: '2px solid var(--f-border)', borderTopColor: 'var(--f-green)' }}></div>
+              <p className="mt-4 text-sm" style={{ color: 'var(--f-text-subtle)' }}>Importerer...</p>
             </div>
           )}
         </div>
@@ -304,4 +307,3 @@ export function CSVImportModal({ isOpen, onClose, onImport, type = 'customer' })
     </div>
   );
 }
-

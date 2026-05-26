@@ -8,10 +8,13 @@ export function ProductCard({ product, formatCurrency: fmt, onEdit, onDelete, in
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: index * 0.05 }}
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
-      className="group relative overflow-hidden rounded-3xl border border-sand/60 bg-white shadow-card transition hover:shadow-lg"
+      className="group relative overflow-hidden rounded-3xl transition"
+      style={{ border: '1px solid var(--f-border-subtle)', background: 'var(--f-surface)', backdropFilter: 'blur(12px)' }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--f-border-green)'; }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--f-border-subtle)'; }}
     >
       {product.image_path ? (
-        <div className="aspect-square w-full overflow-hidden bg-cloud">
+        <div className="aspect-square w-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)' }}>
           <img
             src={product.image_path}
             alt={product.name}
@@ -19,9 +22,9 @@ export function ProductCard({ product, formatCurrency: fmt, onEdit, onDelete, in
           />
         </div>
       ) : (
-        <div className="aspect-square w-full bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center">
+        <div className="aspect-square w-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(63,217,160,0.06), rgba(63,217,160,0.12))' }}>
           <div className="text-center">
-            <svg className="mx-auto h-12 w-12 text-brand-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="mx-auto h-12 w-12" style={{ color: 'var(--f-green-text-dim)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
             </svg>
           </div>
@@ -30,36 +33,40 @@ export function ProductCard({ product, formatCurrency: fmt, onEdit, onDelete, in
       <div className="p-4">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <h3 className="font-semibold text-ink">{product.name}</h3>
-            {product.sku && <p className="mt-1 text-xs text-ink-subtle">SKU: {product.sku}</p>}
+            <h3 className="font-semibold" style={{ color: 'var(--f-text-body)' }}>{product.name}</h3>
+            {product.sku && <p className="mt-1 text-xs" style={{ color: 'var(--f-text-subtle)' }}>SKU: {product.sku}</p>}
           </div>
-          <span className={`ml-2 inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
-            product.active ? 'bg-brand-50 text-brand-700' : 'bg-cloud text-ink-soft'
-          }`}>
+          <span className="ml-2 inline-flex rounded-full px-2 py-1 text-xs font-semibold" style={product.active ? { background: 'var(--f-green-bg)', color: 'var(--f-green-text)', border: '1px solid var(--f-border-green)' } : { background: 'rgba(255,255,255,0.06)', color: 'var(--f-text-subtle)' }}>
             {product.active ? 'Aktiv' : 'Inaktiv'}
           </span>
         </div>
         <div className="mt-3 flex items-center justify-between">
           <div>
-            <p className="text-lg font-semibold text-ink">{fmt(product.unit_price || 0)}</p>
-            {product.unit && <p className="text-xs text-ink-subtle">per {product.unit}</p>}
+            <p className="text-lg font-semibold" style={{ color: 'var(--f-text-body)' }}>{fmt(product.unit_price || 0)}</p>
+            {product.unit && <p className="text-xs" style={{ color: 'var(--f-text-subtle)' }}>per {product.unit}</p>}
           </div>
         </div>
         {product.description && (
-          <p className="mt-2 line-clamp-2 text-sm text-ink-soft">{product.description}</p>
+          <p className="mt-2 line-clamp-2 text-sm" style={{ color: 'var(--f-text-soft)' }}>{product.description}</p>
         )}
         <div className="mt-4 flex gap-2">
           <button
             type="button"
             onClick={() => onEdit?.(product)}
-            className="flex-1 rounded-xl bg-brand-50 px-3 py-2 text-sm font-medium text-brand-700 transition hover:bg-brand-100"
+            className="flex-1 rounded-xl px-3 py-2 text-sm font-medium transition"
+            style={{ background: 'var(--f-green-bg)', color: 'var(--f-green-text)' }}
+            onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
+            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
           >
             Rediger
           </button>
           <button
             type="button"
             onClick={() => onDelete?.(product)}
-            className="flex-1 rounded-xl border border-sand bg-white px-3 py-2 text-sm font-medium text-ink-soft transition hover:bg-cloud"
+            className="flex-1 rounded-xl px-3 py-2 text-sm font-medium transition"
+            style={{ border: '1px solid var(--f-border-subtle)', color: 'var(--f-text-soft)' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--f-danger-bg)'; e.currentTarget.style.color = 'var(--f-danger-text)'; e.currentTarget.style.borderColor = 'var(--f-danger-border)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--f-text-soft)'; e.currentTarget.style.borderColor = 'var(--f-border-subtle)'; }}
           >
             Slett
           </button>

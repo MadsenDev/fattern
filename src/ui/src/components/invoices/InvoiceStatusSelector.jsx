@@ -1,14 +1,20 @@
 import { useState } from 'react';
 import { StatusBadge } from '../StatusBadge';
 import { Select } from '../Select';
-import { FiFileText, FiSend, FiCheckCircle, FiAlertCircle, FiX } from 'react-icons/fi';
+import {
+  IconFile,
+  IconSend,
+  IconCircleCheck,
+  IconAlertCircle,
+  IconX,
+} from '@tabler/icons-react';
 
 const statusOptions = [
-  { value: 'draft', label: 'Kladd', icon: <FiFileText className="h-4 w-4" /> },
-  { value: 'sent', label: 'Sendt', icon: <FiSend className="h-4 w-4" /> },
-  { value: 'paid', label: 'Betalt', icon: <FiCheckCircle className="h-4 w-4" /> },
-  { value: 'overdue', label: 'Forfalt', icon: <FiAlertCircle className="h-4 w-4" /> },
-  { value: 'cancelled', label: 'Kansellert', icon: <FiX className="h-4 w-4" /> },
+  { value: 'draft',     label: 'Kladd',      icon: <IconFile         size={14} stroke={1.8} /> },
+  { value: 'sent',      label: 'Sendt',       icon: <IconSend         size={14} stroke={1.8} /> },
+  { value: 'paid',      label: 'Betalt',      icon: <IconCircleCheck  size={14} stroke={1.8} /> },
+  { value: 'overdue',   label: 'Forfalt',     icon: <IconAlertCircle  size={14} stroke={1.8} /> },
+  { value: 'cancelled', label: 'Kansellert',  icon: <IconX            size={14} stroke={1.8} /> },
 ];
 
 export function InvoiceStatusSelector({ invoice, onStatusChange, showModal }) {

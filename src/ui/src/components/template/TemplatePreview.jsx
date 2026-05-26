@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { FiX } from 'react-icons/fi';
+import { IconX } from '@tabler/icons-react';
 import { renderTemplateToHTML } from '../../utils/templateRenderer';
 
 // Mock data for preview
@@ -92,8 +92,8 @@ export function TemplatePreview({ template, zoom = 100, pan = { x: 0, y: 0 }, on
 
   if (!template) {
     return (
-      <div className="flex h-full items-center justify-center bg-cloud">
-        <p className="text-ink-subtle">Ingen mal å forhåndsvise</p>
+      <div className="flex h-full items-center justify-center" style={{ background: 'rgba(255,255,255,0.03)' }}>
+        <p style={{ color: 'var(--f-text-subtle)' }}>Ingen mal å forhåndsvise</p>
       </div>
     );
   }
@@ -162,7 +162,8 @@ export function TemplatePreview({ template, zoom = 100, pan = { x: 0, y: 0 }, on
   return (
     <div 
       ref={containerRef}
-      className="relative h-full w-full overflow-hidden bg-sand/30"
+      className="relative h-full w-full overflow-hidden"
+      style={{ background: 'rgba(6,12,9,0.8)' }}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
@@ -172,10 +173,13 @@ export function TemplatePreview({ template, zoom = 100, pan = { x: 0, y: 0 }, on
       {onClose && (
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 rounded-lg bg-white p-2 shadow-lg hover:bg-cloud text-ink"
+          className="absolute top-4 right-4 z-10 rounded-lg p-2 shadow-lg transition"
+          style={{ background: 'rgba(12,22,18,0.9)', border: '1px solid var(--f-border)', color: 'var(--f-text-soft)' }}
+          onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'rgba(12,22,18,0.9)'}
           title="Lukk forhåndsvisning"
         >
-          <FiX className="h-5 w-5" />
+          <IconX className="h-5 w-5" />
         </button>
       )}
       <div className="relative h-full w-full overflow-auto">
@@ -193,7 +197,7 @@ export function TemplatePreview({ template, zoom = 100, pan = { x: 0, y: 0 }, on
           <iframe
             ref={iframeRef}
             className="border-0 pointer-events-none"
-            title="Template Preview"
+            title="Forhåndsvisning av mal"
             style={{
               width: `${A4_WIDTH}px`,
               height: `${A4_HEIGHT}px`,
@@ -205,4 +209,3 @@ export function TemplatePreview({ template, zoom = 100, pan = { x: 0, y: 0 }, on
     </div>
   );
 }
-

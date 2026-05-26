@@ -1,4 +1,4 @@
-import { FiCode, FiStar, FiCheck } from 'react-icons/fi';
+import { IconCode, IconStar } from '@tabler/icons-react';
 import { useToast } from '../../hooks/useToast';
 import { useSupporterPack } from '../../hooks/useSupporterPack';
 import { TesseractTest } from '../dev/TesseractTest';
@@ -11,20 +11,19 @@ export function DevSettings() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-3xl border-2 border-dashed border-brand-300 bg-gradient-to-br from-brand-50/50 via-white to-brand-50/30">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-brand-100/20 via-transparent to-transparent" />
+      <div className="f-glass relative overflow-hidden rounded-3xl" style={{ border: '2px dashed var(--f-border-green)' }}>
         <div className="relative p-6 md:p-8">
           <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 rounded-xl bg-brand-100 p-3">
-              <FiCode className="h-6 w-6 text-brand-700" />
+            <div className="flex-shrink-0 rounded-xl p-3" style={{ background: 'var(--f-green-bg)' }}>
+              <IconCode className="h-6 w-6" style={{ color: 'var(--f-green-text)' }} />
             </div>
             <div className="flex-1">
-              <h3 className="text-xl font-bold text-ink mb-2">Utviklermeny</h3>
-              <p className="text-sm text-ink-soft mb-3">
+              <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--f-text)' }}>Utviklermeny</h3>
+              <p className="text-sm mb-3" style={{ color: 'var(--f-text-soft)' }}>
                 Verktøy og innstillinger for utviklere. Denne menyen er skjult og kan åpnes med tastatursnarveien.
               </p>
-              <div className="flex items-center gap-2 text-xs text-ink-subtle">
-                <kbd className="px-2.5 py-1 bg-white rounded-lg border border-brand-200 text-xs font-mono shadow-sm">
+              <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--f-text-subtle)' }}>
+                <kbd className="px-2.5 py-1 rounded-lg text-xs font-mono" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid var(--f-border)', color: 'var(--f-text-body)' }}>
                   Ctrl+Shift+D
                 </kbd>
                 <span>for å vise/skjule denne menyen</span>
@@ -35,38 +34,31 @@ export function DevSettings() {
       </div>
 
       {/* Supporter Pack Toggle */}
-      <div className="rounded-2xl border border-sand/60 bg-white shadow-card overflow-hidden">
+      <div className="f-glass rounded-2xl overflow-hidden">
         <div className="p-6">
           <div className="flex items-start gap-4 mb-4">
-            <div className={`flex-shrink-0 rounded-xl p-3 ${
-              isSupporter ? 'bg-moss/10' : 'bg-brand-50'
-            }`}>
-              <FiStar className={`h-5 w-5 ${
-                isSupporter ? 'text-moss' : 'text-brand-600'
-              }`} />
+            <div className="flex-shrink-0 rounded-xl p-3" style={{ background: isSupporter ? 'rgba(103,185,153,0.12)' : 'var(--f-surface)' }}>
+              <IconStar className="h-5 w-5" style={{ color: isSupporter ? 'var(--f-green)' : 'var(--f-green-text-dim)' }} />
             </div>
             <div className="flex-1">
-              <h4 className="text-base font-semibold text-ink mb-1">Supporter Pack Toggle</h4>
-              <p className="text-xs text-ink-subtle mb-4">
-                Aktiver eller deaktiver Supporter Pack for testing. Dette påvirker tilgang til premium-funksjoner.
+              <h4 className="text-base font-semibold mb-1" style={{ color: 'var(--f-text)' }}>Supporter-pakke</h4>
+              <p className="text-xs mb-4" style={{ color: 'var(--f-text-subtle)' }}>
+                Aktiver eller deaktiver Supporter-pakken for testing. Dette påvirker tilgang til premium-funksjoner.
               </p>
               <div className="flex items-center gap-3 mb-4">
-                <div className={`flex-1 rounded-lg border p-3 ${
-                  isSupporter 
-                    ? 'border-moss/40 bg-moss/5' 
-                    : 'border-sand/60 bg-cloud/30'
-                }`}>
-                  <p className="text-xs text-ink-subtle mb-1">Status</p>
-                  <p className={`text-sm font-semibold ${
-                    isSupporter ? 'text-moss' : 'text-ink-soft'
-                  }`}>
+                <div className="flex-1 rounded-lg p-3" style={{
+                  border: isSupporter ? '1px solid var(--f-border-green)' : '1px solid var(--f-border-subtle)',
+                  background: isSupporter ? 'var(--f-green-bg)' : 'rgba(255,255,255,0.03)',
+                }}>
+                  <p className="text-xs mb-1" style={{ color: 'var(--f-text-subtle)' }}>Status</p>
+                  <p className="text-sm font-semibold" style={{ color: isSupporter ? 'var(--f-green-text)' : 'var(--f-text-soft)' }}>
                     {isSupporter ? 'Aktivert' : 'Deaktivert'}
                   </p>
                 </div>
                 {isSupporter && (
-                  <div className="flex-1 rounded-lg border border-sand/60 bg-cloud/30 p-3">
-                    <p className="text-xs text-ink-subtle mb-1">AI-kreditter</p>
-                    <p className="text-sm font-semibold text-ink">{aiCredits.toLocaleString()}</p>
+                  <div className="flex-1 rounded-lg p-3" style={{ border: '1px solid var(--f-border-subtle)', background: 'rgba(255,255,255,0.03)' }}>
+                    <p className="text-xs mb-1" style={{ color: 'var(--f-text-subtle)' }}>AI-kreditter</p>
+                    <p className="text-sm font-semibold" style={{ color: 'var(--f-text-body)' }}>{aiCredits.toLocaleString()}</p>
                   </div>
                 )}
               </div>
@@ -82,22 +74,18 @@ export function DevSettings() {
                           features: ['premium_themes', 'premium_templates', 'ai'],
                           ai_credits: 1000,
                         });
-                        toast.success('Supporter Pack aktivert', 'Alle premium-funksjoner er nå tilgjengelige');
+                        toast.success('Supporter-pakken er aktivert', 'Alle premium-funksjoner er nå tilgjengelige');
                         setTimeout(() => window.location.reload(), 500);
                       } catch (error) {
                         console.error('Failed to activate supporter pack', error);
-                        toast.error('Kunne ikke aktivere Supporter Pack');
+                        toast.error('Kunne ikke aktivere Supporter-pakken');
                       }
                     })();
                   }
                 }}
-                className={`w-full px-4 py-2.5 rounded-xl text-sm font-semibold transition ${
-                  isSupporter
-                    ? 'bg-sand text-ink hover:bg-sand/80 border border-sand/60'
-                    : 'bg-brand-700 text-white hover:bg-brand-800 shadow-sm'
-                }`}
+                className={`w-full px-4 py-2.5 rounded-xl text-sm font-semibold transition ${isSupporter ? 'f-btn-ghost' : 'f-btn-primary'}`}
               >
-                {isSupporter ? 'Deaktiver Supporter Pack' : 'Aktiver Supporter Pack'}
+                {isSupporter ? 'Deaktiver Supporter-pakken' : 'Aktiver Supporter-pakken'}
               </button>
             </div>
           </div>
@@ -107,19 +95,17 @@ export function DevSettings() {
       {/* Dev Tools */}
       <div className="space-y-6">
         <div>
-          <h4 className="text-sm font-semibold text-ink mb-1">Utviklerverktøy</h4>
-          <p className="text-xs text-ink-subtle">Verktøy for testing og debugging</p>
+          <h4 className="text-sm font-semibold mb-1" style={{ color: 'var(--f-text)' }}>Utviklerverktøy</h4>
+          <p className="text-xs" style={{ color: 'var(--f-text-subtle)' }}>Verktøy for testing og feilsøking</p>
         </div>
 
-        {/* Tesseract Test */}
-        <div className="rounded-2xl border border-sand/60 bg-white shadow-card overflow-hidden">
+        <div className="f-glass rounded-2xl overflow-hidden">
           <div className="p-6">
             <TesseractTest />
           </div>
         </div>
 
-        {/* Credit Ledger Viewer */}
-        <div className="rounded-2xl border border-sand/60 bg-white shadow-card overflow-hidden">
+        <div className="f-glass rounded-2xl overflow-hidden">
           <div className="p-6">
             <CreditLedgerViewer />
           </div>
@@ -128,4 +114,3 @@ export function DevSettings() {
     </div>
   );
 }
-

@@ -1,13 +1,13 @@
 /**
- * Default Invoice Template
- * Simple, clean template for basic invoicing needs
+ * Standard fakturamal
+ * Enkel og ren mal for grunnleggende fakturering
  */
 module.exports = {
   schemaVersion: 1,
   meta: {
     id: 'default_invoice',
-    name: 'Default Invoice',
-    description: 'Simple, clean template for basic invoicing needs',
+    name: 'Standard faktura',
+    description: 'Enkel og ren mal for grunnleggende fakturering',
     version: '1.0.0',
     premium: false,
     createdAt: '2025-01-01T00:00:00.000Z',
@@ -86,4 +86,3 @@ module.exports = {
     },
   ],
 };
-

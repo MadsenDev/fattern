@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FiX, FiSave, FiTag, FiUser, FiLink, FiInfo, FiFileText } from 'react-icons/fi';
+import { IconX, IconDeviceFloppy, IconTag, IconUser, IconLink, IconInfoCircle, IconFileText } from '@tabler/icons-react';
 import { Modal } from '../Modal';
 
 export function TemplateSettingsModal({ isOpen, onClose, template, onSave }) {
@@ -86,95 +86,95 @@ export function TemplateSettingsModal({ isOpen, onClose, template, onSave }) {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Information */}
         <div className="space-y-4">
-          <h3 className="text-sm font-semibold text-ink flex items-center gap-2">
-            <FiFileText className="h-4 w-4" />
+          <h3 className="text-sm font-semibold flex items-center gap-2" style={{ color: 'var(--f-text-body)' }}>
+            <IconFileText className="h-4 w-4" />
             Grunnleggende informasjon
           </h3>
 
           <div>
-            <label className="block text-xs font-medium text-ink-subtle mb-1.5">
+            <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--f-text-subtle)' }}>
               Navn *
             </label>
             <input
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full rounded-lg border border-sand/60 bg-white px-3 py-2 text-sm text-ink shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+              className="f-input w-full rounded-lg px-3 py-2 text-sm"
               required
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-ink-subtle mb-1.5">
+            <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--f-text-subtle)' }}>
               Beskrivelse
             </label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={3}
-              className="w-full rounded-lg border border-sand/60 bg-white px-3 py-2 text-sm text-ink shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200 resize-none"
+              className="f-input w-full rounded-lg px-3 py-2 text-sm resize-none"
               placeholder="Beskrivelse av malen..."
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-ink-subtle mb-1.5">
+            <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--f-text-subtle)' }}>
               Versjon *
             </label>
             <input
               type="text"
               value={formData.version}
               onChange={(e) => setFormData({ ...formData, version: e.target.value })}
-              className="w-full rounded-lg border border-sand/60 bg-white px-3 py-2 text-sm text-ink shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200 font-mono"
+              className="f-input w-full rounded-lg px-3 py-2 text-sm font-mono"
               placeholder="1.0.0"
               required
               pattern="^\d+\.\d+\.\d+(-.+)?$"
               title="Versjon må følge SemVer format (f.eks. 1.0.0)"
             />
-            <p className="text-xs text-ink-subtle mt-1">SemVer format (f.eks. 1.0.0)</p>
+            <p className="text-xs mt-1" style={{ color: 'var(--f-text-subtle)' }}>SemVer format (f.eks. 1.0.0)</p>
           </div>
         </div>
 
         {/* Author Information */}
-        <div className="space-y-4 pt-4 border-t border-sand/40">
-          <h3 className="text-sm font-semibold text-ink flex items-center gap-2">
-            <FiUser className="h-4 w-4" />
+        <div className="space-y-4 pt-4" style={{ borderTop: '1px solid var(--f-border-faint)' }}>
+          <h3 className="text-sm font-semibold flex items-center gap-2" style={{ color: 'var(--f-text-body)' }}>
+            <IconUser className="h-4 w-4" />
             Forfatter informasjon
           </h3>
 
           <div>
-            <label className="block text-xs font-medium text-ink-subtle mb-1.5">
+            <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--f-text-subtle)' }}>
               Forfatter
             </label>
             <input
               type="text"
               value={formData.author}
               onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-              className="w-full rounded-lg border border-sand/60 bg-white px-3 py-2 text-sm text-ink shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+              className="f-input w-full rounded-lg px-3 py-2 text-sm"
               placeholder="Navn på forfatter eller selskap"
             />
-            <p className="text-xs text-ink-subtle mt-1">Brukes når malen eksporteres</p>
+            <p className="text-xs mt-1" style={{ color: 'var(--f-text-subtle)' }}>Brukes når malen eksporteres</p>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-ink-subtle mb-1.5 flex items-center gap-1">
-              <FiLink className="h-3 w-3" />
+            <label className="flex items-center gap-1 text-xs font-medium mb-1.5" style={{ color: 'var(--f-text-subtle)' }}>
+              <IconLink className="h-3 w-3" />
               Forfatter URL
             </label>
             <input
               type="url"
               value={formData.authorUrl}
               onChange={(e) => setFormData({ ...formData, authorUrl: e.target.value })}
-              className="w-full rounded-lg border border-sand/60 bg-white px-3 py-2 text-sm text-ink shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+              className="f-input w-full rounded-lg px-3 py-2 text-sm"
               placeholder="https://example.com"
             />
           </div>
         </div>
 
         {/* Tags */}
-        <div className="space-y-4 pt-4 border-t border-sand/40">
-          <h3 className="text-sm font-semibold text-ink flex items-center gap-2">
-            <FiTag className="h-4 w-4" />
+        <div className="space-y-4 pt-4" style={{ borderTop: '1px solid var(--f-border-faint)' }}>
+          <h3 className="text-sm font-semibold flex items-center gap-2" style={{ color: 'var(--f-text-body)' }}>
+            <IconTag className="h-4 w-4" />
             Tagger
           </h3>
 
@@ -185,13 +185,13 @@ export function TemplateSettingsModal({ isOpen, onClose, template, onSave }) {
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={handleTagInputKeyDown}
-                className="flex-1 rounded-lg border border-sand/60 bg-white px-3 py-2 text-sm text-ink shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+                className="f-input flex-1 rounded-lg px-3 py-2 text-sm"
                 placeholder="Legg til tag (trykk Enter)"
               />
               <button
                 type="button"
                 onClick={handleAddTag}
-                className="rounded-lg border border-brand-300 bg-brand-50 px-4 py-2 text-sm font-medium text-brand-700 hover:bg-brand-100 transition"
+                className="f-btn-ghost rounded-lg px-4 py-2 text-sm font-medium transition"
               >
                 Legg til
               </button>
@@ -201,15 +201,18 @@ export function TemplateSettingsModal({ isOpen, onClose, template, onSave }) {
                 {formData.tags.map((tag, idx) => (
                   <span
                     key={idx}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-brand-100 px-2.5 py-1 text-xs font-medium text-brand-700"
+                    className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
+                    style={{ background: 'var(--f-green-bg)', color: 'var(--f-green-text)', border: '1px solid var(--f-border-green)' }}
                   >
                     {tag}
                     <button
                       type="button"
                       onClick={() => handleRemoveTag(tag)}
-                      className="hover:text-brand-900 transition"
+                      className="transition"
+                      onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
+                      onMouseLeave={e => e.currentTarget.style.opacity = '1'}
                     >
-                      <FiX className="h-3 w-3" />
+                      <IconX className="h-3 w-3" />
                     </button>
                   </span>
                 ))}
@@ -219,41 +222,41 @@ export function TemplateSettingsModal({ isOpen, onClose, template, onSave }) {
         </div>
 
         {/* License */}
-        <div className="pt-4 border-t border-sand/40">
-          <h3 className="text-sm font-semibold text-ink flex items-center gap-2 mb-4">
-            <FiInfo className="h-4 w-4" />
+        <div className="pt-4" style={{ borderTop: '1px solid var(--f-border-faint)' }}>
+          <h3 className="text-sm font-semibold flex items-center gap-2 mb-4" style={{ color: 'var(--f-text-body)' }}>
+            <IconInfoCircle className="h-4 w-4" />
             Lisens
           </h3>
 
           <div>
-            <label className="block text-xs font-medium text-ink-subtle mb-1.5">
+            <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--f-text-subtle)' }}>
               Lisens type
             </label>
             <input
               type="text"
               value={formData.license}
               onChange={(e) => setFormData({ ...formData, license: e.target.value })}
-              className="w-full rounded-lg border border-sand/60 bg-white px-3 py-2 text-sm text-ink shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+              className="f-input w-full rounded-lg px-3 py-2 text-sm"
               placeholder="f.eks. commercial-use, MIT, CC-BY"
             />
-            <p className="text-xs text-ink-subtle mt-1">Valgfritt. Angir lisens for malen.</p>
+            <p className="text-xs mt-1" style={{ color: 'var(--f-text-subtle)' }}>Valgfritt. Angir lisens for malen.</p>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-2 pt-4 border-t border-sand/40">
+        <div className="flex justify-end gap-2 pt-4" style={{ borderTop: '1px solid var(--f-border-faint)' }}>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-sand/60 bg-white px-4 py-2 text-sm font-medium text-ink-soft hover:bg-cloud transition"
+            className="f-btn-ghost rounded-lg px-4 py-2 text-sm font-medium transition"
           >
             Avbryt
           </button>
           <button
             type="submit"
-            className="rounded-lg bg-brand-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-800 transition flex items-center gap-2"
+            className="f-btn-primary rounded-lg px-4 py-2 text-sm font-medium transition flex items-center gap-2"
           >
-            <FiSave className="h-4 w-4" />
+            <IconDeviceFloppy className="h-4 w-4" />
             Lagre innstillinger
           </button>
         </div>

@@ -4,7 +4,7 @@ export function LoadingScreen({ progress = 0 }) {
   return (
     <div className="flex h-screen flex-col overflow-hidden">
       <TitleBar variant="dark" title="Fattern" />
-      <div className="flex flex-1 items-center justify-center bg-gradient-to-br from-brand-900 via-brand-800 to-brand-900 text-white">
+      <div className="flex flex-1 items-center justify-center text-white" style={{ background: 'linear-gradient(135deg, rgba(4,14,10,1) 0%, rgba(8,28,18,1) 50%, rgba(4,14,10,1) 100%)' }}>
       <div className="flex items-center gap-4">
         <div className="relative">
           <div className="absolute inset-0 rounded-2xl bg-white/10 blur-xl" />

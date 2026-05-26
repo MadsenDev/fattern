@@ -85,7 +85,10 @@ export function CustomerModal({ isOpen, mode = 'create', initialCustomer, onSubm
         <>
           <button
             type="button"
-            className="text-sm font-medium text-ink-subtle hover:text-ink"
+            className="text-sm font-medium transition"
+            style={{ color: 'var(--f-text-subtle)' }}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--f-text-body)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'var(--f-text-subtle)'}
             onClick={onClose}
             disabled={saving}
           >
@@ -94,7 +97,7 @@ export function CustomerModal({ isOpen, mode = 'create', initialCustomer, onSubm
           <button
             type="submit"
             form="customer-form"
-            className="rounded-2xl bg-brand-700 px-5 py-2 text-sm font-semibold text-white shadow-card disabled:opacity-60"
+            className="f-btn-primary rounded-2xl px-5 py-2 text-sm font-semibold disabled:opacity-60"
             disabled={saving}
           >
             {saving ? 'Lagrer …' : isEdit ? 'Lagre endringer' : 'Opprett kunde'}
@@ -104,9 +107,9 @@ export function CustomerModal({ isOpen, mode = 'create', initialCustomer, onSubm
     >
       <form id="customer-form" className="space-y-4" onSubmit={handleSubmit}>
         <div>
-          <label className="text-sm font-medium text-ink">Kundenavn *</label>
+          <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Kundenavn *</label>
           <input
-            className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+            className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Eksempel: Acme AS"
@@ -116,18 +119,18 @@ export function CustomerModal({ isOpen, mode = 'create', initialCustomer, onSubm
 
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="text-sm font-medium text-ink">Kontaktperson</label>
+            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Kontaktperson</label>
             <input
-              className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+              className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
               value={contactName}
               onChange={(e) => setContactName(e.target.value)}
               placeholder="Navn på kontaktperson"
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-ink">Organisasjonsnummer</label>
+            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Organisasjonsnummer</label>
             <input
-              className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+              className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
               value={orgNumber}
               onChange={(e) => setOrgNumber(e.target.value)}
               placeholder="123 456 789"
@@ -137,20 +140,20 @@ export function CustomerModal({ isOpen, mode = 'create', initialCustomer, onSubm
 
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="text-sm font-medium text-ink">E-post</label>
+            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>E-post</label>
             <input
               type="email"
-              className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+              className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="kunde@example.com"
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-ink">Telefon</label>
+            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Telefon</label>
             <input
               type="tel"
-              className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+              className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="+47 123 45 678"
@@ -159,9 +162,9 @@ export function CustomerModal({ isOpen, mode = 'create', initialCustomer, onSubm
         </div>
 
         <div>
-          <label className="text-sm font-medium text-ink">Adresse</label>
+          <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Adresse</label>
           <input
-            className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+            className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
             placeholder="Gateadresse"
@@ -170,18 +173,18 @@ export function CustomerModal({ isOpen, mode = 'create', initialCustomer, onSubm
 
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="text-sm font-medium text-ink">Postnummer</label>
+            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Postnummer</label>
             <input
-              className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+              className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
               value={postNumber}
               onChange={(e) => setPostNumber(e.target.value)}
               placeholder="0001"
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-ink">Poststed</label>
+            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Poststed</label>
             <input
-              className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+              className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
               value={postLocation}
               onChange={(e) => setPostLocation(e.target.value)}
               placeholder="Oslo"
@@ -194,19 +197,19 @@ export function CustomerModal({ isOpen, mode = 'create', initialCustomer, onSubm
         </div>
 
         <div className="flex gap-4">
-          <label className="flex items-center gap-2 text-sm text-ink">
+          <label className="flex items-center gap-2 text-sm" style={{ color: 'var(--f-text-body)' }}>
             <input
               type="checkbox"
-              className="h-4 w-4 rounded border-sand text-brand-600 focus:ring-brand-500"
+              className="h-4 w-4 rounded" style={{ accentColor: 'var(--f-green)' }}
               checked={vatExempt}
               onChange={(e) => setVatExempt(e.target.checked)}
             />
             MVA-fritatt
           </label>
-          <label className="flex items-center gap-2 text-sm text-ink">
+          <label className="flex items-center gap-2 text-sm" style={{ color: 'var(--f-text-body)' }}>
             <input
               type="checkbox"
-              className="h-4 w-4 rounded border-sand text-brand-600 focus:ring-brand-500"
+              className="h-4 w-4 rounded" style={{ accentColor: 'var(--f-green)' }}
               checked={active}
               onChange={(e) => setActive(e.target.checked)}
             />
@@ -214,7 +217,7 @@ export function CustomerModal({ isOpen, mode = 'create', initialCustomer, onSubm
           </label>
         </div>
 
-        {error ? <p className="text-sm font-medium text-rose-600">{error}</p> : null}
+        {error ? <p className="text-sm font-medium" style={{ color: 'var(--f-danger-text)' }}>{error}</p> : null}
       </form>
     </Modal>
   );

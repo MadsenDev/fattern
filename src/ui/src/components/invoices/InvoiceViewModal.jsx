@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Modal } from '../Modal';
 import { StatusBadge } from '../StatusBadge';
 import { formatDate } from '../../utils/formatDate';
-import { FiEdit2, FiDownload, FiLink, FiX, FiPlus } from 'react-icons/fi';
+import { IconEdit, IconDownload, IconLink, IconX, IconPlus } from '@tabler/icons-react';
 
 function getDbApi() {
   if (typeof window === 'undefined') return null;
@@ -46,48 +46,49 @@ function ExpensePickerModal({ isOpen, invoiceId, budgetYearId, onLink, onClose, 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-3xl bg-white shadow-xl">
-        <div className="flex items-center justify-between p-6 border-b border-sand/60">
-          <h3 className="text-base font-semibold text-ink">{t('invoice.linked_expenses.picker_title')}</h3>
-          <button type="button" onClick={onClose} className="rounded-lg p-1.5 text-ink-subtle hover:bg-cloud">
-            <FiX className="h-4 w-4" />
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4" style={{ background: 'rgba(4,10,8,0.75)', backdropFilter: 'blur(6px)' }}>
+      <div className="f-glass-hero w-full max-w-lg rounded-3xl shadow-xl">
+        <div className="flex items-center justify-between p-6" style={{ borderBottom: '1px solid var(--f-border-subtle)' }}>
+          <h3 className="text-base font-semibold" style={{ color: 'var(--f-text-body)' }}>{t('invoice.linked_expenses.picker_title')}</h3>
+          <button type="button" onClick={onClose} className="rounded-lg p-1.5 transition" style={{ color: 'var(--f-text-subtle)' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+            <IconX className="h-4 w-4" />
           </button>
         </div>
         <div className="max-h-80 overflow-y-auto p-4">
           {loading ? (
-            <p className="text-sm text-ink-subtle text-center py-4">{t('common.loading')}</p>
+            <p className="text-sm text-center py-4" style={{ color: 'var(--f-text-subtle)' }}>{t('common.loading')}</p>
           ) : unlinked.length === 0 ? (
-            <p className="text-sm text-ink-subtle text-center py-4">{t('invoice.linked_expenses.picker_empty')}</p>
+            <p className="text-sm text-center py-4" style={{ color: 'var(--f-text-subtle)' }}>{t('invoice.linked_expenses.picker_empty')}</p>
           ) : (
             <div className="space-y-2">
               {unlinked.map((exp) => (
-                <label key={exp.id} className="flex items-center gap-3 rounded-xl p-3 hover:bg-cloud/30 cursor-pointer">
+                <label key={exp.id} className="flex items-center gap-3 rounded-xl p-3 cursor-pointer transition" onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                   <input
                     type="checkbox"
                     checked={selected.has(exp.id)}
                     onChange={() => toggle(exp.id)}
-                    className="h-4 w-4 rounded border-sand text-brand-600"
+                    className="h-4 w-4 rounded"
+                    style={{ accentColor: 'var(--f-green)' }}
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-ink truncate">{exp.vendor || '—'}</p>
-                    <p className="text-xs text-ink-subtle">{exp.date ? formatDate(exp.date) : '—'} · {exp.category_name || '—'}</p>
+                    <p className="text-sm font-medium truncate" style={{ color: 'var(--f-text-body)' }}>{exp.vendor || '—'}</p>
+                    <p className="text-xs" style={{ color: 'var(--f-text-subtle)' }}>{exp.date ? formatDate(exp.date) : '—'} · {exp.category_name || '—'}</p>
                   </div>
-                  <span className="text-sm font-semibold text-ink">{fmt ? fmt(exp.amount) : exp.amount}</span>
+                  <span className="text-sm font-semibold" style={{ color: 'var(--f-text-body)' }}>{fmt ? fmt(exp.amount) : exp.amount}</span>
                 </label>
               ))}
             </div>
           )}
         </div>
-        <div className="flex items-center justify-end gap-3 p-4 border-t border-sand/60">
-          <button type="button" onClick={onClose} className="text-sm font-medium text-ink-subtle hover:text-ink">
+        <div className="flex items-center justify-end gap-3 p-4" style={{ borderTop: '1px solid var(--f-border-subtle)' }}>
+          <button type="button" onClick={onClose} className="text-sm font-medium transition" style={{ color: 'var(--f-text-subtle)' }} onMouseEnter={e => e.currentTarget.style.color = 'var(--f-text-body)'} onMouseLeave={e => e.currentTarget.style.color = 'var(--f-text-subtle)'}>
             {t('invoice.linked_expenses.cancel')}
           </button>
           <button
             type="button"
             onClick={handleConfirm}
             disabled={selected.size === 0}
-            className="rounded-2xl bg-brand-700 px-4 py-2 text-sm font-semibold text-white shadow-card disabled:opacity-50"
+            className="f-btn-primary rounded-2xl px-4 py-2 text-sm font-semibold disabled:opacity-50"
           >
             {t('invoice.linked_expenses.confirm')} ({selected.size})
           </button>
@@ -134,15 +135,15 @@ function LinkedExpensesTab({ invoiceId, budgetYearId, formatCurrency: fmt }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <span className="text-sm text-ink-subtle">
+        <span className="text-sm" style={{ color: 'var(--f-text-subtle)' }}>
           {linked.length} {linked.length === 1 ? t('expense.expense_singular') : t('expense.expense_plural')}
         </span>
         <button
           type="button"
           onClick={() => setPickerOpen(true)}
-          className="flex items-center gap-2 rounded-2xl border border-sand bg-white px-4 py-2 text-sm font-medium text-ink hover:bg-cloud shadow-sm"
+          className="f-btn-ghost flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-medium"
         >
-          <FiPlus className="h-4 w-4" />
+          <IconPlus className="h-4 w-4" />
           {t('invoice.linked_expenses.link')}
         </button>
       </div>
@@ -150,27 +151,30 @@ function LinkedExpensesTab({ invoiceId, budgetYearId, formatCurrency: fmt }) {
       {loading ? (
         <p className="text-sm text-ink-subtle text-center py-6">{t('common.loading')}</p>
       ) : linked.length === 0 ? (
-        <p className="text-sm text-ink-subtle text-center py-6">{t('invoice.linked_expenses.empty')}</p>
+        <p className="text-sm text-center py-6" style={{ color: 'var(--f-text-subtle)' }}>{t('invoice.linked_expenses.empty')}</p>
       ) : (
         <div className="space-y-2">
           {linked.map((exp) => (
-            <div key={exp.id} className="flex items-center gap-3 rounded-xl border border-sand/60 bg-white p-3">
+            <div key={exp.id} className="flex items-center gap-3 rounded-xl p-3" style={{ border: '1px solid var(--f-border-subtle)', background: 'rgba(255,255,255,0.02)' }}>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-ink">{exp.vendor || '—'}</p>
-                <p className="text-xs text-ink-subtle">
+                <p className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{exp.vendor || '—'}</p>
+                <p className="text-xs" style={{ color: 'var(--f-text-subtle)' }}>
                   {exp.date ? formatDate(exp.date) : '—'} · {exp.category_name || t('expense.unknown_category')}
                 </p>
               </div>
-              <span className="text-sm font-semibold text-ink">
+              <span className="text-sm font-semibold" style={{ color: 'var(--f-text-body)' }}>
                 {fmt ? fmt(exp.amount) : exp.amount}
               </span>
               <button
                 type="button"
                 onClick={() => handleUnlink(exp.id)}
-                className="rounded-lg p-1.5 text-ink-subtle hover:bg-red-50 hover:text-red-600"
+                className="rounded-lg p-1.5 transition"
+                style={{ color: 'var(--f-text-subtle)' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'var(--f-danger-bg)'; e.currentTarget.style.color = 'var(--f-danger-text)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--f-text-subtle)'; }}
                 title={t('invoice.linked_expenses.unlink')}
               >
-                <FiX className="h-4 w-4" />
+                <IconX className="h-4 w-4" />
               </button>
             </div>
           ))}
@@ -249,8 +253,8 @@ export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGenerateP
           <div className="flex items-center gap-3">
             <StatusBadge status={invoice.status || 'draft'} />
             {invoice.status === 'paid' && invoice.payment_date && (
-              <div className="flex items-center gap-2 rounded-lg bg-brand-50 border border-brand-200 px-3 py-1.5">
-                <span className="text-xs font-medium text-brand-700">
+              <div className="flex items-center gap-2 rounded-lg px-3 py-1.5" style={{ background: 'var(--f-green-bg)', border: '1px solid var(--f-border-green)' }}>
+                <span className="text-xs font-medium" style={{ color: 'var(--f-green-text)' }}>
                   {t('invoice.paid_date')} {formatDate(invoice.payment_date)}
                 </span>
               </div>
@@ -261,9 +265,9 @@ export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGenerateP
               type="button"
               onClick={handleGeneratePDF}
               disabled={generatingPdf}
-              className="rounded-2xl border border-sand bg-white px-4 py-2 text-sm font-medium text-ink hover:bg-cloud disabled:opacity-50 flex items-center gap-2"
+              className="f-btn-ghost rounded-2xl px-4 py-2 text-sm font-medium disabled:opacity-50 flex items-center gap-2"
             >
-              <FiDownload className="h-4 w-4" />
+              <IconDownload className="h-4 w-4" />
               {generatingPdf ? t('common.loading') : t('invoice.generate_pdf')}
             </button>
             {onEdit && (
@@ -273,9 +277,9 @@ export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGenerateP
                   onClose?.();
                   onEdit?.(invoice);
                 }}
-                className="rounded-2xl bg-brand-700 px-4 py-2 text-sm font-semibold text-white shadow-card hover:bg-brand-800 flex items-center gap-2"
+                className="f-btn-primary rounded-2xl px-4 py-2 text-sm font-semibold flex items-center gap-2"
               >
-                <FiEdit2 className="h-4 w-4" />
+                <IconEdit className="h-4 w-4" />
                 {t('common.edit')}
               </button>
             )}
@@ -284,17 +288,19 @@ export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGenerateP
       }
     >
       {/* Tab bar */}
-      <div className="flex border-b border-sand/60 mb-6 -mt-2">
+      <div className="flex mb-6 -mt-2" style={{ borderBottom: '1px solid var(--f-border-subtle)' }}>
         {tabs.map((tab) => (
           <button
             key={tab.id}
             type="button"
             onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
-              activeTab === tab.id
-                ? 'border-brand-700 text-brand-700'
-                : 'border-transparent text-ink-subtle hover:text-ink'
-            }`}
+            className="px-4 py-2 text-sm font-medium border-b-2 transition"
+            style={{
+              borderBottomColor: activeTab === tab.id ? 'var(--f-green)' : 'transparent',
+              color: activeTab === tab.id ? 'var(--f-green-text)' : 'var(--f-text-subtle)',
+            }}
+            onMouseEnter={e => { if (activeTab !== tab.id) e.currentTarget.style.color = 'var(--f-text-body)'; }}
+            onMouseLeave={e => { if (activeTab !== tab.id) e.currentTarget.style.color = 'var(--f-text-subtle)'; }}
           >
             {tab.label}
           </button>
@@ -307,29 +313,29 @@ export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGenerateP
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-semibold uppercase tracking-wide text-ink-subtle">Fakturadato</label>
-                <p className="mt-1 text-sm font-medium text-ink">
+                <label className="f-label uppercase tracking-wide">Fakturadato</label>
+                <p className="mt-1 text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>
                   {invoice.invoice_date ? formatDate(invoice.invoice_date) : '—'}
                 </p>
               </div>
               <div>
-                <label className="text-xs font-semibold uppercase tracking-wide text-ink-subtle">Forfallsdato</label>
-                <p className="mt-1 text-sm font-medium text-ink">
+                <label className="f-label uppercase tracking-wide">Forfallsdato</label>
+                <p className="mt-1 text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>
                   {invoice.due_date ? formatDate(invoice.due_date) : '—'}
                 </p>
               </div>
               {invoice.status === 'paid' && invoice.payment_date && (
                 <div>
-                  <label className="text-xs font-semibold uppercase tracking-wide text-ink-subtle">Betalingsdato</label>
-                  <p className="mt-1 text-sm font-semibold text-brand-700">
+                  <label className="f-label uppercase tracking-wide">Betalingsdato</label>
+                  <p className="mt-1 text-sm font-semibold" style={{ color: 'var(--f-green-text)' }}>
                     {formatDate(invoice.payment_date)}
                   </p>
                 </div>
               )}
               {invoice.start_date && invoice.end_date && (
                 <div>
-                  <label className="text-xs font-semibold uppercase tracking-wide text-ink-subtle">Periode</label>
-                  <p className="mt-1 text-sm font-medium text-ink">
+                  <label className="f-label uppercase tracking-wide">Periode</label>
+                  <p className="mt-1 text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>
                     {formatDate(invoice.start_date)} - {formatDate(invoice.end_date)}
                   </p>
                 </div>
@@ -338,26 +344,26 @@ export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGenerateP
             <div className="space-y-4">
               {invoice.your_reference && (
                 <div>
-                  <label className="text-xs font-semibold uppercase tracking-wide text-ink-subtle">Deres referanse</label>
-                  <p className="mt-1 text-sm font-medium text-ink">{invoice.your_reference}</p>
+                  <label className="f-label uppercase tracking-wide">Deres referanse</label>
+                  <p className="mt-1 text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{invoice.your_reference}</p>
                 </div>
               )}
               {invoice.our_reference && (
                 <div>
-                  <label className="text-xs font-semibold uppercase tracking-wide text-ink-subtle">Vår referanse</label>
-                  <p className="mt-1 text-sm font-medium text-ink">{invoice.our_reference}</p>
+                  <label className="f-label uppercase tracking-wide">Vår referanse</label>
+                  <p className="mt-1 text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{invoice.our_reference}</p>
                 </div>
               )}
               {invoice.delivery_reference && (
                 <div>
-                  <label className="text-xs font-semibold uppercase tracking-wide text-ink-subtle">Leveringsreferanse</label>
-                  <p className="mt-1 text-sm font-medium text-ink">{invoice.delivery_reference}</p>
+                  <label className="f-label uppercase tracking-wide">Leveringsreferanse</label>
+                  <p className="mt-1 text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{invoice.delivery_reference}</p>
                 </div>
               )}
               {invoice.reference && (
                 <div>
-                  <label className="text-xs font-semibold uppercase tracking-wide text-ink-subtle">Referanse</label>
-                  <p className="mt-1 text-sm font-medium text-ink">{invoice.reference}</p>
+                  <label className="f-label uppercase tracking-wide">Referanse</label>
+                  <p className="mt-1 text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{invoice.reference}</p>
                 </div>
               )}
             </div>
@@ -365,19 +371,19 @@ export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGenerateP
 
           {/* Items Table */}
           {invoice.items && invoice.items.length > 0 ? (
-            <div className="rounded-2xl border border-sand/60 bg-white overflow-hidden">
+            <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid var(--f-border-subtle)' }}>
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-cloud/50 border-b border-sand/60">
+                  <thead style={{ background: 'rgba(255,255,255,0.04)', borderBottom: '1px solid var(--f-border-subtle)' }}>
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-ink-subtle">Beskrivelse</th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-ink-subtle">Antall</th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-ink-subtle">Enhetspris</th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-ink-subtle">MVA %</th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-ink-subtle">Total</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--f-text-subtle)' }}>Beskrivelse</th>
+                      <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--f-text-subtle)' }}>Antall</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--f-text-subtle)' }}>Enhetspris</th>
+                      <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--f-text-subtle)' }}>MVA %</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--f-text-subtle)' }}>Total</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-sand/60">
+                  <tbody>
                     {invoice.items.map((item, index) => {
                       const unitPrice = item.unitPrice || item.unit_price || 0;
                       const quantity = item.quantity || 0;
@@ -387,14 +393,14 @@ export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGenerateP
                       const lineTotal = lineSubtotal + lineVat;
 
                       return (
-                        <tr key={item.id || index} className="hover:bg-cloud/30">
-                          <td className="px-4 py-3 text-sm text-ink">{item.description || '—'}</td>
-                          <td className="px-4 py-3 text-sm text-center text-ink-soft">{quantity}</td>
-                          <td className="px-4 py-3 text-sm text-right text-ink-soft">{fmt(unitPrice)}</td>
-                          <td className="px-4 py-3 text-sm text-center text-ink-soft">
+                        <tr key={item.id || index} style={{ borderBottom: '1px solid var(--f-border-faint)' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.025)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                          <td className="px-4 py-3 text-sm" style={{ color: 'var(--f-text-body)' }}>{item.description || '—'}</td>
+                          <td className="px-4 py-3 text-sm text-center" style={{ color: 'var(--f-text-soft)' }}>{quantity}</td>
+                          <td className="px-4 py-3 text-sm text-right" style={{ color: 'var(--f-text-soft)' }}>{fmt(unitPrice)}</td>
+                          <td className="px-4 py-3 text-sm text-center" style={{ color: 'var(--f-text-soft)' }}>
                             {vatRate > 0 ? `${(vatRate * 100).toFixed(0)}%` : '—'}
                           </td>
-                          <td className="px-4 py-3 text-sm text-right font-medium text-ink">{fmt(lineTotal)}</td>
+                          <td className="px-4 py-3 text-sm text-right font-medium" style={{ color: 'var(--f-text-body)' }}>{fmt(lineTotal)}</td>
                         </tr>
                       );
                     })}
@@ -403,7 +409,7 @@ export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGenerateP
               </div>
             </div>
           ) : (
-            <div className="rounded-2xl border border-sand/60 bg-cloud/30 p-8 text-center text-sm text-ink-subtle">
+            <div className="rounded-2xl p-8 text-center text-sm" style={{ border: '1px solid var(--f-border-subtle)', background: 'rgba(255,255,255,0.02)', color: 'var(--f-text-subtle)' }}>
               Ingen linjeelementer
             </div>
           )}
@@ -411,24 +417,24 @@ export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGenerateP
           {/* Summary */}
           <div className="flex justify-end">
             <div className="w-full md:w-80 space-y-2">
-              <div className="flex justify-between text-sm text-ink-soft">
+              <div className="flex justify-between text-sm" style={{ color: 'var(--f-text-soft)' }}>
                 <span>Sum eks. mva:</span>
                 <span className="font-medium">{fmt(calculations.subtotal)}</span>
               </div>
-              <div className="flex justify-between text-sm text-ink-soft">
+              <div className="flex justify-between text-sm" style={{ color: 'var(--f-text-soft)' }}>
                 <span>MVA:</span>
                 <span className="font-medium">{fmt(calculations.vatTotal)}</span>
               </div>
               {invoice.credited && (
-                <div className="pt-2 border-t border-sand/60">
-                  <div className="flex justify-between text-sm text-ink-soft">
+                <div className="pt-2" style={{ borderTop: '1px solid var(--f-border-faint)' }}>
+                  <div className="flex justify-between text-sm" style={{ color: 'var(--f-text-soft)' }}>
                     <span>Kreditert:</span>
-                    <span className="font-medium text-rose-600">Ja</span>
+                    <span className="font-medium" style={{ color: 'var(--f-danger-text)' }}>Ja</span>
                   </div>
                 </div>
               )}
-              <div className="pt-2 border-t-2 border-ink/20">
-                <div className="flex justify-between text-base font-semibold text-ink">
+              <div className="pt-2" style={{ borderTop: '2px solid var(--f-border)' }}>
+                <div className="flex justify-between text-base font-semibold" style={{ color: 'var(--f-text-body)' }}>
                   <span>Totalt:</span>
                   <span>{fmt(calculations.total)}</span>
                 </div>
@@ -438,9 +444,9 @@ export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGenerateP
 
           {/* Notes */}
           {invoice.notes && (
-            <div className="rounded-2xl border border-sand/60 bg-cloud/30 p-4">
-              <label className="text-xs font-semibold uppercase tracking-wide text-ink-subtle">Notater</label>
-              <p className="mt-2 text-sm text-ink whitespace-pre-wrap">{invoice.notes}</p>
+            <div className="rounded-2xl p-4" style={{ border: '1px solid var(--f-border-subtle)', background: 'rgba(255,255,255,0.02)' }}>
+              <label className="f-label uppercase tracking-wide">Notater</label>
+              <p className="mt-2 text-sm whitespace-pre-wrap" style={{ color: 'var(--f-text-body)' }}>{invoice.notes}</p>
             </div>
           )}
         </div>

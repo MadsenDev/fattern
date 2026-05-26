@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FiEdit2, FiTrash2, FiDownload, FiEye } from 'react-icons/fi';
+import { IconEdit, IconTrash, IconDownload, IconEye } from '@tabler/icons-react';
 import { DataTable } from '../components/DataTable';
 import { StatusBadge } from '../components/StatusBadge';
 import { SearchBar } from '../components/SearchBar';
@@ -71,7 +71,7 @@ export function InvoicesPage({ invoices, formatCurrency: fmt, onCreateInvoice, o
         render: (id, invoice) => (
           <button
             onClick={() => onViewInvoice?.(invoice)}
-            className="hover:text-brand-700 hover:underline cursor-pointer text-left"
+            className="cursor-pointer text-left hover:underline hover:[color:var(--f-green-text)]"
           >
             {invoice.invoice_number || id}
           </button>
@@ -104,7 +104,7 @@ export function InvoicesPage({ invoices, formatCurrency: fmt, onCreateInvoice, o
           <div className="flex flex-col">
             <span className="text-ink-subtle">{date ? formatDate(date) : '—'}</span>
             {invoice.status === 'paid' && invoice.payment_date && (
-              <span className="text-xs text-brand-700 font-medium">
+              <span className="text-xs font-medium" style={{ color: 'var(--f-green-text)' }}>
                 {t('invoice.paid_date')} {formatDate(invoice.payment_date)}
               </span>
             )}
@@ -137,36 +137,36 @@ export function InvoicesPage({ invoices, formatCurrency: fmt, onCreateInvoice, o
           <div className="flex items-center justify-end gap-2">
             <button
               onClick={() => onViewInvoice?.(invoice)}
-              className="rounded-lg p-1.5 text-ink-subtle hover:bg-brand-50 hover:text-brand-700"
+              className="rounded-lg p-1.5 text-ink-subtle hover:[background:var(--f-green-bg)] hover:[color:var(--f-green-text)]"
               aria-label={t('invoice.view')}
               title={t('invoice.view')}
             >
-              <FiEye className="h-4 w-4" />
+              <IconEye size={15} stroke={1.8} />
             </button>
             <button
               onClick={() => handleGeneratePDF(invoice)}
               disabled={generatingPdf === invoice.dbId}
-              className="rounded-lg p-1.5 text-ink-subtle hover:bg-brand-50 hover:text-brand-700 disabled:opacity-50"
+              className="rounded-lg p-1.5 text-ink-subtle hover:[background:var(--f-green-bg)] hover:[color:var(--f-green-text)] disabled:opacity-50"
               aria-label={t('invoice.generate_pdf')}
               title={t('invoice.generate_pdf')}
             >
-              <FiDownload className="h-4 w-4" />
+              <IconDownload size={15} stroke={1.8} />
             </button>
             <button
               onClick={() => onEditInvoice?.(invoice)}
-              className="rounded-lg p-1.5 text-ink-subtle hover:bg-brand-50 hover:text-brand-700"
+              className="rounded-lg p-1.5 text-ink-subtle hover:[background:var(--f-green-bg)] hover:[color:var(--f-green-text)]"
               aria-label={t('invoice.edit')}
               title={t('invoice.edit')}
             >
-              <FiEdit2 className="h-4 w-4" />
+              <IconEdit size={15} stroke={1.8} />
             </button>
             <button
               onClick={() => onDeleteInvoice?.(invoice)}
-              className="rounded-lg p-1.5 text-ink-subtle hover:bg-red-50 hover:text-red-600"
+              className="rounded-lg p-1.5 text-ink-subtle hover:[background:var(--f-danger-bg)] hover:[color:var(--f-danger-text)]"
               aria-label={t('invoice.delete')}
               title={t('invoice.delete')}
             >
-              <FiTrash2 className="h-4 w-4" />
+              <IconTrash size={15} stroke={1.8} />
             </button>
           </div>
         ),
@@ -181,18 +181,18 @@ export function InvoicesPage({ invoices, formatCurrency: fmt, onCreateInvoice, o
 
   return (
     <div className="space-y-6">
-      <header className="relative overflow-hidden rounded-3xl border border-sand/60 bg-white shadow-card">
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand-50/60 via-transparent to-transparent" />
+      <header className="f-glass rounded-3xl overflow-hidden" style={{ position: 'relative' }}>
+        <div className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(45,180,130,0.07) 0%, transparent 60%)' }} />
         <div className="relative z-10 p-6 lg:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-ink-subtle">{t('invoice.title')}</p>
-              <h1 className="mt-3 text-3xl font-semibold text-ink">{t('invoice.all_invoices')}</h1>
-              <p className="mt-2 text-sm text-ink-soft">{t('invoice.overview')}</p>
+              <p className="text-xs uppercase tracking-[0.3em]" style={{ color: 'var(--f-text-subtle)' }}>{t('invoice.title')}</p>
+              <h1 className="mt-3 text-3xl font-semibold" style={{ color: 'var(--f-text)' }}>{t('invoice.all_invoices')}</h1>
+              <p className="mt-2 text-sm" style={{ color: 'var(--f-text-soft)' }}>{t('invoice.overview')}</p>
             </div>
             <button
               onClick={() => onCreateInvoice?.()}
-              className="rounded-2xl bg-brand-700 px-5 py-2 text-sm font-semibold text-white shadow-card transition hover:-translate-y-0.5"
+              className="f-btn-primary rounded-2xl px-5 py-2 text-sm font-semibold"
             >
               {t('invoice.new')}
             </button>
@@ -200,7 +200,7 @@ export function InvoicesPage({ invoices, formatCurrency: fmt, onCreateInvoice, o
         </div>
       </header>
 
-      <section className="rounded-3xl border border-sand/60 bg-white p-6 shadow-card">
+      <section className="f-glass rounded-3xl p-6">
         {/* Toolbar: search + status filter + count */}
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="flex-1">
@@ -209,13 +209,13 @@ export function InvoicesPage({ invoices, formatCurrency: fmt, onCreateInvoice, o
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+            className="f-input rounded-xl px-4 py-2 text-sm"
           >
             {STATUS_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>{t(opt.labelKey)}</option>
             ))}
           </select>
-          <span className="whitespace-nowrap text-xs text-ink-subtle">
+          <span className="whitespace-nowrap text-xs" style={{ color: 'var(--f-text-subtle)' }}>
             {t('invoice.showing', { count: filtered.length, total: (invoices || []).length })}
           </span>
         </div>

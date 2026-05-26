@@ -34,30 +34,31 @@ export function InvoiceSettings() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-sm font-semibold text-ink mb-1">Faktura innstillinger</h3>
-        <p className="text-xs text-ink-subtle mb-4">Standardverdier for nye fakturaer</p>
+        <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--f-text-body)' }}>Faktura innstillinger</h3>
+        <p className="text-xs mb-4" style={{ color: 'var(--f-text-subtle)' }}>Standardverdier for nye fakturaer</p>
       </div>
 
       <div className="space-y-4">
         {/* Payment Terms */}
-        <div className="py-3 border-b border-sand/40">
+        <div className="py-3" style={{ borderBottom: '1px solid var(--f-border-faint)' }}>
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <label className="text-sm font-medium text-ink">Standard betalingsfrist</label>
-              <p className="text-xs text-ink-subtle mt-0.5">Antall dager fra faktureringsdato til forfallsdato</p>
+              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Standard betalingsfrist</label>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--f-text-subtle)' }}>Antall dager fra faktureringsdato til forfallsdato</p>
             </div>
-            <div className="flex rounded-lg border border-sand bg-white p-0.5">
+            <div className="flex rounded-lg p-0.5" style={{ border: '1px solid var(--f-border)', background: 'rgba(255,255,255,0.04)' }}>
               {[14, 21, 30, 45, 60].map((days) => (
                 <button
                   key={days}
                   type="button"
                   onClick={() => handlePaymentTermsChange(days)}
                   disabled={isLoading}
-                  className={`rounded-md px-3 py-1.5 text-xs font-medium transition disabled:opacity-60 ${
-                    defaultPaymentTerms === days
-                      ? 'bg-brand-700 text-white shadow-sm'
-                      : 'text-ink-soft hover:text-ink hover:bg-cloud'
-                  }`}
+                  className="rounded-md px-3 py-1.5 text-xs font-medium transition disabled:opacity-60"
+                  style={defaultPaymentTerms === days
+                    ? { background: 'var(--f-green-bg)', color: 'var(--f-green-text)', border: '1px solid var(--f-border-green)' }
+                    : { color: 'var(--f-text-soft)' }}
+                  onMouseEnter={e => { if (defaultPaymentTerms !== days) { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'var(--f-text-body)'; } }}
+                  onMouseLeave={e => { if (defaultPaymentTerms !== days) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--f-text-soft)'; } }}
                 >
                   {days} dager
                 </button>
@@ -76,19 +77,19 @@ export function InvoiceSettings() {
                   handlePaymentTermsChange(days);
                 }
               }}
-              className="w-24 rounded-lg border border-sand bg-white px-2 py-1 text-sm text-ink shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+              className="f-input w-24 rounded-lg px-2 py-1 text-sm"
               placeholder="Egendefinert"
             />
-            <span className="ml-2 text-xs text-ink-subtle">dager</span>
+            <span className="ml-2 text-xs" style={{ color: 'var(--f-text-subtle)' }}>dager</span>
           </div>
         </div>
 
         {/* Auto-calculate Due Date */}
-        <div className="py-3 border-b border-sand/40">
+        <div className="py-3" style={{ borderBottom: '1px solid var(--f-border-faint)' }}>
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <label className="text-sm font-medium text-ink">Automatisk forfallsdato</label>
-              <p className="text-xs text-ink-subtle mt-0.5">
+              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Automatisk forfallsdato</label>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--f-text-subtle)' }}>
                 Beregn forfallsdato automatisk basert på faktureringsdato og betalingsfrist
               </p>
             </div>
@@ -96,9 +97,8 @@ export function InvoiceSettings() {
               type="button"
               onClick={() => handleAutoCalculateDueDate(!autoCalculateDueDate)}
               disabled={isLoading}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-brand-200 focus:ring-offset-2 disabled:opacity-60 ${
-                autoCalculateDueDate ? 'bg-brand-700' : 'bg-sand'
-              }`}
+              className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none disabled:opacity-60"
+              style={{ background: autoCalculateDueDate ? 'var(--f-green)' : 'rgba(255,255,255,0.12)' }}
             >
               <span
                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -110,22 +110,21 @@ export function InvoiceSettings() {
         </div>
 
         {/* Default Status */}
-        <div className="py-3 border-b border-sand/40">
+        <div className="py-3" style={{ borderBottom: '1px solid var(--f-border-faint)' }}>
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <label className="text-sm font-medium text-ink">Standard status</label>
-              <p className="text-xs text-ink-subtle mt-0.5">Standard status for nye fakturaer</p>
+              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Standard status</label>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--f-text-subtle)' }}>Standard status for nye fakturaer</p>
             </div>
-            <div className="flex rounded-lg border border-sand bg-white p-0.5">
+            <div className="flex rounded-lg p-0.5" style={{ border: '1px solid var(--f-border)', background: 'rgba(255,255,255,0.04)' }}>
               <button
                 type="button"
                 onClick={() => handleDefaultStatusChange('draft')}
                 disabled={isLoading}
-                className={`rounded-md px-3 py-1.5 text-xs font-medium transition disabled:opacity-60 ${
-                  defaultStatus === 'draft'
-                    ? 'bg-brand-700 text-white shadow-sm'
-                    : 'text-ink-soft hover:text-ink hover:bg-cloud'
-                }`}
+                className="rounded-md px-3 py-1.5 text-xs font-medium transition disabled:opacity-60"
+                style={defaultStatus === 'draft' ? { background: 'var(--f-green-bg)', color: 'var(--f-green-text)', border: '1px solid var(--f-border-green)' } : { color: 'var(--f-text-soft)' }}
+                onMouseEnter={e => { if (defaultStatus !== 'draft') { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; } }}
+                onMouseLeave={e => { if (defaultStatus !== 'draft') { e.currentTarget.style.background = 'transparent'; } }}
               >
                 Utkast
               </button>
@@ -133,11 +132,10 @@ export function InvoiceSettings() {
                 type="button"
                 onClick={() => handleDefaultStatusChange('sent')}
                 disabled={isLoading}
-                className={`rounded-md px-3 py-1.5 text-xs font-medium transition disabled:opacity-60 ${
-                  defaultStatus === 'sent'
-                    ? 'bg-brand-700 text-white shadow-sm'
-                    : 'text-ink-soft hover:text-ink hover:bg-cloud'
-                }`}
+                className="rounded-md px-3 py-1.5 text-xs font-medium transition disabled:opacity-60"
+                style={defaultStatus === 'sent' ? { background: 'var(--f-green-bg)', color: 'var(--f-green-text)', border: '1px solid var(--f-border-green)' } : { color: 'var(--f-text-soft)' }}
+                onMouseEnter={e => { if (defaultStatus !== 'sent') { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; } }}
+                onMouseLeave={e => { if (defaultStatus !== 'sent') { e.currentTarget.style.background = 'transparent'; } }}
               >
                 Sendt
               </button>
@@ -146,11 +144,11 @@ export function InvoiceSettings() {
         </div>
 
         {/* Auto-increment Invoice Numbers */}
-        <div className="py-3 border-b border-sand/40">
+        <div className="py-3" style={{ borderBottom: '1px solid var(--f-border-faint)' }}>
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <label className="text-sm font-medium text-ink">Automatisk fakturanummerering</label>
-              <p className="text-xs text-ink-subtle mt-0.5">
+              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Automatisk fakturanummerering</label>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--f-text-subtle)' }}>
                 Generer fakturanummer automatisk (format: YYYY-XXX eller budsjettår-XXX)
               </p>
             </div>
@@ -158,9 +156,8 @@ export function InvoiceSettings() {
               type="button"
               onClick={() => handleAutoIncrementChange(!autoIncrementNumbers)}
               disabled={isLoading}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-brand-200 focus:ring-offset-2 disabled:opacity-60 ${
-                autoIncrementNumbers ? 'bg-brand-700' : 'bg-sand'
-              }`}
+              className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none disabled:opacity-60"
+              style={{ background: autoIncrementNumbers ? 'var(--f-green)' : 'rgba(255,255,255,0.12)' }}
             >
               <span
                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -172,9 +169,9 @@ export function InvoiceSettings() {
         </div>
 
         {/* Info Box */}
-        <div className="rounded-lg border border-brand-200 bg-brand-50/50 p-4">
-          <p className="text-xs text-ink-soft">
-            <strong className="text-ink">Merk:</strong> Disse innstillingene gjelder for nye fakturaer. 
+        <div className="rounded-lg p-4" style={{ border: '1px solid var(--f-border-subtle)', background: 'rgba(255,255,255,0.03)' }}>
+          <p className="text-xs" style={{ color: 'var(--f-text-soft)' }}>
+            <strong style={{ color: 'var(--f-text-body)' }}>Merk:</strong> Disse innstillingene gjelder for nye fakturaer.
             Eksisterende fakturaer påvirkes ikke. Fakturanummerering følger budsjettår-grenser og nullstilles automatisk ved årsskifte.
           </p>
         </div>
@@ -182,4 +179,3 @@ export function InvoiceSettings() {
     </div>
   );
 }
-

@@ -31,7 +31,7 @@ function ImageLoader({ src, elementId, templateId }) {
   }, [src, templateId]);
 
   if (error || !imageSrc) {
-    return <span className="text-xs text-ink-subtle">Bilde</span>;
+    return <span className="text-xs" style={{ color: '#9ca3af' }}>Bilde</span>;
   }
 
   return (
@@ -191,18 +191,17 @@ export function TemplateElement({
                 ? `${element.boxShadowX || 0}px ${element.boxShadowY || 0}px ${element.boxShadowBlur || 0}px ${element.boxShadowColor || 'rgba(0, 0, 0, 0.1)'}`
                 : 'none',
             }}
-            className="text-ink-subtle"
           >
             {element.binding || '{{field}}'}
           </div>
         );
       case 'image':
         return (
-          <div className="flex h-full w-full items-center justify-center border-2 border-dashed border-sand/60 bg-cloud/50" style={{ contain: 'layout style paint' }}>
+          <div className="flex h-full w-full items-center justify-center border-2 border-dashed" style={{ contain: 'layout style paint', borderColor: 'rgba(0,0,0,0.15)', background: 'rgba(0,0,0,0.04)' }}>
             {element.src ? (
               <ImageLoader src={element.src} elementId={element.id} templateId={templateId} />
             ) : (
-              <span className="text-xs text-ink-subtle">Bilde</span>
+              <span className="text-xs" style={{ color: '#9ca3af' }}>Bilde</span>
             )}
           </div>
         );
@@ -226,10 +225,10 @@ export function TemplateElement({
                 : 'none',
             }}
           >
-            <div className="border-b border-sand/60 bg-cloud/50 p-1 text-xs font-semibold text-ink">
+            <div className="p-1 text-xs font-semibold" style={{ borderBottom: '1px solid rgba(0,0,0,0.12)', background: 'rgba(0,0,0,0.04)', color: '#374151' }}>
               Tabell: {element.binding || 'invoice.items'}
             </div>
-            <div className="p-2 text-xs text-ink-subtle">
+            <div className="p-2 text-xs" style={{ color: '#9ca3af' }}>
               {element.columns?.length || 0} kolonner
             </div>
           </div>
@@ -302,16 +301,14 @@ export function TemplateElement({
           );
         }
       default:
-        return <div className="text-xs text-ink-subtle">Ukjent element</div>;
+        return <div className="text-xs" style={{ color: '#9ca3af' }}>Ukjent element</div>;
     }
   };
 
   return (
     <div
       ref={elementRef}
-      className={`absolute cursor-move ${
-        isSelected ? 'ring-2 ring-brand-600' : 'ring-1 ring-transparent hover:ring-sand/60'
-      }`}
+      className="absolute cursor-move"
       style={{
         left: `${element.x}px`,
         top: `${element.y}px`,
@@ -320,7 +317,7 @@ export function TemplateElement({
         boxSizing: 'border-box',
         overflow: 'hidden',
         zIndex: element.zIndex ?? 1,
-        // No per-element scaling - canvas handles all scaling
+        outline: isSelected ? '2px solid #3fd9a0' : '1px solid transparent',
       }}
       onMouseDown={handleMouseDown}
     >
@@ -328,14 +325,14 @@ export function TemplateElement({
       {isSelected && (
         <>
           {/* Resize handles */}
-          <div className="resize-handle absolute -right-1 -top-1 h-3 w-3 cursor-nwse-resize rounded-full bg-brand-600" />
-          <div className="resize-handle absolute -right-1 -bottom-1 h-3 w-3 cursor-nesw-resize rounded-full bg-brand-600" />
-          <div className="resize-handle absolute -left-1 -top-1 h-3 w-3 cursor-nesw-resize rounded-full bg-brand-600" />
-          <div className="resize-handle absolute -left-1 -bottom-1 h-3 w-3 cursor-nwse-resize rounded-full bg-brand-600" />
-          <div className="resize-handle absolute -right-1 top-1/2 h-3 w-3 -translate-y-1/2 cursor-ew-resize rounded-full bg-brand-600" />
-          <div className="resize-handle absolute -bottom-1 left-1/2 h-3 w-3 -translate-x-1/2 cursor-ns-resize rounded-full bg-brand-600" />
-          <div className="resize-handle absolute -left-1 top-1/2 h-3 w-3 -translate-y-1/2 cursor-ew-resize rounded-full bg-brand-600" />
-          <div className="resize-handle absolute -top-1 left-1/2 h-3 w-3 -translate-x-1/2 cursor-ns-resize rounded-full bg-brand-600" />
+          <div className="resize-handle absolute -right-1 -top-1 h-3 w-3 cursor-nwse-resize rounded-full" style={{ background: '#3fd9a0' }} />
+          <div className="resize-handle absolute -right-1 -bottom-1 h-3 w-3 cursor-nesw-resize rounded-full" style={{ background: '#3fd9a0' }} />
+          <div className="resize-handle absolute -left-1 -top-1 h-3 w-3 cursor-nesw-resize rounded-full" style={{ background: '#3fd9a0' }} />
+          <div className="resize-handle absolute -left-1 -bottom-1 h-3 w-3 cursor-nwse-resize rounded-full" style={{ background: '#3fd9a0' }} />
+          <div className="resize-handle absolute -right-1 top-1/2 h-3 w-3 -translate-y-1/2 cursor-ew-resize rounded-full" style={{ background: '#3fd9a0' }} />
+          <div className="resize-handle absolute -bottom-1 left-1/2 h-3 w-3 -translate-x-1/2 cursor-ns-resize rounded-full" style={{ background: '#3fd9a0' }} />
+          <div className="resize-handle absolute -left-1 top-1/2 h-3 w-3 -translate-y-1/2 cursor-ew-resize rounded-full" style={{ background: '#3fd9a0' }} />
+          <div className="resize-handle absolute -top-1 left-1/2 h-3 w-3 -translate-x-1/2 cursor-ns-resize rounded-full" style={{ background: '#3fd9a0' }} />
         </>
       )}
     </div>

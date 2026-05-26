@@ -80,7 +80,10 @@ export function InvoiceStatusModal({ isOpen, invoice, onClose, onSubmit, initial
         <>
           <button
             type="button"
-            className="text-sm font-medium text-ink-subtle hover:text-ink"
+            className="text-sm font-medium transition"
+            style={{ color: 'var(--f-text-subtle)' }}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--f-text-body)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'var(--f-text-subtle)'}
             onClick={onClose}
             disabled={saving}
           >
@@ -89,7 +92,7 @@ export function InvoiceStatusModal({ isOpen, invoice, onClose, onSubmit, initial
           <button
             type="submit"
             form="status-form"
-            className="rounded-2xl bg-brand-700 px-5 py-2 text-sm font-semibold text-white shadow-card disabled:opacity-60"
+            className="f-btn-primary rounded-2xl px-5 py-2 text-sm font-semibold disabled:opacity-60"
             disabled={saving}
           >
             {saving ? 'Lagrer …' : 'Oppdater status'}
@@ -99,7 +102,7 @@ export function InvoiceStatusModal({ isOpen, invoice, onClose, onSubmit, initial
     >
       <form id="status-form" className="space-y-4" onSubmit={handleSubmit}>
         <div>
-          <label className="text-sm font-medium text-ink">Status</label>
+          <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Status</label>
           <Select
             value={status}
             onChange={setStatus}
@@ -110,7 +113,7 @@ export function InvoiceStatusModal({ isOpen, invoice, onClose, onSubmit, initial
 
         {requiresDate && (
           <div>
-            <label className="text-sm font-medium text-ink">
+            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>
               {status === 'paid' ? 'Betalingsdato' : 'Dato'} *
             </label>
             <DatePicker
@@ -118,17 +121,17 @@ export function InvoiceStatusModal({ isOpen, invoice, onClose, onSubmit, initial
               onChange={setPaymentDate}
               placeholder="dd.mm.yyyy"
               required
-              className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+              className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
             />
-            <p className="mt-1 text-xs text-ink-subtle">
+            <p className="mt-1 text-xs" style={{ color: 'var(--f-text-subtle)' }}>
               {status === 'paid' ? 'Når ble fakturaen betalt?' : 'Dato for denne statusendringen'}
             </p>
           </div>
         )}
 
         {error ? (
-          <div className="rounded-lg bg-rose-50 border border-rose-200 p-3">
-            <p className="text-sm font-medium text-rose-600">{error}</p>
+          <div className="rounded-lg p-3" style={{ background: 'var(--f-danger-bg)', border: '1px solid var(--f-danger-border)' }}>
+            <p className="text-sm font-medium" style={{ color: 'var(--f-danger-text)' }}>{error}</p>
           </div>
         ) : null}
       </form>

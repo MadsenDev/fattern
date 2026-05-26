@@ -1,109 +1,106 @@
 import { useEffect, useState } from 'react';
-import { FiMaximize2, FiX, FiMinus, FiSquare, FiTerminal } from 'react-icons/fi';
+import { IconTerminal2 } from '@tabler/icons-react';
 
-export function TitleBar({ variant = 'light', title = 'Fattern' }) {
+export function TitleBar({ title = 'Fattern' }) {
   const [isMaximized, setIsMaximized] = useState(false);
 
   useEffect(() => {
-    // Check initial maximized state
     if (window.fattern?.window?.isMaximized) {
       window.fattern.window.isMaximized().then(setIsMaximized);
     }
-
-    // Listen for maximize/unmaximize events
     const handleResize = () => {
       if (window.fattern?.window?.isMaximized) {
         window.fattern.window.isMaximized().then(setIsMaximized);
       }
     };
-
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const handleMinimize = () => {
-    if (window.fattern?.window?.minimize) {
-      window.fattern.window.minimize();
-    }
-  };
-
-  const handleMaximize = () => {
-    if (window.fattern?.window?.maximize) {
-      window.fattern.window.maximize();
-    }
-  };
-
-  const handleClose = () => {
-    if (window.fattern?.window?.close) {
-      window.fattern.window.close();
-    }
-  };
-
-  const handleToggleDevTools = () => {
-    if (window.fattern?.window?.toggleDevTools) {
-      window.fattern.window.toggleDevTools();
-    }
-  };
-
-  const isDark = variant === 'dark';
-
-  const baseStyles = isDark
-    ? 'bg-brand-900 text-white'
-    : 'bg-cloud border-b border-sand/50 text-ink';
-
-  const buttonHoverStyles = isDark
-    ? 'hover:bg-white/10'
-    : 'hover:bg-sand/50';
-
-  const closeButtonHoverStyles = isDark
-    ? 'hover:bg-red-500/20 hover:text-red-300'
-    : 'hover:bg-red-50 hover:text-red-600';
+  const handleMinimize = () => window.fattern?.window?.minimize?.();
+  const handleMaximize = () => window.fattern?.window?.maximize?.();
+  const handleClose    = () => window.fattern?.window?.close?.();
+  const handleDevTools = () => window.fattern?.window?.toggleDevTools?.();
 
   return (
     <div
-      className={`flex h-8 items-center justify-between px-2 ${baseStyles} select-none`}
-      style={{ WebkitAppRegion: 'drag' }}
+      style={{
+        height: 'var(--f-topbar-h)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 18px',
+        flexShrink: 0,
+        background: 'var(--f-surface-topbar)',
+        backdropFilter: 'blur(30px)',
+        borderBottom: '1px solid var(--f-border-top)',
+        WebkitAppRegion: 'drag',
+        userSelect: 'none',
+        zIndex: 100,
+      }}
     >
-      <div className="flex items-center gap-2 px-2">
-        <img src="/fattern-monogram.svg" alt="Fattern" className="h-4 w-4" />
-        <span className="text-xs font-medium">Fattern</span>
+      {/* Brand */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+        <div
+          style={{
+            width: 22, height: 22, borderRadius: 6,
+            background: 'linear-gradient(135deg, rgba(45,180,130,0.9), rgba(30,140,100,0.7))',
+            border: '1px solid rgba(80,220,160,0.4)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 0 12px rgba(45,180,130,0.3)',
+          }}
+        >
+          <span style={{ fontSize: 11, fontWeight: 700, color: '#fff' }}>F</span>
+        </div>
+        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--f-text)', letterSpacing: '-0.01em' }}>
+          {title}
+        </span>
       </div>
-      <div className="flex items-center" style={{ WebkitAppRegion: 'no-drag' }}>
+
+      {/* Window controls — no-drag zone */}
+      <div
+        style={{ display: 'flex', alignItems: 'center', gap: 6, WebkitAppRegion: 'no-drag' }}
+      >
+        {/* Dev tools — subtle icon button */}
         <button
-          onClick={handleToggleDevTools}
-          className={`flex h-6 w-8 items-center justify-center transition-colors ${buttonHoverStyles}`}
-          aria-label="Toggle Developer Tools"
-          title="Toggle Developer Tools (F12)"
+          onClick={handleDevTools}
+          title="Utviklerverktøy (F12)"
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            color: 'var(--f-text-muted)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            width: 22, height: 22, borderRadius: 5,
+            transition: 'color 0.12s',
+            marginRight: 4,
+          }}
+          onMouseEnter={e => (e.currentTarget.style.color = 'var(--f-text-subtle)')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'var(--f-text-muted)')}
         >
-          <FiTerminal className="h-3.5 w-3.5" />
+          <IconTerminal2 size={13} stroke={1.6} />
         </button>
-        <button
-          onClick={handleMinimize}
-          className={`flex h-6 w-8 items-center justify-center transition-colors ${buttonHoverStyles}`}
-          aria-label="Minimize"
-        >
-          <FiMinus className="h-3.5 w-3.5" />
-        </button>
-        <button
-          onClick={handleMaximize}
-          className={`flex h-6 w-8 items-center justify-center transition-colors ${buttonHoverStyles}`}
-          aria-label={isMaximized ? 'Restore' : 'Maximize'}
-        >
-          {isMaximized ? (
-            <FiSquare className="h-3 w-3" />
-          ) : (
-            <FiMaximize2 className="h-3 w-3" />
-          )}
-        </button>
-        <button
-          onClick={handleClose}
-          className={`flex h-6 w-8 items-center justify-center transition-colors ${closeButtonHoverStyles}`}
-          aria-label="Close"
-        >
-          <FiX className="h-3.5 w-3.5" />
-        </button>
+
+        {/* macOS-style traffic lights */}
+        {[
+          { color: '#f0c060', label: 'Minimiser', action: handleMinimize },
+          { color: '#70c87a', label: isMaximized ? 'Gjenopprett' : 'Maksimer', action: handleMaximize },
+          { color: '#f07060', label: 'Lukk', action: handleClose },
+        ].map(({ color, label, action }) => (
+          <button
+            key={label}
+            onClick={action}
+            aria-label={label}
+            style={{
+              width: 12, height: 12, borderRadius: '50%',
+              background: color,
+              border: 'none', cursor: 'pointer', padding: 0,
+              boxShadow: `0 0 0 0.5px rgba(0,0,0,0.25)`,
+              transition: 'filter 0.1s',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.filter = 'brightness(1.15)')}
+            onMouseLeave={e => (e.currentTarget.style.filter = 'none')}
+          />
+        ))}
       </div>
     </div>
   );
 }
-

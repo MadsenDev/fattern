@@ -93,7 +93,10 @@ export function ProductModal({ isOpen, mode = 'create', initialProduct, onSubmit
         <>
           <button
             type="button"
-            className="text-sm font-medium text-ink-subtle hover:text-ink"
+            className="text-sm font-medium transition"
+            style={{ color: 'var(--f-text-subtle)' }}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--f-text-body)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'var(--f-text-subtle)'}
             onClick={onClose}
             disabled={saving}
           >
@@ -102,7 +105,7 @@ export function ProductModal({ isOpen, mode = 'create', initialProduct, onSubmit
           <button
             type="submit"
             form="product-form"
-            className="rounded-2xl bg-brand-700 px-5 py-2 text-sm font-semibold text-white shadow-card disabled:opacity-60"
+            className="f-btn-primary rounded-2xl px-5 py-2 text-sm font-semibold disabled:opacity-60"
             disabled={saving}
           >
             {saving ? 'Lagrer …' : isEdit ? 'Lagre endringer' : 'Opprett produkt'}
@@ -112,9 +115,9 @@ export function ProductModal({ isOpen, mode = 'create', initialProduct, onSubmit
     >
       <form id="product-form" className="space-y-4" onSubmit={handleSubmit}>
         <div>
-          <label className="text-sm font-medium text-ink">Produktnavn *</label>
+          <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Produktnavn *</label>
           <input
-            className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+            className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Eksempel: Konsulenttimer"
@@ -124,24 +127,24 @@ export function ProductModal({ isOpen, mode = 'create', initialProduct, onSubmit
 
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="text-sm font-medium text-ink">SKU</label>
+            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>SKU</label>
             <input
-              className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+              className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
               value={sku}
               onChange={(e) => setSku(e.target.value)}
               placeholder="Produktkode"
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-ink">Enhet</label>
+            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Enhet</label>
             <UnitSelect value={unit || ''} onChange={setUnit} placeholder="Velg eller skriv enhet" />
           </div>
         </div>
 
         <div>
-          <label className="text-sm font-medium text-ink">Beskrivelse</label>
+          <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Beskrivelse</label>
           <textarea
-            className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+            className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Valgfri beskrivelse av produktet"
@@ -155,12 +158,12 @@ export function ProductModal({ isOpen, mode = 'create', initialProduct, onSubmit
 
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="text-sm font-medium text-ink">Pris *</label>
+            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Pris *</label>
             <input
               type="number"
               step="0.01"
               min="0"
-              className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+              className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
               value={unitPrice}
               onChange={(e) => setUnitPrice(e.target.value)}
               placeholder="0.00"
@@ -168,32 +171,33 @@ export function ProductModal({ isOpen, mode = 'create', initialProduct, onSubmit
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-ink">MVA-sats (%)</label>
+            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>MVA-sats (%)</label>
             <input
               type="number"
               step="0.01"
               min="0"
               max="100"
-              className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+              className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
               value={vatRate}
               onChange={(e) => setVatRate(e.target.value)}
               placeholder="25"
             />
-            <p className="mt-1 text-xs text-ink-subtle">Standard er 25%</p>
+            <p className="mt-1 text-xs" style={{ color: 'var(--f-text-subtle)' }}>Standard er 25%</p>
           </div>
         </div>
 
-        <label className="flex items-center gap-2 text-sm text-ink">
+        <label className="flex items-center gap-2 text-sm" style={{ color: 'var(--f-text-body)' }}>
           <input
             type="checkbox"
-            className="h-4 w-4 rounded border-sand text-brand-600 focus:ring-brand-500"
+            className="h-4 w-4 rounded"
+            style={{ accentColor: 'var(--f-green)' }}
             checked={active}
             onChange={(e) => setActive(e.target.checked)}
           />
           Produktet er aktivt
         </label>
 
-        {error ? <p className="text-sm font-medium text-rose-600">{error}</p> : null}
+        {error ? <p className="text-sm font-medium" style={{ color: 'var(--f-danger-text)' }}>{error}</p> : null}
       </form>
     </Modal>
   );

@@ -6,7 +6,7 @@ import { DatePicker } from '../DatePicker';
 import { formatDate, parseDateInput } from '../../utils/formatDate';
 import { formatCurrency } from '../../utils/formatCurrency';
 import { useSettings } from '../../hooks/useSettings';
-import { FiPlus, FiTrash2, FiCheck, FiCheckCircle, FiSend, FiFileText, FiAlertCircle, FiX } from 'react-icons/fi';
+import { IconPlus, IconTrash, IconCheck, IconCircleCheck, IconSend, IconFile, IconAlertCircle, IconX } from '@tabler/icons-react';
 
 export function InvoiceModal({ isOpen, mode = 'create', initialInvoice, onSubmit, onClose, customers = [], products = [] }) {
   const { getSetting } = useSettings();
@@ -235,26 +235,29 @@ export function InvoiceModal({ isOpen, mode = 'create', initialInvoice, onSubmit
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-ink/70 backdrop-blur-sm px-4 py-8">
-      <div className="relative flex h-full max-h-[90vh] w-full max-w-7xl rounded-3xl border border-sand/70 bg-white shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-40 flex items-center justify-center px-4 py-8" style={{ background: 'rgba(4,10,8,0.75)', backdropFilter: 'blur(6px)' }}>
+      <div className="relative flex h-full max-h-[90vh] w-full max-w-7xl rounded-3xl overflow-hidden f-glass-hero">
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-4 top-4 z-10 rounded-full border border-sand/60 bg-white/80 px-2 py-0.5 text-xs font-medium text-ink-subtle hover:text-ink"
+          className="absolute right-4 top-4 z-10 rounded-full px-2 py-0.5 text-xs font-medium transition"
+          style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid var(--f-border)', color: 'var(--f-text-subtle)' }}
+          onMouseEnter={e => e.currentTarget.style.color = 'var(--f-text-body)'}
+          onMouseLeave={e => e.currentTarget.style.color = 'var(--f-text-subtle)'}
         >
           Lukk
         </button>
 
         <div className="flex h-full w-full">
           {/* Left Panel: Customers */}
-          <div className="w-80 border-r border-sand/60 bg-cloud/30 flex flex-col">
-            <div className="border-b border-sand/60 bg-white p-4">
-              <h3 className="text-sm font-semibold text-ink">Velg kunde</h3>
-              <p className="mt-1 text-xs text-ink-soft">Klikk på en kunde for å velge</p>
+          <div className="w-80 flex flex-col" style={{ borderRight: '1px solid var(--f-border-subtle)', background: 'rgba(255,255,255,0.02)' }}>
+            <div className="p-4" style={{ borderBottom: '1px solid var(--f-border-subtle)' }}>
+              <h3 className="text-sm font-semibold" style={{ color: 'var(--f-text)' }}>Velg kunde</h3>
+              <p className="mt-1 text-xs" style={{ color: 'var(--f-text-soft)' }}>Klikk på en kunde for å velge</p>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
               {customers.length === 0 ? (
-                <div className="py-8 text-center text-sm text-ink-subtle">Ingen kunder tilgjengelig</div>
+                <div className="py-8 text-center text-sm" style={{ color: 'var(--f-text-subtle)' }}>Ingen kunder tilgjengelig</div>
               ) : (
                 customers.map((customer) => {
                   const isSelected = customerId === customer.id.toString();
@@ -263,11 +266,13 @@ export function InvoiceModal({ isOpen, mode = 'create', initialInvoice, onSubmit
                       key={customer.id}
                       type="button"
                       onClick={() => handleSelectCustomer(customer)}
-                      className={`w-full rounded-xl border p-3 text-left transition ${
-                        isSelected
-                          ? 'border-brand-600 bg-brand-50 shadow-sm'
-                          : 'border-sand/60 bg-white hover:border-brand-300 hover:bg-brand-50/50'
-                      }`}
+                      className="w-full rounded-xl p-3 text-left transition"
+                      style={{
+                        border: isSelected ? '1px solid var(--f-border-green)' : '1px solid var(--f-border-subtle)',
+                        background: isSelected ? 'var(--f-green-bg)' : 'rgba(255,255,255,0.03)',
+                      }}
+                      onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
+                      onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
                     >
                       <div className="flex items-center gap-3">
                         {customer.image_path ? (
@@ -277,18 +282,18 @@ export function InvoiceModal({ isOpen, mode = 'create', initialInvoice, onSubmit
                             className="h-10 w-10 rounded-lg object-cover"
                           />
                         ) : (
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-200 text-sm font-semibold text-brand-700">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg text-sm font-semibold" style={{ background: 'var(--f-green-bg)', color: 'var(--f-green-text)' }}>
                             {customer.name?.charAt(0)?.toUpperCase() || '?'}
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm text-ink truncate">{customer.name}</div>
+                          <div className="font-medium text-sm truncate" style={{ color: 'var(--f-text-body)' }}>{customer.name}</div>
                           {customer.contact_name && (
-                            <div className="text-xs text-ink-subtle truncate">{customer.contact_name}</div>
+                            <div className="text-xs truncate" style={{ color: 'var(--f-text-subtle)' }}>{customer.contact_name}</div>
                           )}
                         </div>
                         {isSelected && (
-                          <FiCheck className="h-5 w-5 flex-shrink-0 text-brand-700" />
+                          <IconCheck className="h-5 w-5 flex-shrink-0" style={{ color: 'var(--f-green-text)' }} />
                         )}
                       </div>
                     </button>
@@ -300,21 +305,21 @@ export function InvoiceModal({ isOpen, mode = 'create', initialInvoice, onSubmit
 
           {/* Middle Panel: Invoice Form */}
           <div className="flex-1 flex flex-col overflow-hidden">
-            <div className="border-b border-sand/60 bg-white p-6">
-              <h2 className="text-lg font-semibold text-ink">{isEdit ? 'Rediger faktura' : 'Ny faktura'}</h2>
-              <p className="mt-1 text-sm text-ink-soft">{isEdit ? 'Oppdater fakturainformasjon' : 'Opprett en ny faktura'}</p>
+            <div className="p-6" style={{ borderBottom: '1px solid var(--f-border-subtle)' }}>
+              <h2 className="text-lg font-semibold" style={{ color: 'var(--f-text)' }}>{isEdit ? 'Rediger faktura' : 'Ny faktura'}</h2>
+              <p className="mt-1 text-sm" style={{ color: 'var(--f-text-soft)' }}>{isEdit ? 'Oppdater fakturainformasjon' : 'Opprett en ny faktura'}</p>
             </div>
 
             <div className="flex-1 overflow-y-auto p-6">
               <form id="invoice-form" onSubmit={handleSubmit} className="space-y-6">
                 {error && (
-                  <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+                  <div className="rounded-xl px-4 py-3 text-sm" style={{ background: 'var(--f-danger-bg)', border: '1px solid var(--f-danger-border)', color: 'var(--f-danger-text)' }}>
                     {error}
                   </div>
                 )}
 
                 {selectedCustomer && (
-                  <div className="rounded-xl border border-brand-200 bg-brand-50 p-4">
+                  <div className="rounded-xl p-4" style={{ background: 'var(--f-green-bg)', border: '1px solid var(--f-border-green)' }}>
                     <div className="flex items-center gap-3">
                       {selectedCustomer.image_path ? (
                         <img
@@ -323,14 +328,14 @@ export function InvoiceModal({ isOpen, mode = 'create', initialInvoice, onSubmit
                           className="h-12 w-12 rounded-lg object-cover"
                         />
                       ) : (
-                        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-brand-200 text-lg font-semibold text-brand-700">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-lg text-lg font-semibold" style={{ background: 'var(--f-green-bg)', color: 'var(--f-green-text)' }}>
                           {selectedCustomer.name?.charAt(0)?.toUpperCase() || '?'}
                         </div>
                       )}
                       <div>
-                        <div className="font-semibold text-ink">{selectedCustomer.name}</div>
+                        <div className="font-semibold" style={{ color: 'var(--f-text-body)' }}>{selectedCustomer.name}</div>
                         {selectedCustomer.email && (
-                          <div className="text-sm text-ink-soft">{selectedCustomer.email}</div>
+                          <div className="text-sm" style={{ color: 'var(--f-text-soft)' }}>{selectedCustomer.email}</div>
                         )}
                       </div>
                     </div>
@@ -339,58 +344,58 @@ export function InvoiceModal({ isOpen, mode = 'create', initialInvoice, onSubmit
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-ink">Fakturadato *</label>
+                    <label className="f-label block text-sm">Fakturadato *</label>
                     <DatePicker
                       value={invoiceDate}
                       onChange={setInvoiceDate}
                       placeholder="dd.mm.yyyy"
                       required
-                      className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+                      className="f-input mt-2 w-full rounded-xl px-4 py-2 text-sm"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-ink">Forfallsdato *</label>
+                    <label className="f-label block text-sm">Forfallsdato *</label>
                     <DatePicker
                       value={dueDate}
                       onChange={setDueDate}
                       placeholder="dd.mm.yyyy"
                       required
-                      className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+                      className="f-input mt-2 w-full rounded-xl px-4 py-2 text-sm"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-ink">Startdato</label>
+                    <label className="f-label block text-sm">Startdato</label>
                     <DatePicker
                       value={startDate}
                       onChange={setStartDate}
                       placeholder="dd.mm.yyyy"
-                      className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+                      className="f-input mt-2 w-full rounded-xl px-4 py-2 text-sm"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-ink">Sluttdato</label>
+                    <label className="f-label block text-sm">Sluttdato</label>
                     <DatePicker
                       value={endDate}
                       onChange={setEndDate}
                       placeholder="dd.mm.yyyy"
-                      className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+                      className="f-input mt-2 w-full rounded-xl px-4 py-2 text-sm"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-ink">Status</label>
+                    <label className="f-label block text-sm">Status</label>
                     <Select
                       value={status}
                       onChange={setStatus}
                       options={[
-                        { value: 'draft', label: 'Kladd', icon: <FiFileText className="h-4 w-4" /> },
-                        { value: 'sent', label: 'Sendt', icon: <FiSend className="h-4 w-4" /> },
-                        { value: 'paid', label: 'Betalt', icon: <FiCheckCircle className="h-4 w-4" /> },
-                        { value: 'overdue', label: 'Forfalt', icon: <FiAlertCircle className="h-4 w-4" /> },
-                        { value: 'cancelled', label: 'Kansellert', icon: <FiX className="h-4 w-4" /> },
+                        { value: 'draft', label: 'Kladd', icon: <IconFile className="h-4 w-4" /> },
+                        { value: 'sent', label: 'Sendt', icon: <IconSend className="h-4 w-4" /> },
+                        { value: 'paid', label: 'Betalt', icon: <IconCircleCheck className="h-4 w-4" /> },
+                        { value: 'overdue', label: 'Forfalt', icon: <IconAlertCircle className="h-4 w-4" /> },
+                        { value: 'cancelled', label: 'Kansellert', icon: <IconX className="h-4 w-4" /> },
                       ]}
                     />
                   </div>
@@ -398,46 +403,46 @@ export function InvoiceModal({ isOpen, mode = 'create', initialInvoice, onSubmit
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-ink">Deres referanse</label>
+                    <label className="f-label block text-sm">Deres referanse</label>
                     <input
                       type="text"
                       value={yourReference}
                       onChange={(e) => setYourReference(e.target.value)}
                       placeholder="Deres referanse"
-                      className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+                      className="f-input mt-2 w-full rounded-xl px-4 py-2 text-sm"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-ink">Vår referanse</label>
+                    <label className="f-label block text-sm">Vår referanse</label>
                     <input
                       type="text"
                       value={ourReference}
                       onChange={(e) => setOurReference(e.target.value)}
                       placeholder="Vår referanse"
-                      className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+                      className="f-input mt-2 w-full rounded-xl px-4 py-2 text-sm"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-ink">Leveringsreferanse</label>
+                    <label className="f-label block text-sm">Leveringsreferanse</label>
                     <input
                       type="text"
                       value={deliveryReference}
                       onChange={(e) => setDeliveryReference(e.target.value)}
                       placeholder="Leveringsreferanse"
-                      className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+                      className="f-input mt-2 w-full rounded-xl px-4 py-2 text-sm"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-ink">Referanse</label>
+                    <label className="f-label block text-sm">Referanse</label>
                     <input
                       type="text"
                       value={reference}
                       onChange={(e) => setReference(e.target.value)}
                       placeholder="Referanse"
-                      className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+                      className="f-input mt-2 w-full rounded-xl px-4 py-2 text-sm"
                     />
                   </div>
                 </div>
@@ -452,36 +457,39 @@ export function InvoiceModal({ isOpen, mode = 'create', initialInvoice, onSubmit
 
                 <div>
                   <div className="mb-3 flex items-center justify-between">
-                    <label className="block text-sm font-medium text-ink">Linjeelementer *</label>
+                    <label className="f-label block text-sm">Linjeelementer *</label>
                   </div>
 
                   {items.length === 0 ? (
-                    <div className="rounded-xl border-2 border-dashed border-sand/60 bg-cloud/30 p-8 text-center">
-                      <p className="text-sm text-ink-subtle">Klikk på produkter til høyre for å legge dem til</p>
+                    <div className="rounded-xl p-8 text-center" style={{ border: '2px dashed var(--f-border)', background: 'rgba(255,255,255,0.02)' }}>
+                      <p className="text-sm" style={{ color: 'var(--f-text-subtle)' }}>Klikk på produkter til høyre for å legge dem til</p>
                     </div>
                   ) : (
-                    <div className="rounded-lg border border-sand/60 bg-white overflow-hidden">
+                    <div className="rounded-lg overflow-hidden" style={{ border: '1px solid var(--f-border-subtle)' }}>
                       {/* Table Header */}
-                      <div className="grid grid-cols-[1fr_80px_96px_64px_96px_40px] gap-2 bg-cloud/50 px-3 py-2 border-b border-sand/60">
-                        <div className="text-xs font-semibold text-ink-soft uppercase tracking-wide">Beskrivelse</div>
-                        <div className="text-xs font-semibold text-ink-soft uppercase tracking-wide text-center">Antall</div>
-                        <div className="text-xs font-semibold text-ink-soft uppercase tracking-wide text-right">Pris</div>
-                        <div className="text-xs font-semibold text-ink-soft uppercase tracking-wide text-center">MVA %</div>
-                        <div className="text-xs font-semibold text-ink-soft uppercase tracking-wide text-right">Total</div>
+                      <div className="grid grid-cols-[1fr_80px_96px_64px_96px_40px] gap-2 px-3 py-2" style={{ background: 'rgba(255,255,255,0.04)', borderBottom: '1px solid var(--f-border-subtle)' }}>
+                        <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--f-text-subtle)' }}>Beskrivelse</div>
+                        <div className="text-xs font-semibold uppercase tracking-wide text-center" style={{ color: 'var(--f-text-subtle)' }}>Antall</div>
+                        <div className="text-xs font-semibold uppercase tracking-wide text-right" style={{ color: 'var(--f-text-subtle)' }}>Pris</div>
+                        <div className="text-xs font-semibold uppercase tracking-wide text-center" style={{ color: 'var(--f-text-subtle)' }}>MVA %</div>
+                        <div className="text-xs font-semibold uppercase tracking-wide text-right" style={{ color: 'var(--f-text-subtle)' }}>Total</div>
                         <div></div>
                       </div>
 
                       {/* Table Rows */}
-                      <div className="divide-y divide-sand/60">
+                      <div>
                         {items.map((item) => (
-                          <div key={item.id} className="grid grid-cols-[1fr_80px_96px_64px_96px_40px] gap-2 px-3 py-2 hover:bg-cloud/30 transition">
+                          <div key={item.id} className="grid grid-cols-[1fr_80px_96px_64px_96px_40px] gap-2 px-3 py-2 transition" style={{ borderBottom: '1px solid var(--f-border-faint)' }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.025)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                          >
                             <div className="flex items-center min-w-0">
                               <input
                                 type="text"
                                 value={item.description}
                                 onChange={(e) => handleItemChange(item.id, 'description', e.target.value)}
                                 placeholder="Beskrivelse *"
-                                className="w-full rounded-lg border border-sand bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+                                className="f-input w-full rounded-lg px-3 py-1.5 text-sm"
                               />
                             </div>
                             <div className="flex items-center">
@@ -491,7 +499,7 @@ export function InvoiceModal({ isOpen, mode = 'create', initialInvoice, onSubmit
                                 min="0"
                                 value={item.quantity}
                                 onChange={(e) => handleItemChange(item.id, 'quantity', parseFloat(e.target.value) || 0)}
-                                className="w-full rounded-lg border border-sand bg-white px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-brand-200"
+                                className="f-input w-full rounded-lg px-2 py-1.5 text-sm text-center"
                               />
                             </div>
                             <div className="flex items-center">
@@ -501,7 +509,7 @@ export function InvoiceModal({ isOpen, mode = 'create', initialInvoice, onSubmit
                                 min="0"
                                 value={item.unitPrice}
                                 onChange={(e) => handleItemChange(item.id, 'unitPrice', parseFloat(e.target.value) || 0)}
-                                className="w-full rounded-lg border border-sand bg-white px-2 py-1.5 text-sm text-right focus:outline-none focus:ring-2 focus:ring-brand-200"
+                                className="f-input w-full rounded-lg px-2 py-1.5 text-sm text-right"
                               />
                             </div>
                             <div className="flex items-center">
@@ -512,11 +520,11 @@ export function InvoiceModal({ isOpen, mode = 'create', initialInvoice, onSubmit
                                 max="100"
                                 value={(item.vatRate * 100).toFixed(0)}
                                 onChange={(e) => handleItemChange(item.id, 'vatRate', (parseFloat(e.target.value) || 0) / 100)}
-                                className="w-full rounded-lg border border-sand bg-white px-2 py-1.5 text-sm text-center focus:outline-none focus:ring-2 focus:ring-brand-200"
+                                className="f-input w-full rounded-lg px-2 py-1.5 text-sm text-center"
                               />
                             </div>
                             <div className="flex items-center justify-end">
-                              <div className="text-sm font-medium text-ink">
+                              <div className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>
                                 {formatCurrency(item.quantity * item.unitPrice * (1 + item.vatRate))}
                               </div>
                             </div>
@@ -524,10 +532,13 @@ export function InvoiceModal({ isOpen, mode = 'create', initialInvoice, onSubmit
                               <button
                                 type="button"
                                 onClick={() => handleRemoveItem(item.id)}
-                                className="rounded-lg p-1.5 text-ink-subtle hover:bg-red-50 hover:text-red-600 transition"
+                                className="rounded-lg p-1.5 transition"
+                                style={{ color: 'var(--f-text-subtle)' }}
+                                onMouseEnter={e => { e.currentTarget.style.background = 'var(--f-danger-bg)'; e.currentTarget.style.color = 'var(--f-danger-text)'; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--f-text-subtle)'; }}
                                 aria-label="Fjern linje"
                               >
-                                <FiTrash2 className="h-4 w-4" />
+                                <IconTrash className="h-4 w-4" />
                               </button>
                             </div>
                           </div>
@@ -537,17 +548,17 @@ export function InvoiceModal({ isOpen, mode = 'create', initialInvoice, onSubmit
                   )}
                 </div>
 
-                <div className="rounded-xl border border-sand/60 bg-cloud/30 p-4">
+                <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid var(--f-border-subtle)' }}>
                   <div className="space-y-2 text-sm">
-                    <div className="flex justify-between text-ink-soft">
+                    <div className="flex justify-between" style={{ color: 'var(--f-text-soft)' }}>
                       <span>Delsum:</span>
-                      <span className="font-medium text-ink">{formatCurrency(calculations.subtotal)}</span>
+                      <span className="font-medium" style={{ color: 'var(--f-text-body)' }}>{formatCurrency(calculations.subtotal)}</span>
                     </div>
-                    <div className="flex justify-between text-ink-soft">
+                    <div className="flex justify-between" style={{ color: 'var(--f-text-soft)' }}>
                       <span>MVA:</span>
-                      <span className="font-medium text-ink">{formatCurrency(calculations.vatTotal)}</span>
+                      <span className="font-medium" style={{ color: 'var(--f-text-body)' }}>{formatCurrency(calculations.vatTotal)}</span>
                     </div>
-                    <div className="flex justify-between border-t border-sand/60 pt-2 text-base font-semibold text-ink">
+                    <div className="flex justify-between pt-2 text-base font-semibold" style={{ borderTop: '1px solid var(--f-border-subtle)', color: 'var(--f-text)' }}>
                       <span>Total:</span>
                       <span>{formatCurrency(calculations.total)}</span>
                     </div>
@@ -555,23 +566,24 @@ export function InvoiceModal({ isOpen, mode = 'create', initialInvoice, onSubmit
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-ink">Notater</label>
+                  <label className="f-label">Notater</label>
                   <textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     rows={3}
                     placeholder="Valgfrie notater..."
-                    className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+                    className="f-input mt-2 w-full rounded-xl px-4 py-2 text-sm"
+                    style={{ resize: 'vertical' }}
                   />
                 </div>
               </form>
             </div>
 
-            <div className="border-t border-sand/60 bg-white p-4 flex items-center justify-end gap-3">
+            <div className="p-4 flex items-center justify-end gap-3" style={{ borderTop: '1px solid var(--f-border-subtle)', background: 'rgba(0,0,0,0.15)' }}>
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-xl border border-sand bg-white px-4 py-2 text-sm font-medium text-ink-soft hover:bg-cloud"
+                className="f-btn-ghost rounded-xl px-4 py-2 text-sm font-medium"
               >
                 Avbryt
               </button>
@@ -579,7 +591,7 @@ export function InvoiceModal({ isOpen, mode = 'create', initialInvoice, onSubmit
                 type="submit"
                 form="invoice-form"
                 disabled={saving}
-                className="rounded-xl bg-brand-700 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-800 disabled:opacity-50"
+                className="f-btn-primary rounded-xl px-4 py-2 text-sm font-medium"
               >
                 {saving ? 'Lagrer...' : isEdit ? 'Oppdater' : 'Opprett'}
               </button>
@@ -587,21 +599,24 @@ export function InvoiceModal({ isOpen, mode = 'create', initialInvoice, onSubmit
           </div>
 
           {/* Right Panel: Products */}
-          <div className="w-80 border-l border-sand/60 bg-cloud/30 flex flex-col">
-            <div className="border-b border-sand/60 bg-white p-4">
-              <h3 className="text-sm font-semibold text-ink">Produkter</h3>
-              <p className="mt-1 text-xs text-ink-soft">Klikk for å legge til</p>
+          <div className="w-80 flex flex-col" style={{ borderLeft: '1px solid var(--f-border-subtle)', background: 'rgba(255,255,255,0.02)' }}>
+            <div className="p-4" style={{ borderBottom: '1px solid var(--f-border-subtle)' }}>
+              <h3 className="text-sm font-semibold" style={{ color: 'var(--f-text)' }}>Produkter</h3>
+              <p className="mt-1 text-xs" style={{ color: 'var(--f-text-soft)' }}>Klikk for å legge til</p>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
               {activeProducts.length === 0 ? (
-                <div className="py-8 text-center text-sm text-ink-subtle">Ingen produkter tilgjengelig</div>
+                <div className="py-8 text-center text-sm" style={{ color: 'var(--f-text-subtle)' }}>Ingen produkter tilgjengelig</div>
               ) : (
                 activeProducts.map((product) => (
                   <button
                     key={product.id}
                     type="button"
                     onClick={() => handleAddProduct(product)}
-                    className="w-full rounded-xl border border-sand/60 bg-white p-3 text-left transition hover:border-brand-300 hover:bg-brand-50/50 hover:shadow-sm"
+                    className="w-full rounded-xl p-3 text-left transition"
+                    style={{ border: '1px solid var(--f-border-subtle)', background: 'rgba(255,255,255,0.03)' }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.borderColor = 'var(--f-border-green)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.borderColor = 'var(--f-border-subtle)'; }}
                   >
                     <div className="flex items-start gap-3">
                       {product.image_path ? (
@@ -611,23 +626,23 @@ export function InvoiceModal({ isOpen, mode = 'create', initialInvoice, onSubmit
                           className="h-10 w-10 rounded-lg object-cover"
                         />
                       ) : (
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-100">
-                          <svg className="h-6 w-6 text-brand-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                          <svg className="h-6 w-6" style={{ color: 'var(--f-text-subtle)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                           </svg>
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm text-ink truncate">{product.name}</div>
-                        <div className="mt-0.5 text-xs font-semibold text-brand-700">
+                        <div className="font-medium text-sm truncate" style={{ color: 'var(--f-text-body)' }}>{product.name}</div>
+                        <div className="mt-0.5 text-xs font-semibold" style={{ color: 'var(--f-green-text-dim)' }}>
                           {formatCurrency(product.unit_price || 0)}
-                          {product.unit && <span className="text-ink-subtle font-normal"> / {product.unit}</span>}
+                          {product.unit && <span className="font-normal" style={{ color: 'var(--f-text-subtle)' }}> / {product.unit}</span>}
                         </div>
                         {product.sku && (
-                          <div className="mt-0.5 text-xs text-ink-subtle">SKU: {product.sku}</div>
+                          <div className="mt-0.5 text-xs" style={{ color: 'var(--f-text-subtle)' }}>SKU: {product.sku}</div>
                         )}
                       </div>
-                      <FiPlus className="h-4 w-4 flex-shrink-0 text-ink-subtle mt-1" />
+                      <IconPlus className="h-4 w-4 flex-shrink-0 mt-1" style={{ color: 'var(--f-text-subtle)' }} />
                     </div>
                   </button>
                 ))

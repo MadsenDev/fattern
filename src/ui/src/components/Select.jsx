@@ -13,14 +13,12 @@ export function Select({ value, onChange, options = [], placeholder = 'Velg...',
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
 
   const allOptions = allowCustom ? [...options, { value: '__custom__', label: customLabel }] : options;
-  
-  // Helper to get option label (supports both string and object with label property)
+
   const getOptionLabel = (option) => {
     if (typeof option === 'string') return option;
     return option?.label || option?.value || '';
   };
-  
-  // Helper to get option icon (if provided)
+
   const getOptionIcon = (option) => {
     if (typeof option === 'string') return null;
     return option?.icon || null;
@@ -30,20 +28,17 @@ export function Select({ value, onChange, options = [], placeholder = 'Velg...',
     const handleClickOutside = (event) => {
       const clickedButton = buttonRef.current?.contains(event.target);
       const clickedDropdown = dropdownRef.current?.contains(event.target);
-      
       if (!clickedButton && !clickedDropdown) {
         setIsOpen(false);
         setShowCustomInput(false);
       }
     };
-
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [isOpen]);
 
-  // Calculate dropdown position when opening and on scroll/resize
   useEffect(() => {
     const updatePosition = () => {
       if (isOpen && buttonRef.current) {
@@ -55,7 +50,6 @@ export function Select({ value, onChange, options = [], placeholder = 'Velg...',
         });
       }
     };
-
     if (isOpen) {
       updatePosition();
       window.addEventListener('scroll', updatePosition, true);
@@ -102,11 +96,15 @@ export function Select({ value, onChange, options = [], placeholder = 'Velg...',
   const dropdownContent = isOpen ? (
     <div
       ref={dropdownRef}
-      className="fixed z-[9999] rounded-2xl border border-sand bg-white shadow-lg"
+      className="fixed z-[9999] rounded-xl overflow-hidden"
       style={{
         top: `${dropdownPosition.top}px`,
         left: `${dropdownPosition.left}px`,
         width: `${dropdownPosition.width}px`,
+        background: 'rgba(12,22,18,0.96)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid var(--f-border)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
       }}
     >
       {!showCustomInput ? (
@@ -115,18 +113,21 @@ export function Select({ value, onChange, options = [], placeholder = 'Velg...',
             const optionValue = typeof option === 'string' ? option : option.value;
             const optionLabel = getOptionLabel(option);
             const optionIcon = getOptionIcon(option);
+            const isSelected = value === optionValue;
             return (
               <button
                 key={optionValue}
                 type="button"
                 onClick={() => handleSelect(optionValue)}
-                className={`flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm transition ${
-                  value === optionValue
-                    ? 'bg-brand-50 text-brand-700'
-                    : 'text-ink-soft hover:bg-cloud'
-                }`}
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition"
+                style={{
+                  background: isSelected ? 'var(--f-green-bg)' : 'transparent',
+                  color: isSelected ? 'var(--f-green-text)' : 'var(--f-text-soft)',
+                }}
+                onMouseEnter={e => { if (!isSelected) { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'var(--f-text-body)'; }}}
+                onMouseLeave={e => { if (!isSelected) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--f-text-soft)'; }}}
               >
-                {optionIcon && <span className="flex-shrink-0">{optionIcon}</span>}
+                {optionIcon && <span className="flex-shrink-0 opacity-70">{optionIcon}</span>}
                 {optionLabel}
               </button>
             );
@@ -139,36 +140,16 @@ export function Select({ value, onChange, options = [], placeholder = 'Velg...',
             value={customValue}
             onChange={(e) => setCustomValue(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                handleCustomSubmit();
-              } else if (e.key === 'Escape') {
-                setShowCustomInput(false);
-                setIsOpen(false);
-              }
+              if (e.key === 'Enter') { e.preventDefault(); handleCustomSubmit(); }
+              else if (e.key === 'Escape') { setShowCustomInput(false); setIsOpen(false); }
             }}
             placeholder="Skriv inn enhet"
-            className="w-full rounded-xl border border-sand bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+            className="f-input w-full px-3 py-2 text-sm"
             autoFocus
           />
           <div className="mt-2 flex gap-2">
-            <button
-              type="button"
-              onClick={handleCustomSubmit}
-              className="flex-1 rounded-xl bg-brand-700 px-3 py-1.5 text-sm font-medium text-white"
-            >
-              Lagre
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setShowCustomInput(false);
-                setCustomValue('');
-              }}
-              className="flex-1 rounded-xl border border-sand bg-white px-3 py-1.5 text-sm font-medium text-ink-soft"
-            >
-              Avbryt
-            </button>
+            <button type="button" onClick={handleCustomSubmit} className="f-btn-primary flex-1 rounded-lg px-3 py-1.5 text-sm font-medium">Lagre</button>
+            <button type="button" onClick={() => { setShowCustomInput(false); setCustomValue(''); }} className="f-btn-ghost flex-1 rounded-lg px-3 py-1.5 text-sm font-medium">Avbryt</button>
           </div>
         </div>
       )}
@@ -182,11 +163,12 @@ export function Select({ value, onChange, options = [], placeholder = 'Velg...',
           ref={buttonRef}
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-left text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+          className="mt-2 w-full rounded-xl px-4 py-2 text-left text-sm f-input"
+          style={{ cursor: 'pointer' }}
         >
-          <span className={`flex items-center gap-2 ${selectedOption ? 'text-ink' : 'text-ink-subtle'}`}>
+          <span className="flex items-center gap-2" style={{ color: selectedOption ? 'var(--f-text-body)' : 'var(--f-text-subtle)' }}>
             {selectedOption && getOptionIcon(selectedOption) && (
-              <span className="flex-shrink-0">{getOptionIcon(selectedOption)}</span>
+              <span className="flex-shrink-0 opacity-70">{getOptionIcon(selectedOption)}</span>
             )}
             {selectedOption ? getOptionLabel(selectedOption) : placeholder}
           </span>
@@ -199,7 +181,6 @@ export function Select({ value, onChange, options = [], placeholder = 'Velg...',
 
 export function UnitSelect({ value, onChange, placeholder = 'Velg enhet' }) {
   const unitOptions = commonUnits.map((unit) => ({ value: unit, label: unit }));
-
   return (
     <Select
       value={value}
@@ -211,4 +192,3 @@ export function UnitSelect({ value, onChange, placeholder = 'Velg enhet' }) {
     />
   );
 }
-

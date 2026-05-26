@@ -1,11 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiBarChart2, FiCalendar } from 'react-icons/fi';
-import { TbCoin, TbReceipt } from 'react-icons/tb';
+import {
+  IconChartBar,
+  IconCalendar,
+  IconCoin,
+  IconReceipt,
+} from '@tabler/icons-react';
 import { LoadingScreen } from './components/LoadingScreen';
 import { OnboardingFlow } from './components/OnboardingFlow';
 import { Layout } from './components/layout/Layout';
 import { TitleBar } from './components/TitleBar';
+import { BottomBar } from './components/layout/BottomBar';
 import { DashboardView } from './components/dashboard/DashboardView';
 import { InvoicesPage } from './pages/InvoicesPage';
 import { ExpensesPage } from './pages/ExpensesPage';
@@ -210,27 +215,27 @@ function App() {
   const netMargin = summary.income > 0 ? Math.round((summary.net / summary.income) * 100) : 0;
 
   const statHighlights = [
-    { title: 'Inntekter', value: formatCurrency(summary.income), subtitle: 'Hittil i år', icon: <TbCoin /> },
+    { title: 'Inntekter', value: formatCurrency(summary.income), subtitle: 'Hittil i år', icon: <IconCoin size={18} stroke={1.6} />, tone: 'accent' },
     {
       title: 'Utgifter',
       value: formatCurrency(summary.expenses),
       subtitle: 'Registrerte kostnader',
-      icon: <TbReceipt />,
-      tone: 'soft',
+      icon: <IconReceipt size={18} stroke={1.6} />,
+      tone: 'warn',
     },
     {
       title: 'Netto margin',
       value: `${netMargin}%`,
       subtitle: 'av omsetning',
-      icon: <FiBarChart2 />,
-      tone: 'accent',
+      icon: <IconChartBar size={18} stroke={1.6} />,
+      tone: 'default',
     },
     {
       title: 'Forfalt',
       value: formatCurrency(summary.overdue),
       subtitle: 'Krever oppfølging',
-      icon: <FiCalendar />,
-      tone: 'muted',
+      icon: <IconCalendar size={18} stroke={1.6} />,
+      tone: 'danger',
     },
   ];
 
@@ -918,15 +923,24 @@ function App() {
   };
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden">
-      <TitleBar variant="light" />
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100vh',
+        overflow: 'hidden',
+      }}
+    >
+      <TitleBar />
       {templateEditorId ? (
-        <TemplateEditorPage
-          templateId={templateEditorId}
-          onClose={() => setTemplateEditorId(null)}
-        />
+        <div style={{ flex: 1, overflow: 'hidden' }}>
+          <TemplateEditorPage
+            templateId={templateEditorId}
+            onClose={() => setTemplateEditorId(null)}
+          />
+        </div>
       ) : (
-        <div className="flex-1 overflow-auto">
+        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
           <Layout
             company={company}
             navItems={navItems}
@@ -941,6 +955,7 @@ function App() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2, ease: 'easeOut' }}
+                style={{ padding: '24px 28px', minHeight: '100%' }}
               >
                 {renderPage()}
               </motion.div>
@@ -948,6 +963,12 @@ function App() {
           </Layout>
         </div>
       )}
+      <BottomBar
+        company={company}
+        onCreateInvoice={openCreateInvoiceModal}
+        onRegisterPayment={() => showInvoiceStatusModal(null)}
+        onAddExpense={openCreateExpenseModal}
+      />
       {showOnboarding ? (
         <OnboardingFlow initialCompany={company} onComplete={handleOnboardingComplete} />
       ) : null}

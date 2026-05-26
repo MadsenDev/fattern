@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { FiArrowLeft, FiSave, FiZoomIn, FiZoomOut, FiMaximize2, FiEye, FiSettings } from 'react-icons/fi';
+import { IconArrowLeft, IconDeviceFloppy, IconZoomIn, IconZoomOut, IconMaximize, IconEye, IconSettings } from '@tabler/icons-react';
 import { TemplateCanvas } from '../components/template/TemplateCanvas';
 import { TemplatePalette } from '../components/template/TemplatePalette';
 import { TemplateProperties } from '../components/template/TemplateProperties';
@@ -13,7 +13,7 @@ export function TemplateEditorPage({ templateId, onClose }) {
   const [zoom, setZoom] = useState(() => {
     // Calculate initial zoom to fit A4 page in viewport
     // Account for: titlebar (2rem), editor toolbar (3rem), margins
-    const viewportHeight = window.innerHeight - 32 - 48; // titlebar + toolbar
+    const viewportHeight = window.innerHeight - 40 - 56; // titlebar (40) + toolbar (56)
     const A4_HEIGHT = 1123; // A4 at 96 DPI
     const fitZoom = Math.floor((viewportHeight / A4_HEIGHT) * 100);
     return Math.min(100, Math.max(50, fitZoom));
@@ -137,119 +137,142 @@ export function TemplateEditorPage({ templateId, onClose }) {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-cloud">
-        <p className="text-ink-subtle">Laster mal...</p>
+      <div className="flex h-screen items-center justify-center" style={{ background: 'var(--f-bg)' }}>
+        <p style={{ color: 'var(--f-text-subtle)' }}>Laster mal...</p>
       </div>
     );
   }
 
   if (!template) {
     return (
-      <div className="flex h-screen items-center justify-center bg-cloud">
-        <p className="text-ink-subtle">Kunne ikke laste mal</p>
+      <div className="flex h-screen items-center justify-center" style={{ background: 'var(--f-bg)' }}>
+        <p style={{ color: 'var(--f-text-subtle)' }}>Kunne ikke laste mal</p>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-40 flex flex-col bg-cloud" style={{ top: '2rem' }}>
+    <div className="fixed inset-0 z-40 flex flex-col" style={{ top: 'var(--f-topbar-h)', background: 'var(--f-bg)' }}>
       {/* Top Bar */}
-      <div className="flex h-12 items-center justify-between border-b border-sand/60 bg-white px-4">
-        <div className="flex items-center gap-4">
+      <div className="flex h-14 items-center justify-between px-5" style={{ background: 'rgba(8,16,12,0.8)', borderBottom: '1px solid var(--f-border-subtle)', backdropFilter: 'blur(20px)' }}>
+        <div className="flex items-center gap-5">
           <button
             onClick={onClose}
-            className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-ink hover:bg-cloud"
+            className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition"
+            style={{ color: 'var(--f-text-soft)' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'var(--f-text-body)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--f-text-soft)'; }}
           >
-            <FiArrowLeft className="h-4 w-4" />
+            <IconArrowLeft className="h-4 w-4" />
             Tilbake
           </button>
-          <div className="h-6 w-px bg-sand/60" />
-          <h1 className="text-sm font-semibold text-ink">{template.meta?.name || template.name}</h1>
+          <div className="h-6 w-px" style={{ background: 'var(--f-border)' }} />
+          <h1 className="text-sm font-semibold" style={{ color: 'var(--f-text-body)' }}>{template.meta?.name || template.name}</h1>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {/* Undo/Redo */}
           <button
             onClick={handleUndo}
             disabled={!canUndo}
-            className="rounded-lg px-3 py-1.5 text-sm font-medium text-ink disabled:opacity-50 disabled:cursor-not-allowed hover:bg-cloud"
+            className="rounded-lg px-3 py-1.5 text-sm font-medium transition disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ color: 'var(--f-text-soft)' }}
+            onMouseEnter={e => { if (!e.currentTarget.disabled) e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
           >
             Angre
           </button>
           <button
             onClick={handleRedo}
             disabled={!canRedo}
-            className="rounded-lg px-3 py-1.5 text-sm font-medium text-ink disabled:opacity-50 disabled:cursor-not-allowed hover:bg-cloud"
+            className="rounded-lg px-3 py-1.5 text-sm font-medium transition disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ color: 'var(--f-text-soft)' }}
+            onMouseEnter={e => { if (!e.currentTarget.disabled) e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
           >
             Gjør om
           </button>
 
-          <div className="h-6 w-px bg-sand/60" />
+          <div className="h-6 w-px" style={{ background: 'var(--f-border)' }} />
 
           {/* Zoom Controls */}
           <div className="flex items-center gap-1">
             <button
               onClick={() => setZoom((z) => Math.max(50, z - 25))}
-              className="rounded-lg p-1.5 text-ink hover:bg-cloud"
+              className="rounded-lg p-1.5 transition disabled:opacity-40"
+              style={{ color: 'var(--f-text-soft)' }}
               disabled={zoom <= 50}
+              onMouseEnter={e => { if (!e.currentTarget.disabled) e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
             >
-              <FiZoomOut className="h-4 w-4" />
+              <IconZoomOut className="h-4 w-4" />
             </button>
-            <span className="min-w-[4rem] text-center text-sm font-medium text-ink">
+            <span className="min-w-[4rem] text-center text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>
               {zoom}%
             </span>
             <button
               onClick={() => setZoom((z) => Math.min(200, z + 25))}
-              className="rounded-lg p-1.5 text-ink hover:bg-cloud"
+              className="rounded-lg p-1.5 transition disabled:opacity-40"
+              style={{ color: 'var(--f-text-soft)' }}
               disabled={zoom >= 200}
+              onMouseEnter={e => { if (!e.currentTarget.disabled) e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
             >
-              <FiZoomIn className="h-4 w-4" />
+              <IconZoomIn className="h-4 w-4" />
             </button>
             <button
               onClick={() => {
-                // Calculate zoom to fit A4 page in viewport
-                const viewportHeight = window.innerHeight - 32 - 48; // titlebar (2rem) + toolbar (3rem)
-                const A4_HEIGHT = 1123; // A4 at 96 DPI
+                const viewportHeight = window.innerHeight - 32 - 48;
+                const A4_HEIGHT = 1123;
                 const fitZoom = Math.floor((viewportHeight / A4_HEIGHT) * 100);
                 setZoom(Math.min(100, Math.max(50, fitZoom)));
               }}
-              className="ml-2 rounded-lg px-3 py-1.5 text-xs font-medium text-ink hover:bg-cloud"
+              className="ml-2 rounded-lg px-3 py-1.5 text-xs font-medium transition"
+              style={{ color: 'var(--f-text-soft)' }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
             >
               Tilpass
             </button>
           </div>
 
-          <div className="h-6 w-px bg-sand/60" />
+          <div className="h-6 w-px" style={{ background: 'var(--f-border)' }} />
 
           {/* Preview */}
           <button
             onClick={() => setShowPreview(!showPreview)}
-            className="rounded-lg px-4 py-1.5 text-sm font-medium text-ink hover:bg-cloud"
+            className="rounded-lg px-4 py-1.5 text-sm font-medium transition"
+            style={{ color: 'var(--f-text-soft)' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'var(--f-text-body)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--f-text-soft)'; }}
           >
-            <FiEye className="mr-2 inline h-4 w-4" />
+            <IconEye className="mr-2 inline h-4 w-4" />
             {showPreview ? 'Rediger' : 'Forhåndsvisning'}
           </button>
 
-          <div className="h-6 w-px bg-sand/60" />
+          <div className="h-6 w-px" style={{ background: 'var(--f-border)' }} />
 
           {/* Settings */}
           <button
             onClick={() => setShowSettings(true)}
-            className="rounded-lg px-4 py-1.5 text-sm font-medium text-ink hover:bg-cloud"
+            className="rounded-lg px-4 py-1.5 text-sm font-medium transition"
+            style={{ color: 'var(--f-text-soft)' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'var(--f-text-body)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--f-text-soft)'; }}
             title="Mal innstillinger"
           >
-            <FiSettings className="mr-2 inline h-4 w-4" />
+            <IconSettings className="mr-2 inline h-4 w-4" />
             Innstillinger
           </button>
 
-          <div className="h-6 w-px bg-sand/60" />
+          <div className="h-6 w-px" style={{ background: 'var(--f-border)' }} />
 
           {/* Save */}
           <button
             onClick={handleSave}
-            className="rounded-lg bg-ink px-4 py-1.5 text-sm font-medium text-white hover:bg-ink-soft"
+            className="f-btn-primary rounded-lg px-4 py-1.5 text-sm font-medium"
           >
-            <FiSave className="mr-2 inline h-4 w-4" />
+            <IconDeviceFloppy className="mr-2 inline h-4 w-4" />
             Lagre
           </button>
         </div>

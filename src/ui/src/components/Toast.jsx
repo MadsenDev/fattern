@@ -1,39 +1,45 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiX, FiCheckCircle, FiAlertCircle, FiInfo, FiAlertTriangle } from 'react-icons/fi';
+import {
+  IconX,
+  IconCircleCheck,
+  IconAlertCircle,
+  IconAlertTriangle,
+  IconInfoCircle,
+} from '@tabler/icons-react';
 
 const variants = {
   success: {
-    bg: 'bg-green-50',
-    border: 'border-green-200',
-    text: 'text-green-900',
-    icon: FiCheckCircle,
-    iconColor: 'text-green-600',
-    progress: 'bg-green-600',
+    bg: 'rgba(45,180,130,0.12)',
+    border: '1px solid rgba(63,217,160,0.25)',
+    text: 'var(--f-text)',
+    icon: IconCircleCheck,
+    iconColor: 'var(--f-green)',
+    progress: 'var(--f-green)',
   },
   error: {
-    bg: 'bg-red-50',
-    border: 'border-red-200',
-    text: 'text-red-900',
-    icon: FiAlertCircle,
-    iconColor: 'text-red-600',
-    progress: 'bg-red-600',
+    bg: 'rgba(240,120,96,0.12)',
+    border: '1px solid rgba(240,120,96,0.25)',
+    text: 'var(--f-text)',
+    icon: IconAlertCircle,
+    iconColor: 'var(--f-danger)',
+    progress: 'var(--f-danger)',
   },
   warning: {
-    bg: 'bg-amber-50',
-    border: 'border-amber-200',
-    text: 'text-amber-900',
-    icon: FiAlertTriangle,
-    iconColor: 'text-amber-600',
-    progress: 'bg-amber-600',
+    bg: 'rgba(240,184,64,0.12)',
+    border: '1px solid rgba(240,184,64,0.25)',
+    text: 'var(--f-text)',
+    icon: IconAlertTriangle,
+    iconColor: 'var(--f-warn)',
+    progress: 'var(--f-warn)',
   },
   info: {
-    bg: 'bg-brand-50',
-    border: 'border-brand-200',
-    text: 'text-brand-900',
-    icon: FiInfo,
-    iconColor: 'text-brand-600',
-    progress: 'bg-brand-600',
+    bg: 'rgba(80,140,220,0.12)',
+    border: '1px solid rgba(80,140,220,0.25)',
+    text: 'var(--f-text)',
+    icon: IconInfoCircle,
+    iconColor: 'var(--f-blue)',
+    progress: 'var(--f-blue)',
   },
 };
 
@@ -49,37 +55,53 @@ export function Toast({ id, message, variant = 'info', duration = 4000, onClose 
         const elapsed = Date.now() - startTime;
         const remaining = Math.max(0, 100 - (elapsed / duration) * 100);
         setProgress(remaining);
-        
         if (remaining === 0) {
           clearInterval(interval);
           onClose?.(id);
         }
-      }, 16); // ~60fps
-      
+      }, 16);
       return () => clearInterval(interval);
     }
   }, [id, duration, onClose]);
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 100, scale: 0.9 }}
+      initial={{ opacity: 0, x: 60, scale: 0.95 }}
       animate={{ opacity: 1, x: 0, scale: 1 }}
-      exit={{ opacity: 0, x: 100, scale: 0.9 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
-      className={`flex items-start gap-3 rounded-xl border ${style.bg} ${style.border} ${style.text} p-4 shadow-xl min-w-[320px] max-w-md`}
+      exit={{ opacity: 0, x: 60, scale: 0.95 }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
       role="alert"
+      style={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: 12,
+        borderRadius: 'var(--f-radius-md)',
+        border: style.border,
+        background: style.bg,
+        backdropFilter: 'blur(20px)',
+        color: style.text,
+        padding: '12px 14px',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+        minWidth: 300,
+        maxWidth: 420,
+      }}
     >
-      <div className="flex-shrink-0">
-        <div className={`rounded-full ${style.iconColor.replace('text-', 'bg-')} bg-opacity-10 p-2`}>
-          <Icon className={`h-5 w-5 ${style.iconColor}`} />
-        </div>
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="text-sm font-medium leading-snug">{message}</div>
+      <Icon size={18} stroke={1.8} style={{ color: style.iconColor, flexShrink: 0, marginTop: 1 }} />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.4 }}>{message}</div>
         {duration > 0 && (
-          <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-white/50">
+          <div
+            style={{
+              marginTop: 8,
+              height: 2,
+              width: '100%',
+              borderRadius: 2,
+              background: 'rgba(255,255,255,0.1)',
+              overflow: 'hidden',
+            }}
+          >
             <motion.div
-              className={`h-full ${style.progress}`}
+              style={{ height: '100%', background: style.progress, borderRadius: 2 }}
               initial={{ width: '100%' }}
               animate={{ width: `${progress}%` }}
               transition={{ duration: 0.1, ease: 'linear' }}
@@ -87,25 +109,42 @@ export function Toast({ id, message, variant = 'info', duration = 4000, onClose 
           </div>
         )}
       </div>
-      <motion.button
+      <button
         onClick={() => onClose?.(id)}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-        className={`flex-shrink-0 rounded-lg p-1 ${style.iconColor} hover:bg-white/50 transition-colors`}
         aria-label="Lukk"
+        style={{
+          background: 'none', border: 'none', cursor: 'pointer',
+          color: 'var(--f-text-subtle)', flexShrink: 0, padding: 2,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          borderRadius: 4,
+          transition: 'color 0.1s',
+        }}
+        onMouseEnter={e => (e.currentTarget.style.color = 'var(--f-text-body)')}
+        onMouseLeave={e => (e.currentTarget.style.color = 'var(--f-text-subtle)')}
       >
-        <FiX className="h-4 w-4" />
-      </motion.button>
+        <IconX size={14} stroke={2} />
+      </button>
     </motion.div>
   );
 }
 
 export function ToastContainer({ toasts, onClose }) {
   return (
-    <div className="fixed top-20 right-4 z-50 flex flex-col gap-3 pointer-events-none">
+    <div
+      style={{
+        position: 'fixed',
+        top: 'calc(var(--f-topbar-h) + 12px)',
+        right: 16,
+        zIndex: 9999,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 10,
+        pointerEvents: 'none',
+      }}
+    >
       <AnimatePresence mode="popLayout">
         {toasts.map((toast) => (
-          <div key={toast.id} className="pointer-events-auto">
+          <div key={toast.id} style={{ pointerEvents: 'auto' }}>
             <Toast {...toast} onClose={onClose} />
           </div>
         ))}
@@ -113,4 +152,3 @@ export function ToastContainer({ toasts, onClose }) {
     </div>
   );
 }
-

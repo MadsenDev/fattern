@@ -70,7 +70,10 @@ export function BudgetYearModal({ isOpen, mode = 'create', initialYear, onSubmit
         <>
           <button
             type="button"
-            className="text-sm font-medium text-ink-subtle hover:text-ink"
+            className="text-sm font-medium transition"
+            style={{ color: 'var(--f-text-subtle)' }}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--f-text-body)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'var(--f-text-subtle)'}
             onClick={onClose}
             disabled={saving}
           >
@@ -79,7 +82,7 @@ export function BudgetYearModal({ isOpen, mode = 'create', initialYear, onSubmit
           <button
             type="submit"
             form="budget-year-form"
-            className="rounded-2xl bg-brand-700 px-5 py-2 text-sm font-semibold text-white shadow-card disabled:opacity-60"
+            className="f-btn-primary rounded-2xl px-5 py-2 text-sm font-semibold disabled:opacity-60"
             disabled={saving}
           >
             {saving ? 'Lagrer …' : isEdit ? 'Lagre endringer' : 'Opprett år'}
@@ -89,9 +92,9 @@ export function BudgetYearModal({ isOpen, mode = 'create', initialYear, onSubmit
     >
       <form id="budget-year-form" className="space-y-4" onSubmit={handleSubmit}>
         <div>
-          <label className="text-sm font-medium text-ink">Navn på budsjettår</label>
+          <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Navn på budsjettår</label>
           <input
-            className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+            className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
             value={label}
             onChange={(e) => setLabel(e.target.value)}
             placeholder="2025 eller 2024/2025"
@@ -100,39 +103,38 @@ export function BudgetYearModal({ isOpen, mode = 'create', initialYear, onSubmit
 
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="text-sm font-medium text-ink">Startdato</label>
+            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Startdato</label>
             <DatePicker
               value={startDate}
               onChange={setStartDate}
               placeholder="dd.mm.yyyy"
-              className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+              className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-ink">Sluttdato</label>
+            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Sluttdato</label>
             <DatePicker
               value={endDate}
               onChange={setEndDate}
               placeholder="dd.mm.yyyy"
-              className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+              className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
             />
           </div>
         </div>
 
-        <label className="flex items-center gap-2 text-sm text-ink">
+        <label className="flex items-center gap-2 text-sm" style={{ color: 'var(--f-text-body)' }}>
           <input
             type="checkbox"
-            className="h-4 w-4 rounded border-sand text-brand-600 focus:ring-brand-500"
+            className="h-4 w-4 rounded"
+            style={{ accentColor: 'var(--f-green)' }}
             checked={isCurrent}
             onChange={(e) => setIsCurrent(e.target.checked)}
           />
           Marker som aktivt budsjettår
         </label>
 
-        {error ? <p className="text-sm font-medium text-rose-600">{error}</p> : null}
+        {error ? <p className="text-sm font-medium" style={{ color: 'var(--f-danger-text)' }}>{error}</p> : null}
       </form>
     </Modal>
   );
 }
-
-

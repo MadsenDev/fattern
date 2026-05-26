@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { FiCheck, FiEdit2, FiDownload, FiLock, FiCopy, FiTrash2, FiMoreVertical } from 'react-icons/fi';
+import { IconCheck, IconEdit, IconDownload, IconLock, IconCopy, IconTrash, IconDotsVertical } from '@tabler/icons-react';
 import { renderTemplateToHTML } from '../../utils/templateRenderer';
 import { getTemplateId, getTemplateName, getTemplateMeta, isTemplatePremium, isTemplateLocked, isTemplateDefault, isTemplatePreset } from '../../utils/templateUtils';
 
@@ -142,16 +142,16 @@ export function TemplateCard({
   return (
     <div
       ref={cardRef}
-      className={`group relative rounded-xl border bg-white overflow-hidden transition-all ${
-        isLocked
-          ? 'border-sand/40 bg-cloud/30 opacity-75'
-          : isDefault
-          ? 'border-brand-600 shadow-lg shadow-brand-600/20'
-          : 'border-sand/60 hover:border-brand-300 hover:shadow-md'
-      }`}
+      className="group relative rounded-xl overflow-hidden transition-all f-glass"
+      style={isLocked
+        ? { opacity: 0.7 }
+        : isDefault
+        ? { borderColor: 'var(--f-border-green)', boxShadow: '0 0 16px rgba(63,217,160,0.18)' }
+        : {}
+      }
     >
       {/* Preview */}
-      <div className="relative h-48 bg-cloud/50 overflow-hidden flex items-center justify-center">
+      <div className="relative h-48 overflow-hidden flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.05)' }}>
         {previewHtml ? (
           <div className="relative w-full h-full flex items-center justify-center">
             <iframe
@@ -167,11 +167,11 @@ export function TemplateCard({
                 marginLeft: '-397px', // Half of 794px
                 marginTop: '-561.5px', // Half of 1123px
               }}
-              title={`Preview of ${templateName}`}
+              title={`Forhåndsvisning av ${templateName}`}
             />
           </div>
         ) : (
-          <div className="flex items-center justify-center h-full text-xs text-ink-subtle">
+          <div className="flex items-center justify-center h-full text-xs" style={{ color: 'var(--f-text-subtle)' }}>
             Laster forhåndsvisning...
           </div>
         )}
@@ -185,23 +185,19 @@ export function TemplateCard({
         {/* Badges */}
         <div className="flex items-center gap-2 mb-3">
           {isDefault && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-brand-600 px-2 py-1 text-xs font-semibold text-white">
-              <FiCheck className="h-3 w-3" />
+            <span className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold" style={{ background: 'var(--f-green-bg)', color: 'var(--f-green-text)', border: '1px solid var(--f-border-green)' }}>
+              <IconCheck className="h-3 w-3" />
               Standard
             </span>
           )}
           {isPremium && (
-            <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold ${
-              isLocked
-                ? 'bg-amber-600 text-white'
-                : 'bg-amber-500 text-white'
-            }`}>
-              {isLocked && <FiLock className="h-3 w-3" />}
+            <span className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold" style={{ background: 'rgba(217,119,6,0.15)', color: '#fbbf24', border: '1px solid rgba(217,119,6,0.3)' }}>
+              {isLocked && <IconLock className="h-3 w-3" />}
               Premium
             </span>
           )}
           {isPreset && !isPremium && !isDefault && (
-            <span className="inline-flex items-center rounded-full bg-cloud px-2 py-1 text-xs font-medium text-ink-subtle">
+            <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium" style={{ background: 'rgba(255,255,255,0.06)', color: 'var(--f-text-subtle)' }}>
               Forhåndsdefinert
             </span>
           )}
@@ -209,11 +205,11 @@ export function TemplateCard({
 
         <div className="flex items-start justify-between mb-2">
           <div className="flex-1 min-w-0">
-            <h4 className={`text-sm font-semibold truncate ${isLocked ? 'text-ink-subtle' : 'text-ink'}`}>
+            <h4 className="text-sm font-semibold truncate" style={{ color: isLocked ? 'var(--f-text-subtle)' : 'var(--f-text-body)' }}>
               {templateName}
             </h4>
             {templateMeta.description && (
-              <p className="text-xs text-ink-subtle mt-0.5 line-clamp-2">
+              <p className="text-xs mt-0.5 line-clamp-2" style={{ color: 'var(--f-text-subtle)' }}>
                 {templateMeta.description}
               </p>
             )}
@@ -224,10 +220,13 @@ export function TemplateCard({
             <button
               ref={buttonRef}
               onClick={() => setShowActions(!showActions)}
-              className="rounded-lg p-1.5 text-ink-subtle hover:bg-cloud hover:text-ink transition"
+              className="rounded-lg p-1.5 transition"
+              style={{ color: 'var(--f-text-subtle)' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = 'var(--f-text-body)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--f-text-subtle)'; }}
               title="Flere handlinger"
             >
-              <FiMoreVertical className="h-4 w-4" />
+              <IconDotsVertical className="h-4 w-4" />
             </button>
           </div>
         </div>
@@ -236,7 +235,7 @@ export function TemplateCard({
         {templateMeta.tags && templateMeta.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-2">
             {templateMeta.tags.map((tag, idx) => (
-              <span key={idx} className="inline-flex items-center rounded-full bg-cloud px-2 py-0.5 text-xs font-medium text-ink-subtle">
+              <span key={idx} className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style={{ background: 'rgba(255,255,255,0.06)', color: 'var(--f-text-subtle)' }}>
                 {tag}
               </span>
             ))}
@@ -246,18 +245,18 @@ export function TemplateCard({
         {/* Metadata */}
         <div className="flex flex-wrap items-center gap-2 mt-2">
           {templateMeta.version && (
-            <span className="text-xs text-ink-subtle">v{templateMeta.version}</span>
+            <span className="text-xs" style={{ color: 'var(--f-text-subtle)' }}>v{templateMeta.version}</span>
           )}
           {templateMeta.author && (
-            <span className="text-xs text-ink-subtle">av {templateMeta.author}</span>
+            <span className="text-xs" style={{ color: 'var(--f-text-subtle)' }}>av {templateMeta.author}</span>
           )}
         </div>
 
         {isLocked && (
-          <div className="mt-2 pt-2 border-t border-sand/40">
-            <p className="text-xs text-amber-600 font-medium flex items-center gap-1">
-              <FiLock className="h-3 w-3" />
-              Krever Supporter Pack
+          <div className="mt-2 pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+            <p className="text-xs font-medium flex items-center gap-1" style={{ color: '#fbbf24' }}>
+              <IconLock className="h-3 w-3" />
+              Krever Supporter-pakken
             </p>
           </div>
         )}
@@ -267,8 +266,12 @@ export function TemplateCard({
       {typeof document !== 'undefined' && showActions && createPortal(
         <div
           ref={menuRef}
-          className="fixed z-[9999] w-48 rounded-lg border border-sand/60 bg-white shadow-lg py-1"
+          className="fixed z-[9999] w-48 rounded-lg py-1"
           style={{
+            background: 'rgba(12,22,18,0.96)',
+            border: '1px solid var(--f-border)',
+            backdropFilter: 'blur(20px)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
             top: `${menuPosition.top}px`,
             left: `${menuPosition.left}px`,
           }}
@@ -279,9 +282,12 @@ export function TemplateCard({
                 onSetDefault?.();
                 setShowActions(false);
               }}
-              className="w-full px-3 py-2 text-left text-xs text-ink hover:bg-cloud transition flex items-center gap-2"
+              className="w-full px-3 py-2 text-left text-xs transition flex items-center gap-2"
+              style={{ color: 'var(--f-text-body)' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
             >
-              <FiCheck className="h-3.5 w-3.5" />
+              <IconCheck className="h-3.5 w-3.5" />
               Sett som standard
             </button>
           )}
@@ -291,9 +297,12 @@ export function TemplateCard({
                 onEdit?.();
                 setShowActions(false);
               }}
-              className="w-full px-3 py-2 text-left text-xs text-ink hover:bg-cloud transition flex items-center gap-2"
+              className="w-full px-3 py-2 text-left text-xs transition flex items-center gap-2"
+              style={{ color: 'var(--f-text-body)' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
             >
-              <FiEdit2 className="h-3.5 w-3.5" />
+              <IconEdit className="h-3.5 w-3.5" />
               Rediger
             </button>
           )}
@@ -303,9 +312,12 @@ export function TemplateCard({
                 onExport?.();
                 setShowActions(false);
               }}
-              className="w-full px-3 py-2 text-left text-xs text-ink hover:bg-cloud transition flex items-center gap-2"
+              className="w-full px-3 py-2 text-left text-xs transition flex items-center gap-2"
+              style={{ color: 'var(--f-text-body)' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
             >
-              <FiDownload className="h-3.5 w-3.5" />
+              <IconDownload className="h-3.5 w-3.5" />
               Eksporter
             </button>
           )}
@@ -315,9 +327,12 @@ export function TemplateCard({
                 onDuplicate?.();
                 setShowActions(false);
               }}
-              className="w-full px-3 py-2 text-left text-xs text-ink hover:bg-cloud transition flex items-center gap-2"
+              className="w-full px-3 py-2 text-left text-xs transition flex items-center gap-2"
+              style={{ color: 'var(--f-text-body)' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
             >
-              <FiCopy className="h-3.5 w-3.5" />
+              <IconCopy className="h-3.5 w-3.5" />
               Dupliser
             </button>
           )}
@@ -327,9 +342,12 @@ export function TemplateCard({
                 onDelete?.();
                 setShowActions(false);
               }}
-              className="w-full px-3 py-2 text-left text-xs text-rose-600 hover:bg-rose-50 transition flex items-center gap-2"
+              className="w-full px-3 py-2 text-left text-xs transition flex items-center gap-2"
+              style={{ color: 'var(--f-danger-text)' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--f-danger-bg)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
             >
-              <FiTrash2 className="h-3.5 w-3.5" />
+              <IconTrash className="h-3.5 w-3.5" />
               Slett
             </button>
           )}
@@ -339,4 +357,3 @@ export function TemplateCard({
     </div>
   );
 }
-

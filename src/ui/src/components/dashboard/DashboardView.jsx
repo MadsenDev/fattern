@@ -1,10 +1,323 @@
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FiClock, FiTrendingUp } from 'react-icons/fi';
-import { StatCard } from '../StatCard';
-import { StatusBadge } from '../StatusBadge';
+// (tabler icons available if individual sections need them)
 import { InvoiceStatusSelector } from '../invoices/InvoiceStatusSelector';
 import { IncomeExpenseChart } from './IncomeExpenseChart';
 import { formatDate } from '../../utils/formatDate';
+
+/* ── Helpers ─────────────────────────────────────────────────────────── */
+
+function GlassSection({ children, style }) {
+  return (
+    <div
+      style={{
+        background: 'var(--f-surface-elevated)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid var(--f-border)',
+        borderRadius: 'var(--f-radius-md)',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
+        padding: '20px 22px',
+        ...style,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function SectionHead({ title, link, onLink }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+      <span
+        style={{
+          fontSize: 10.5,
+          fontWeight: 600,
+          color: 'var(--f-text-subtle)',
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
+        }}
+      >
+        {title}
+      </span>
+      {link && (
+        <button
+          onClick={onLink}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            fontSize: 11.5, color: 'var(--f-green-text)', fontWeight: 500,
+          }}
+        >
+          {link}
+        </button>
+      )}
+    </div>
+  );
+}
+
+
+/* ── Hero Sparkline ───────────────────────────────────────────────────── */
+const MONTH_LABELS_NO = ['JAN','FEB','MAR','APR','MAI','JUN','JUL','AUG','SEP','OKT','NOV','DES'];
+
+function Sparkline({ monthlyBreakdown }) {
+  const bars = useMemo(() => {
+    if (!monthlyBreakdown?.length) {
+      return [34, 26, 46, 30, 50, 40].map((h, i) => ({ h, label: MONTH_LABELS_NO[i], isNow: i === 5 }));
+    }
+    const last6 = monthlyBreakdown.slice(-6);
+    const max = Math.max(...last6.map(m => m.income || 0), 1);
+    return last6.map((m, i) => ({
+      h: Math.max(4, Math.round(((m.income || 0) / max) * 40)),
+      label: m.label || MONTH_LABELS_NO[i],
+      isNow: i === last6.length - 1,
+    }));
+  }, [monthlyBreakdown]);
+
+  return (
+    <>
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 42 }}>
+        {bars.map(({ h, label, isNow }) => (
+          <div
+            key={label}
+            style={{
+              flex: 1,
+              height: h,
+              borderRadius: '2px 2px 0 0',
+              background: isNow ? 'rgba(63,217,160,0.9)' : 'rgba(63,217,160,0.32)',
+              boxShadow: isNow ? '0 0 8px rgba(63,217,160,0.5)' : 'none',
+            }}
+          />
+        ))}
+      </div>
+      <div
+        style={{
+          display: 'flex',
+          borderTop: '1px solid var(--f-border-subtle)',
+          paddingTop: 6, paddingBottom: 14,
+        }}
+      >
+        {bars.map(({ label }) => (
+          <div
+            key={label}
+            style={{
+              flex: 1,
+              fontSize: 9,
+              color: 'var(--f-text-muted)',
+              textAlign: 'center',
+              fontFamily: 'var(--f-font-mono)',
+              letterSpacing: '0.05em',
+            }}
+          >
+            {label}
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+/* ── Stat cards ───────────────────────────────────────────────────────── */
+const CARD_TONES = [
+  { shimmer: 'rgba(63,217,160,0.5)',  valueColor: 'var(--f-green)',   metaColor: 'rgba(63,217,160,0.6)' },
+  { shimmer: 'rgba(240,184,64,0.5)',  valueColor: 'var(--f-warn)',    metaColor: 'var(--f-text-subtle)' },
+  { shimmer: 'rgba(255,255,255,0.2)', valueColor: 'var(--f-warn)',    metaColor: 'var(--f-text-subtle)' },
+];
+
+function StatCard({ label, value, meta, toneIndex = 0 }) {
+  const tone = CARD_TONES[toneIndex] || CARD_TONES[0];
+  return (
+    <div
+      style={{
+        borderRadius: 'var(--f-radius-md)',
+        padding: '14px 16px',
+        position: 'relative',
+        overflow: 'hidden',
+        background: 'var(--f-surface)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid var(--f-border)',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.07)',
+        transition: 'border-color 0.15s',
+      }}
+      onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)')}
+      onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--f-border)')}
+    >
+      {/* Top shimmer line */}
+      <div
+        style={{
+          position: 'absolute', top: 0, left: 0, right: 0, height: 1,
+          background: `linear-gradient(90deg, transparent, ${tone.shimmer}, transparent)`,
+        }}
+      />
+      <div
+        style={{
+          fontSize: 10,
+          fontWeight: 500,
+          color: 'var(--f-text-subtle)',
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
+          fontFamily: 'var(--f-font-mono)',
+          marginBottom: 8,
+        }}
+      >
+        {label}
+      </div>
+      <div
+        style={{
+          fontSize: 20, fontWeight: 700,
+          letterSpacing: '-0.02em',
+          marginBottom: 3,
+          color: tone.valueColor,
+        }}
+      >
+        {value}
+      </div>
+      <div
+        style={{
+          fontSize: 11,
+          fontFamily: 'var(--f-font-mono)',
+          color: tone.metaColor,
+        }}
+      >
+        {meta}
+      </div>
+    </div>
+  );
+}
+
+/* ── Invoice table row ────────────────────────────────────────────────── */
+const COL_TEMPLATE = '86px 1fr 88px 74px 96px';
+
+function TableHead() {
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: COL_TEMPLATE,
+        gap: 10,
+        padding: '8px 16px',
+        background: 'rgba(255,255,255,0.03)',
+        borderBottom: '1px solid var(--f-border-subtle)',
+      }}
+    >
+      {['Nummer', 'Kunde', 'Status', 'Dato', 'Beløp'].map((h, i) => (
+        <div
+          key={h}
+          style={{
+            fontSize: 9.5,
+            fontWeight: 600,
+            color: 'var(--f-text-muted)',
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            fontFamily: 'var(--f-font-mono)',
+            textAlign: i === 4 ? 'right' : 'left',
+          }}
+        >
+          {h}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function TableRow({ invoice, formatCurrency, onViewInvoice, onStatusChange, showStatusModal, isLast }) {
+  const fmt = (v) => (typeof formatCurrency === 'function' ? formatCurrency(v) : v);
+
+  return (
+    <div
+      onClick={() => onViewInvoice?.(invoice)}
+      style={{
+        display: 'grid',
+        gridTemplateColumns: COL_TEMPLATE,
+        gap: 10,
+        padding: '10px 16px',
+        borderBottom: isLast ? 'none' : '1px solid var(--f-border-faint)',
+        cursor: 'pointer',
+        alignItems: 'center',
+        transition: 'background 0.1s',
+      }}
+      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.04)')}
+      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+    >
+      <div style={{ fontSize: 11, color: 'var(--f-text-subtle)', fontFamily: 'var(--f-font-mono)' }}>
+        {invoice.invoice_number || invoice.id}
+      </div>
+      <div style={{ fontSize: 12.5, fontWeight: 500, color: 'var(--f-text-body)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        {invoice.customer}
+      </div>
+      <div onClick={e => e.stopPropagation()}>
+        <InvoiceStatusSelector
+          invoice={invoice}
+          onStatusChange={onStatusChange}
+          showModal={showStatusModal}
+        />
+      </div>
+      <div style={{ fontSize: 11, color: 'var(--f-text-subtle)', fontFamily: 'var(--f-font-mono)' }}>
+        {invoice.date ? formatDate(invoice.date) : '—'}
+      </div>
+      <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--f-text-body)', textAlign: 'right', fontFamily: 'var(--f-font-mono)' }}>
+        {fmt(invoice.amount)}
+      </div>
+    </div>
+  );
+}
+
+/* ── Budget year card ─────────────────────────────────────────────────── */
+function BudgetYearCard({ year, isActive, onEdit, onDelete, onSelect }) {
+  const start = year.start ?? year.start_date;
+  const end   = year.end   ?? year.end_date;
+  return (
+    <div
+      style={{
+        borderRadius: 'var(--f-radius-md)',
+        padding: '14px 16px',
+        border: isActive ? '1px solid var(--f-border-green)' : '1px solid var(--f-border)',
+        background: isActive ? 'var(--f-green-bg)' : 'var(--f-surface)',
+        cursor: isActive ? 'default' : 'pointer',
+        transition: 'all 0.15s',
+      }}
+      onClick={() => !isActive && onSelect?.(year.id)}
+    >
+      <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--f-text)' }}>{year.label}</p>
+      <p style={{ fontSize: 11, color: 'var(--f-text-subtle)', marginTop: 3, fontFamily: 'var(--f-font-mono)' }}>
+        {start ? formatDate(start) : '—'} → {end ? formatDate(end) : '—'}
+      </p>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}>
+        <span
+          style={{
+            display: 'inline-flex',
+            padding: '2px 8px',
+            borderRadius: 20,
+            fontSize: 11,
+            fontWeight: 600,
+            background: isActive ? 'var(--f-green)' : 'rgba(255,255,255,0.08)',
+            color: isActive ? '#000' : 'var(--f-text-soft)',
+          }}
+        >
+          {isActive ? 'Aktiv' : 'Tilgjengelig'}
+        </span>
+        <div style={{ display: 'flex', gap: 10, fontSize: 11 }}>
+          <button
+            onClick={e => { e.stopPropagation(); onEdit?.(year); }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--f-green-text)', fontWeight: 500 }}
+          >
+            Rediger
+          </button>
+          {!isActive && (
+            <button
+              onClick={e => { e.stopPropagation(); onDelete?.(year); }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--f-danger)', fontWeight: 500 }}
+            >
+              Slett
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════ */
+/*  Main DashboardView                                                   */
+/* ══════════════════════════════════════════════════════════════════════ */
 
 export function DashboardView({
   budgetYears,
@@ -32,367 +345,308 @@ export function DashboardView({
   onViewInvoice,
 }) {
   const { t } = useTranslation();
-  const fmt = (value) => (typeof formatCurrency === 'function' ? formatCurrency(value) : value);
+  const fmt = (v) => (typeof formatCurrency === 'function' ? formatCurrency(v) : v);
+
+  const activeBudgetYear = budgetYears?.find(y => y.id === selectedYear);
+  const yearLabel = activeBudgetYear?.label || '—';
+  const now = new Date();
+  const monthName = now.toLocaleString('nb-NO', { month: 'long' });
+  const heroLabel = `Nettoinntekt · ${monthName.charAt(0).toUpperCase() + monthName.slice(1)} ${now.getFullYear()}`;
 
   return (
-    <div className="space-y-6">
-          <header className="relative overflow-hidden rounded-3xl border border-sand/60 bg-white shadow-card">
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand-50/60 via-transparent to-transparent" />
-            <div className="relative z-10 space-y-6 p-6 lg:p-8">
-              <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.3em] text-ink-subtle">Budsjettkontroll</p>
-                  <h1 className="mt-3 text-3xl font-semibold text-ink">Likviditetsoversikt</h1>
-                  <p className="mt-2 text-sm text-ink-soft">
-                    Følg innbetalinger, forbruk og fokusarbeid for det aktive året.
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+
+      {/* ── Hero glass card ─────────────────────────────────────────── */}
+      <div
+        className="f-glass-hero"
+        style={{ borderRadius: 'var(--f-radius-xl)', padding: '20px 22px 0', overflow: 'hidden' }}
+      >
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 14 }}>
+          <div>
+            <div
+              style={{
+                fontSize: 10,
+                fontWeight: 500,
+                color: 'var(--f-text-label)',
+                letterSpacing: '0.13em',
+                textTransform: 'uppercase',
+                fontFamily: 'var(--f-font-mono)',
+                marginBottom: 6,
+              }}
+            >
+              {heroLabel}
+            </div>
+            <div style={{ fontSize: 44, fontWeight: 700, color: '#fff', letterSpacing: '-0.04em', lineHeight: 1 }}>
+              {fmt(summaries?.net ?? 0)}
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--f-green-text-dim)', marginTop: 5, fontFamily: 'var(--f-font-mono)' }}>
+              Aktivt år · {yearLabel}
+            </div>
+          </div>
+
+          {/* Right stats */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10 }}>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--f-warn)', letterSpacing: '-0.02em' }}>
+                {fmt(summaries?.unpaid ?? 0)}
+              </div>
+              <div style={{ fontSize: 10, color: 'var(--f-text-subtle)', fontFamily: 'var(--f-font-mono)', marginTop: 1 }}>
+                ubetalt
+              </div>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--f-danger)', letterSpacing: '-0.02em' }}>
+                {fmt(summaries?.overdue ?? 0)}
+              </div>
+              <div style={{ fontSize: 10, color: 'var(--f-text-subtle)', fontFamily: 'var(--f-font-mono)', marginTop: 1 }}>
+                forfalt
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <Sparkline monthlyBreakdown={monthlyBreakdown} />
+      </div>
+
+      {/* ── Stat cards ──────────────────────────────────────────────── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+        <StatCard
+          label="Inntekter"
+          value={fmt(summaries?.income ?? 0)}
+          meta={`${utilization}% kapasitetsbruk`}
+          toneIndex={0}
+        />
+        <StatCard
+          label="Utgifter"
+          value={fmt(summaries?.expenses ?? 0)}
+          meta="Registrerte kostnader"
+          toneIndex={1}
+        />
+        <StatCard
+          label="Innkrevingstakt"
+          value={`${collectionRate}%`}
+          meta="av fakturert beløp"
+          toneIndex={2}
+        />
+      </div>
+
+      {/* ── Invoice table ───────────────────────────────────────────── */}
+      <div>
+        <SectionHead
+          title="Siste fakturaer"
+          link="Vis alle →"
+          onLink={() => onNavigate?.('Fakturaer')}
+        />
+        <div
+          style={{
+            borderRadius: 'var(--f-radius-md)',
+            overflow: 'hidden',
+            background: 'var(--f-surface-elevated)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid var(--f-border)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
+          }}
+        >
+          <TableHead />
+          {invoices.length === 0 ? (
+            <div style={{ padding: '24px', textAlign: 'center', fontSize: 13, color: 'var(--f-text-subtle)' }}>
+              Ingen fakturaer i denne perioden
+            </div>
+          ) : (
+            invoices.map((invoice, i) => (
+              <TableRow
+                key={invoice.id}
+                invoice={invoice}
+                formatCurrency={formatCurrency}
+                onViewInvoice={onViewInvoice}
+                onStatusChange={onInvoiceStatusChange}
+                showStatusModal={showInvoiceStatusModal}
+                isLast={i === invoices.length - 1}
+              />
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* ── Income vs Expenses chart ─────────────────────────────────── */}
+      <GlassSection>
+        <SectionHead title={t('dashboard_view.income_vs_expenses')} />
+        <IncomeExpenseChart data={monthlyBreakdown || []} />
+      </GlassSection>
+
+      {/* ── Activity feed + Client highlights ───────────────────────── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
+
+        {/* Activity feed */}
+        <GlassSection>
+          <SectionHead
+            title="Siste hendelser"
+            link="Tidslinje →"
+            onLink={onOpenTimeline}
+          />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {activityFeed.length === 0 ? (
+              <div style={{ padding: '16px', textAlign: 'center', fontSize: 13, color: 'var(--f-text-subtle)' }}>
+                Ingen aktivitet å vise
+              </div>
+            ) : (
+              activityFeed.slice(0, 5).map(item => (
+                <div
+                  key={item.id}
+                  style={{
+                    display: 'flex', alignItems: 'flex-start', gap: 10,
+                    padding: '10px 12px',
+                    borderRadius: 'var(--f-radius)',
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid var(--f-border-faint)',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      background: item.status === 'success' ? 'var(--f-green-bg)'
+                                : item.status === 'warn'    ? 'rgba(240,184,64,0.15)'
+                                : 'rgba(255,255,255,0.06)',
+                      border: `1px solid ${
+                        item.status === 'success' ? 'var(--f-border-green)'
+                        : item.status === 'warn'  ? 'var(--f-warn-border)'
+                        : 'var(--f-border-subtle)'
+                      }`,
+                      color: item.status === 'success' ? 'var(--f-green-text)'
+                           : item.status === 'warn'    ? 'var(--f-warn)'
+                           : 'var(--f-text-soft)',
+                      fontSize: 13, fontWeight: 600,
+                    }}
+                  >
+                    {item.title.charAt(0)}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: 12.5, fontWeight: 500, color: 'var(--f-text-body)', lineHeight: 1.3 }}>
+                      {item.title}
+                    </p>
+                    <p style={{ fontSize: 11, color: 'var(--f-text-subtle)', marginTop: 2 }}>{item.detail}</p>
+                    <p style={{ fontSize: 10, color: 'var(--f-text-muted)', marginTop: 3, fontFamily: 'var(--f-font-mono)' }}>
+                      {item.time}
+                    </p>
+                  </div>
+                  {typeof item.amount === 'number' && (
+                    <p style={{
+                      fontSize: 12,
+                      fontWeight: 600,
+                      fontFamily: 'var(--f-font-mono)',
+                      color: item.amount > 0 ? 'var(--f-green-text)' : 'var(--f-text-subtle)',
+                      flexShrink: 0,
+                    }}>
+                      {item.amount > 0 ? '+' : '-'}{fmt(Math.abs(item.amount))}
+                    </p>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        </GlassSection>
+
+        {/* Client highlights */}
+        <GlassSection>
+          <SectionHead
+            title="Kunderelasjoner"
+            link="Se alle →"
+            onLink={() => onNavigate?.('Kunder')}
+          />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {clientHighlights.length === 0 ? (
+              <div style={{ padding: '16px', textAlign: 'center', fontSize: 13, color: 'var(--f-text-subtle)' }}>
+                Ingen kunder med fakturaer
+              </div>
+            ) : (
+              clientHighlights.map(client => (
+                <div
+                  key={client.name}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '10px 12px',
+                    borderRadius: 'var(--f-radius)',
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid var(--f-border-faint)',
+                  }}
+                >
+                  <div>
+                    <p style={{ fontSize: 12.5, fontWeight: 500, color: 'var(--f-text-body)' }}>{client.name}</p>
+                    <p style={{ fontSize: 11, color: 'var(--f-text-subtle)', marginTop: 2 }}>{client.meta}</p>
+                  </div>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--f-green-text)', fontFamily: 'var(--f-font-mono)' }}>
+                    {fmt(client.value)}
                   </p>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-ink-subtle">Budsjettår</label>
-                  <select
-                    className="w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200 lg:w-64"
-                    value={selectedYear}
-                    onChange={(e) => onSelectYear(e.target.value)}
-                  >
-                    {budgetYears.map((year) => {
-                      const start = year.start ?? year.start_date;
-                      const end = year.end ?? year.end_date;
-                      return (
-                        <option key={year.id} value={year.id}>
-                          {`${year.label} (${start ? formatDate(start) : '—'} → ${
-                            end ? formatDate(end) : '—'
-                          })`}
-                        </option>
-                      );
-                    })}
-                  </select>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={onCreateInvoice}
-                      className="flex-1 rounded-2xl border border-sand/80 bg-white px-3 py-2 text-sm font-medium text-ink transition hover:-translate-y-0.5"
-                    >
-                      Ny faktura
-                    </button>
-                    <button
-                      onClick={() => onNavigate?.('Utgifter')}
-                      className="flex-1 rounded-2xl bg-ink px-3 py-2 text-sm font-medium text-white shadow-card transition hover:-translate-y-0.5"
-                    >
-                      Legg til utgift
-                    </button>
-                  </div>
-                </div>
-              </div>
+              ))
+            )}
+          </div>
+        </GlassSection>
+      </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <div className="flex items-center justify-between text-xs font-semibold text-ink-soft">
-                    <span>Kapasitetsbruk</span>
-                    <span>{utilization}% brukt</span>
-                  </div>
-                  <div className="mt-2 h-3 rounded-full bg-cloud">
-                    <div className="h-full rounded-full bg-brand-400" style={{ width: `${utilization}%` }} />
-                  </div>
-                </div>
-                <div>
-                  <div className="flex items-center justify-between text-xs font-semibold text-ink-soft">
-                    <span>Innkrevingstakt</span>
-                    <span>{collectionRate}%</span>
-                  </div>
-                  <div className="mt-2 h-3 rounded-full bg-cloud">
-                    <div className="h-full rounded-full bg-brand-600" style={{ width: `${collectionRate}%` }} />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-3">
-                <div className="flex items-center gap-2 rounded-2xl border border-brand-100 bg-brand-50 px-3 py-2 text-xs font-medium text-brand-700">
-                  <FiTrendingUp /> {collectionRate}% fakturaer betalt
-                </div>
-                <div className="flex items-center gap-2 rounded-2xl border border-sand/70 px-3 py-2 text-xs font-medium text-ink">
-                  <FiClock /> {summaries ? fmt(summaries.overdue) : '-'} forfalt
-                </div>
-                <div className="flex items-center gap-2 rounded-2xl border border-sand/70 px-3 py-2 text-xs font-medium text-ink-soft">
-                  Aktivt år · {budgetYears.find((y) => y.id === selectedYear)?.label || selectedYear}
-                </div>
-              </div>
+      {/* ── Expenses summary ────────────────────────────────────────── */}
+      <GlassSection>
+        <SectionHead
+          title="Utgifter"
+          link="Registrer utgift →"
+          onLink={() => onNavigate?.('Utgifter')}
+        />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {expenses.length === 0 ? (
+            <div style={{ padding: '16px', textAlign: 'center', fontSize: 13, color: 'var(--f-text-subtle)' }}>
+              Ingen utgifter registrert
             </div>
-          </header>
-
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {statHighlights.map((stat) => (
-              <StatCard key={stat.title} {...stat} />
-            ))}
-          </div>
-
-          {/* Income vs Expenses chart */}
-          <section className="rounded-3xl border border-sand/60 bg-white p-6 shadow-card">
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold text-ink">{t('dashboard_view.income_vs_expenses')}</h3>
-              <p className="mt-1 text-sm text-ink-subtle">{t('dashboard_view.monthly_overview')}</p>
-            </div>
-            <IncomeExpenseChart data={monthlyBreakdown || []} />
-          </section>
-
-          <div className="grid gap-4 xl:grid-cols-3">
-            <section className="xl:col-span-2 rounded-3xl border border-sand/60 bg-white p-6 shadow-card">
-              <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <h3 className="text-lg font-semibold">Fakturaløp</h3>
-                  <p className="mt-1 text-sm text-ink-subtle">Hvor dagens kontantstrøm holder til</p>
-                </div>
-                <button
-                  onClick={() => onNavigate?.('Fakturaer')}
-                  className="text-sm font-medium text-accent hover:underline"
-                >
-                  Åpne løp
-                </button>
-              </div>
-              <div className="overflow-x-auto rounded-2xl border border-sand/60">
-                <table className="min-w-full text-sm">
-                  <thead className="bg-cloud/80 text-ink-subtle">
-                    <tr>
-                      <th className="px-4 py-3 text-left font-medium">Faktura</th>
-                      <th className="px-4 py-3 text-left font-medium">Kunde</th>
-                      <th className="px-4 py-3 text-left font-medium">Status</th>
-                      <th className="px-4 py-3 text-left font-medium">Dato</th>
-                      <th className="px-4 py-3 text-right font-medium">Beløp</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-sand/60 bg-white">
-                    {invoices.length === 0 ? (
-                      <tr>
-                        <td colSpan={5} className="px-4 py-8 text-center text-sm text-ink-subtle">
-                          Ingen fakturaer i denne perioden
-                        </td>
-                      </tr>
-                    ) : (
-                      invoices.map((invoice) => (
-                        <tr key={invoice.id} className="hover:bg-cloud/60">
-                          <td className="px-4 py-3 font-semibold text-ink">
-                            <button
-                              onClick={() => onViewInvoice?.(invoice)}
-                              className="hover:text-brand-700 hover:underline cursor-pointer"
-                            >
-                              {invoice.invoice_number || invoice.id}
-                            </button>
-                          </td>
-                          <td className="px-4 py-3 text-ink-soft">{invoice.customer}</td>
-                          <td className="px-4 py-3">
-                            <InvoiceStatusSelector
-                              invoice={invoice}
-                              onStatusChange={onInvoiceStatusChange}
-                              showModal={showInvoiceStatusModal}
-                            />
-                          </td>
-                          <td className="px-4 py-3 text-ink-subtle">
-                            <div className="flex flex-col">
-                              <span>{invoice.date ? formatDate(invoice.date) : '—'}</span>
-                              {invoice.status === 'paid' && invoice.payment_date && (
-                                <span className="text-xs text-brand-700 font-medium">
-                                  Betalt: {formatDate(invoice.payment_date)}
-                                </span>
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 text-right font-medium text-ink">{fmt(invoice.amount)}</td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-
-            <section className="rounded-3xl border border-brand-100 bg-brand-50/60 p-6 shadow-card">
-              <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <h3 className="text-lg font-semibold">Siste hendelser</h3>
-                  <p className="mt-1 text-sm text-ink-subtle">Økonomihendelser i arbeidsområdet</p>
-                </div>
-                <button
-                  onClick={onOpenTimeline}
-                  className="text-sm font-medium text-accent hover:underline"
-                >
-                  Åpne tidslinje
-                </button>
-              </div>
-              <div className="space-y-3">
-                {activityFeed.length === 0 ? (
-                  <div className="rounded-2xl border border-sand/60 bg-white p-6 text-center text-sm text-ink-subtle">
-                    Ingen aktivitet å vise
-                  </div>
-                ) : (
-                  activityFeed.map((item) => (
-                  <div key={item.id} className="flex items-start gap-3 rounded-2xl border border-sand/60 bg-white p-3">
-                    <div
-                      className={`mt-0.5 flex h-10 w-10 items-center justify-center rounded-2xl border ${
-                        item.status === 'success'
-                          ? 'border-brand-200 bg-brand-50 text-brand-700'
-                          : item.status === 'warn'
-                          ? 'border-amber-200 bg-amber-50 text-amber-700'
-                          : item.status === 'info'
-                          ? 'border-sand/80 bg-cloud text-ink'
-                          : 'border-sand/80 bg-white text-ink'
-                      }`}
-                    >
-                      <span className="text-sm font-semibold">{item.title.charAt(0)}</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-ink">{item.title}</p>
-                      <p className="text-sm text-ink-soft">{item.detail}</p>
-                      <p className="mt-1 text-xs text-ink-subtle">{item.time}</p>
-                    </div>
-                    {typeof item.amount === 'number' ? (
-                      <p className={`text-sm font-semibold ${item.amount > 0 ? 'text-brand-700' : 'text-ink-subtle'}`}>
-                        {item.amount > 0 ? '+' : '-'}
-                        {fmt(Math.abs(item.amount))}
-                      </p>
-                    ) : null}
-                  </div>
-                  ))
-                )}
-              </div>
-            </section>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <section className="rounded-3xl border border-sand/60 bg-white/80 p-6 shadow-card backdrop-blur">
-              <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <h3 className="text-lg font-semibold">Utgifter</h3>
-                  <p className="mt-1 text-sm text-ink-subtle">Rask status på ferske kvitteringer</p>
-                </div>
-                <button
-                  onClick={() => onNavigate?.('Utgifter')}
-                  className="text-sm font-medium text-accent hover:underline"
-                >
-                  Registrer utgift
-                </button>
-              </div>
-              <div className="space-y-3">
-                {expenses.length === 0 ? (
-                  <div className="rounded-2xl border border-sand/70 bg-white px-4 py-6 text-center text-sm text-ink-subtle">
-                    Ingen utgifter registrert
-                  </div>
-                ) : (
-                  expenses.map((expense) => (
-                  <div
-                    key={expense.id}
-                    className="flex items-center justify-between rounded-2xl border border-sand/70 bg-white px-4 py-3"
-                  >
-                    <div>
-                      <p className="font-semibold text-ink">{expense.vendor}</p>
-                      <p className="text-sm text-ink-soft">{expense.category}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-ink">{fmt(expense.amount)}</p>
-                      <p className="text-xs text-ink-subtle">
-                        {expense.date ? formatDate(expense.date) : '—'}
-                      </p>
-                    </div>
-                  </div>
-                  ))
-                )}
-              </div>
-            </section>
-
-            <section className="rounded-3xl border border-brand-100 bg-brand-50/60 p-6 shadow-card">
-              <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <h3 className="text-lg font-semibold">Kunderelasjoner</h3>
-                  <p className="mt-1 text-sm text-ink-subtle">Viktigste kontoer som driver inntekter</p>
-                </div>
-                <button
-                  onClick={() => onNavigate?.('Kunder')}
-                  className="text-sm font-medium text-accent hover:underline"
-                >
-                  Se alle kunder
-                </button>
-              </div>
-              <div className="space-y-3">
-                {clientHighlights.length === 0 ? (
-                  <div className="rounded-2xl border border-brand-100 bg-white px-4 py-6 text-center text-sm text-ink-subtle">
-                    Ingen kunder med fakturaer
-                  </div>
-                ) : (
-                  clientHighlights.map((client) => (
-                  <div
-                    key={client.name}
-                    className="flex items-center justify-between rounded-2xl border border-brand-100 bg-white px-4 py-3"
-                  >
-                    <div>
-                      <p className="font-semibold text-ink">{client.name}</p>
-                      <p className="text-sm text-ink-soft">{client.meta}</p>
-                    </div>
-                    <p className="text-right text-sm font-semibold text-brand-700">{fmt(client.value)}</p>
-                  </div>
-                  ))
-                )}
-              </div>
-            </section>
-          </div>
-
-          <section className="rounded-3xl border border-sand/60 bg-white p-6 shadow-card">
-            <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <h3 className="text-lg font-semibold">Status for budsjettår</h3>
-                <p className="mt-1 text-sm text-ink-subtle">Sammenlign perioder og aktiver nye sykluser</p>
-              </div>
-              <button
-                type="button"
-                className="text-sm font-medium text-accent hover:underline"
-                onClick={onOpenBudgetYearModal}
+          ) : (
+            expenses.slice(0, 5).map(expense => (
+              <div
+                key={expense.id}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '10px 12px',
+                  borderRadius: 'var(--f-radius)',
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid var(--f-border-faint)',
+                }}
               >
-                Administrer år
-              </button>
-            </div>
-            <div className="grid gap-4 md:grid-cols-3">
-              {budgetYears.map((year) => {
-                const isActive = selectedYear === year.id;
-                const start = year.start ?? year.start_date;
-                const end = year.end ?? year.end_date;
-                return (
-                  <div
-                    key={year.id}
-                    className={`rounded-2xl border px-4 py-4 shadow-sm ${
-                      isActive ? 'border-brand-200 bg-brand-50' : 'border-sand/70 bg-white'
-                    }`}
-                  >
-                    <p className="text-sm font-semibold text-ink">{year.label}</p>
-                    <p className="mt-1 text-xs text-ink-subtle">
-                      {start ? formatDate(start) : '—'} → {end ? formatDate(end) : '—'}
-                    </p>
-                    <span
-                      className={`mt-3 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-                        isActive ? 'bg-brand-600 text-white' : 'bg-cloud text-ink-soft'
-                      }`}
-                    >
-                      {isActive ? 'Aktiv' : 'Tilgjengelig'}
-                    </span>
-                    <div className="mt-3 flex items-center justify-between text-xs">
-                      <button
-                        type="button"
-                        className="font-medium text-accent hover:underline"
-                        onClick={() => onEditBudgetYear?.(year)}
-                      >
-                        Rediger
-                      </button>
-                      {!isActive ? (
-                        <button
-                          type="button"
-                          className="font-medium text-rose-600 hover:underline"
-                          onClick={() => onDeleteBudgetYear?.(year)}
-                        >
-                          Slett
-                        </button>
-                      ) : null}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
+                <div>
+                  <p style={{ fontSize: 12.5, fontWeight: 500, color: 'var(--f-text-body)' }}>{expense.vendor}</p>
+                  <p style={{ fontSize: 11, color: 'var(--f-text-subtle)', marginTop: 2 }}>{expense.category}</p>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--f-text-body)', fontFamily: 'var(--f-font-mono)' }}>
+                    {fmt(expense.amount)}
+                  </p>
+                  <p style={{ fontSize: 10, color: 'var(--f-text-muted)', marginTop: 2, fontFamily: 'var(--f-font-mono)' }}>
+                    {expense.date ? formatDate(expense.date) : '—'}
+                  </p>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </GlassSection>
+
+      {/* ── Budget years ────────────────────────────────────────────── */}
+      <div>
+        <SectionHead
+          title="Budsjettår"
+          link="Administrer →"
+          onLink={onOpenBudgetYearModal}
+        />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10 }}>
+          {budgetYears.map(year => (
+            <BudgetYearCard
+              key={year.id}
+              year={year}
+              isActive={selectedYear === year.id}
+              onEdit={onEditBudgetYear}
+              onDelete={onDeleteBudgetYear}
+              onSelect={onSelectYear}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
-

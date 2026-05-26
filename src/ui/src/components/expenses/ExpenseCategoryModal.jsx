@@ -99,7 +99,10 @@ export function ExpenseCategoryModal({ isOpen, mode = 'create', initialCategory,
         <>
           <button
             type="button"
-            className="text-sm font-medium text-ink-subtle hover:text-ink"
+            className="text-sm font-medium transition"
+            style={{ color: 'var(--f-text-subtle)' }}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--f-text-body)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'var(--f-text-subtle)'}
             onClick={onClose}
             disabled={saving}
           >
@@ -108,7 +111,7 @@ export function ExpenseCategoryModal({ isOpen, mode = 'create', initialCategory,
           <button
             type="submit"
             form="expense-category-form"
-            className="rounded-2xl bg-brand-700 px-5 py-2 text-sm font-semibold text-white shadow-card disabled:opacity-60"
+            className="f-btn-primary rounded-2xl px-5 py-2 text-sm font-semibold disabled:opacity-60"
             disabled={saving}
           >
             {saving ? 'Lagrer …' : isEdit ? 'Lagre endringer' : 'Opprett kategori'}
@@ -118,9 +121,9 @@ export function ExpenseCategoryModal({ isOpen, mode = 'create', initialCategory,
     >
       <form id="expense-category-form" className="space-y-4" onSubmit={handleSubmit}>
         <div>
-          <label className="text-sm font-medium text-ink">Kategorinavn *</label>
+          <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Kategorinavn *</label>
           <input
-            className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+            className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Eksempel: Reise, Kontor, Mat"
@@ -129,21 +132,20 @@ export function ExpenseCategoryModal({ isOpen, mode = 'create', initialCategory,
         </div>
 
         <div>
-          <label className="text-sm font-medium text-ink">Overordnet kategori</label>
+          <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Overordnet kategori</label>
           <Select
             value={parentId}
             onChange={setParentId}
             options={parentOptions}
             placeholder="Velg overordnet kategori (valgfritt)"
           />
-          <p className="mt-1 text-xs text-ink-subtle">
+          <p className="mt-1 text-xs" style={{ color: 'var(--f-text-subtle)' }}>
             Velg en overordnet kategori for å lage en underkategori
           </p>
         </div>
 
-        {error ? <p className="text-sm font-medium text-rose-600">{error}</p> : null}
+        {error ? <p className="text-sm font-medium" style={{ color: 'var(--f-danger-text)' }}>{error}</p> : null}
       </form>
     </Modal>
   );
 }
-

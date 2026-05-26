@@ -1,7 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { FiCalendar, FiEdit2, FiTrash2, FiCheck, FiPlus, FiTrendingUp, FiTrendingDown, FiDollarSign, FiCreditCard, FiAlertCircle } from 'react-icons/fi';
-import { TbCoin, TbReceipt } from 'react-icons/tb';
+import {
+  IconCalendar, IconEdit, IconTrash, IconCheck, IconPlus,
+  IconTrendingUp, IconTrendingDown, IconCurrencyDollar,
+  IconCreditCard, IconAlertCircle, IconCoin, IconReceipt,
+} from '@tabler/icons-react';
 import { formatDate } from '../utils/formatDate';
 import { formatCurrency } from '../utils/formatCurrency';
 
@@ -110,23 +113,23 @@ export function BudgetYearsPage({
 
   return (
     <div className="space-y-6">
-      <header className="relative overflow-hidden rounded-3xl border border-sand/60 bg-white shadow-card">
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand-50/60 via-transparent to-transparent" />
+      <header className="f-glass rounded-3xl overflow-hidden" style={{ position: 'relative' }}>
+        <div className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(45,180,130,0.07) 0%, transparent 60%)' }} />
         <div className="relative z-10 p-6 lg:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-ink-subtle">Budsjettår</p>
-              <h1 className="mt-3 text-3xl font-semibold text-ink">Administrer budsjettår</h1>
-              <p className="mt-2 text-sm text-ink-soft">
+              <p className="text-xs uppercase tracking-[0.3em]" style={{ color: 'var(--f-text-subtle)' }}>Budsjettår</p>
+              <h1 className="mt-3 text-3xl font-semibold" style={{ color: 'var(--f-text)' }}>Administrer budsjettår</h1>
+              <p className="mt-2 text-sm" style={{ color: 'var(--f-text-soft)' }}>
                 Oversikt over alle budsjettår med detaljert statistikk og finansielle nøkkeltall
               </p>
             </div>
             <button
               type="button"
               onClick={onCreateYear}
-              className="flex items-center gap-2 rounded-2xl bg-brand-700 px-5 py-3 text-sm font-semibold text-white shadow-card hover:bg-brand-800 transition"
+              className="f-btn-primary flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold transition"
             >
-              <FiPlus className="h-4 w-4" />
+              <IconPlus size={15} stroke={1.8} />
               Nytt budsjettår
             </button>
           </div>
@@ -134,16 +137,16 @@ export function BudgetYearsPage({
       </header>
 
       {budgetYears.length === 0 ? (
-        <div className="rounded-3xl border border-sand/60 bg-white p-12 shadow-card text-center">
-          <FiCalendar className="h-12 w-12 text-ink-subtle mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-ink mb-2">Ingen budsjettår</h3>
-          <p className="text-sm text-ink-soft mb-6">
+        <div className="f-glass rounded-3xl p-12 text-center">
+          <IconCalendar size={48} stroke={1.4} style={{ color: 'var(--f-text-subtle)', margin: '0 auto 16px' }} />
+          <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--f-text)' }}>Ingen budsjettår</h3>
+          <p className="text-sm mb-6" style={{ color: 'var(--f-text-soft)' }}>
             Opprett ditt første budsjettår for å begynne å organisere fakturaer og utgifter
           </p>
           <button
             type="button"
             onClick={onCreateYear}
-            className="rounded-2xl bg-brand-700 px-5 py-2 text-sm font-semibold text-white shadow-card hover:bg-brand-800 transition"
+            className="f-btn-primary rounded-2xl px-5 py-2 text-sm font-semibold transition"
           >
             Opprett budsjettår
           </button>
@@ -172,38 +175,35 @@ export function BudgetYearsPage({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: sortedYears.indexOf(year) * 0.05 }}
                 whileHover={{ y: -2, transition: { duration: 0.2 } }}
-                className={`rounded-3xl border shadow-card overflow-hidden transition ${
-                  isActive
-                    ? 'border-brand-200 bg-white ring-2 ring-brand-200'
-                    : 'border-sand/60 bg-white'
-                }`}
+                className="f-glass rounded-3xl overflow-hidden transition"
+                style={isActive ? { borderColor: 'var(--f-border-green)', boxShadow: '0 0 20px rgba(63,217,160,0.12)' } : {}}
               >
                 {/* Header */}
-                <div className="relative overflow-hidden border-b border-sand/40 bg-gradient-to-br from-brand-50/60 via-transparent to-transparent p-6">
+                <div className="relative overflow-hidden p-6" style={{ borderBottom: '1px solid var(--f-border-subtle)', background: 'linear-gradient(135deg, rgba(45,180,130,0.06) 0%, transparent 60%)' }}>
                   <div className="relative z-10 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h2 className="text-2xl font-semibold text-ink">{year.label}</h2>
+                        <h2 className="text-2xl font-semibold" style={{ color: 'var(--f-text)' }}>{year.label}</h2>
                         {isActive && (
-                          <div className="flex items-center gap-1.5 rounded-full bg-brand-600 px-3 py-1">
-                            <FiCheck className="h-3.5 w-3.5 text-white" />
-                            <span className="text-xs font-semibold text-white">Aktivt år</span>
+                          <div className="flex items-center gap-1.5 rounded-full px-3 py-1" style={{ background: 'var(--f-green-bg)', border: '1px solid var(--f-border-green)' }}>
+                            <IconCheck size={14} stroke={2} style={{ color: 'var(--f-green-text)' }} />
+                            <span className="text-xs font-semibold" style={{ color: 'var(--f-green-text)' }}>Aktivt år</span>
                           </div>
                         )}
                         {progress?.isFuture && (
-                          <span className="rounded-full bg-cloud px-3 py-1 text-xs font-semibold text-ink-soft">
+                          <span className="rounded-full px-3 py-1 text-xs font-semibold" style={{ background: 'rgba(255,255,255,0.07)', color: 'var(--f-text-soft)', border: '1px solid var(--f-border)' }}>
                             Fremtidig
                           </span>
                         )}
                         {progress?.isPast && (
-                          <span className="rounded-full bg-sand px-3 py-1 text-xs font-semibold text-ink-soft">
+                          <span className="rounded-full px-3 py-1 text-xs font-semibold" style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--f-text-subtle)', border: '1px solid var(--f-border-subtle)' }}>
                             Avsluttet
                           </span>
                         )}
                       </div>
-                      <div className="flex flex-wrap items-center gap-4 text-sm text-ink-soft">
+                      <div className="flex flex-wrap items-center gap-4 text-sm" style={{ color: 'var(--f-text-soft)' }}>
                         <div className="flex items-center gap-1.5">
-                          <FiCalendar className="h-4 w-4" />
+                          <IconCalendar size={15} stroke={1.8} />
                           <span>
                             {start ? formatDate(start) : '—'} → {end ? formatDate(end) : '—'}
                           </span>
@@ -227,9 +227,10 @@ export function BudgetYearsPage({
                         )}
                       </div>
                       {progress?.isActive && progress.progress > 0 && (
-                        <div className="mt-3 h-2 w-full rounded-full bg-sand/40 overflow-hidden relative">
+                        <div className="mt-3 h-2 w-full rounded-full overflow-hidden relative" style={{ background: 'rgba(255,255,255,0.1)' }}>
                           <motion.div
-                            className="h-full bg-brand-600 relative overflow-hidden"
+                            className="h-full relative overflow-hidden"
+                            style={{ background: 'var(--f-green)' }}
                             initial={{ width: 0 }}
                             animate={{ width: `${progress.progress}%` }}
                             transition={{ duration: 0.8, ease: 'easeOut' }}
@@ -260,7 +261,7 @@ export function BudgetYearsPage({
                         <button
                           type="button"
                           onClick={() => handleSetActive(year.id)}
-                          className="rounded-xl border border-brand-300 bg-white px-4 py-2 text-sm font-medium text-brand-700 hover:bg-brand-50 transition"
+                          className="f-btn-primary rounded-xl px-4 py-2 text-sm font-medium transition"
                         >
                           Sett som aktivt
                         </button>
@@ -268,18 +269,18 @@ export function BudgetYearsPage({
                       <button
                         type="button"
                         onClick={() => onEditYear?.(year)}
-                        className="rounded-xl border border-sand/60 bg-white px-4 py-2 text-sm font-medium text-ink hover:bg-cloud transition flex items-center gap-1.5"
+                        className="f-btn-ghost rounded-xl px-4 py-2 text-sm font-medium transition flex items-center gap-1.5"
                       >
-                        <FiEdit2 className="h-4 w-4" />
+                        <IconEdit size={15} stroke={1.8} />
                         Rediger
                       </button>
                       {!isActive && (
                         <button
                           type="button"
                           onClick={() => onDeleteYear?.(year)}
-                          className="rounded-xl border border-rose-200 bg-white px-4 py-2 text-sm font-medium text-rose-600 hover:bg-rose-50 transition flex items-center gap-1.5"
+                          className="f-btn-danger rounded-xl px-4 py-2 text-sm font-medium transition flex items-center gap-1.5"
                         >
-                          <FiTrash2 className="h-4 w-4" />
+                          <IconTrash size={15} stroke={1.8} />
                           Slett
                         </button>
                       )}
@@ -290,61 +291,61 @@ export function BudgetYearsPage({
                 {/* Statistics Grid */}
                 <div className="p-6">
                   {isLoading ? (
-                    <div className="py-8 text-center text-sm text-ink-subtle">Laster statistikk...</div>
+                    <div className="py-8 text-center text-sm" style={{ color: 'var(--f-text-subtle)' }}>Laster statistikk...</div>
                   ) : (
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                       {/* Income */}
-                      <div className="rounded-2xl border border-sand/40 bg-white p-4">
+                      <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid var(--f-border-subtle)' }}>
                         <div className="flex items-center gap-2 mb-2">
-                          <div className="rounded-lg bg-brand-100 p-2">
-                            <TbCoin className="h-5 w-5 text-brand-700" />
+                          <div className="rounded-lg p-2" style={{ background: 'var(--f-green-bg)' }}>
+                            <IconCoin size={18} stroke={1.6} style={{ color: 'var(--f-green-text)' }} />
                           </div>
                           <div className="flex-1">
-                            <p className="text-xs font-medium text-ink-subtle uppercase tracking-wider">Inntekter</p>
-                            <p className="text-xl font-semibold text-ink mt-0.5">
+                            <p className="text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--f-text-subtle)' }}>Inntekter</p>
+                            <p className="text-xl font-semibold mt-0.5" style={{ color: 'var(--f-text)' }}>
                               {formatCurrencyFn(summary.income)}
                             </p>
                           </div>
                         </div>
-                        <div className="mt-3 pt-3 border-t border-sand/40 space-y-1.5 text-xs">
+                        <div className="mt-3 pt-3 space-y-1.5 text-xs" style={{ borderTop: '1px solid var(--f-border-faint)' }}>
                           <div className="flex items-center justify-between">
-                            <span className="text-ink-soft">Betalt</span>
-                            <span className="font-medium text-moss">{formatCurrencyFn(summary.paid)}</span>
+                            <span style={{ color: 'var(--f-text-soft)' }}>Betalt</span>
+                            <span className="font-medium" style={{ color: 'var(--f-green-text)' }}>{formatCurrencyFn(summary.paid)}</span>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-ink-soft">Ikke betalt</span>
-                            <span className="font-medium text-ink">{formatCurrencyFn(summary.unpaid)}</span>
+                            <span style={{ color: 'var(--f-text-soft)' }}>Ikke betalt</span>
+                            <span className="font-medium" style={{ color: 'var(--f-text-body)' }}>{formatCurrencyFn(summary.unpaid)}</span>
                           </div>
                           {summary.overdue > 0 && (
                             <div className="flex items-center justify-between">
-                              <span className="text-ink-soft flex items-center gap-1">
-                                <FiAlertCircle className="h-3 w-3" />
+                              <span className="flex items-center gap-1" style={{ color: 'var(--f-text-soft)' }}>
+                                <IconAlertCircle size={12} stroke={2} />
                                 Forfalt
                               </span>
-                              <span className="font-medium text-rose-600">{formatCurrencyFn(summary.overdue)}</span>
+                              <span className="font-medium" style={{ color: 'var(--f-danger-text)' }}>{formatCurrencyFn(summary.overdue)}</span>
                             </div>
                           )}
                         </div>
                       </div>
 
                       {/* Expenses */}
-                      <div className="rounded-2xl border border-sand/40 bg-white p-4">
+                      <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid var(--f-border-subtle)' }}>
                         <div className="flex items-center gap-2 mb-2">
-                          <div className="rounded-lg bg-rose-100 p-2">
-                            <TbReceipt className="h-5 w-5 text-rose-700" />
+                          <div className="rounded-lg p-2" style={{ background: 'var(--f-danger-bg)' }}>
+                            <IconReceipt size={18} stroke={1.6} style={{ color: 'var(--f-danger-text)' }} />
                           </div>
                           <div className="flex-1">
-                            <p className="text-xs font-medium text-ink-subtle uppercase tracking-wider">Utgifter</p>
-                            <p className="text-xl font-semibold text-ink mt-0.5">
+                            <p className="text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--f-text-subtle)' }}>Utgifter</p>
+                            <p className="text-xl font-semibold mt-0.5" style={{ color: 'var(--f-text)' }}>
                               {formatCurrencyFn(summary.expenses)}
                             </p>
                           </div>
                         </div>
                         {summary.income > 0 && (
-                          <div className="mt-3 pt-3 border-t border-sand/40">
+                          <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--f-border-faint)' }}>
                             <div className="flex items-center justify-between text-xs">
-                              <span className="text-ink-soft">Andel av inntekter</span>
-                              <span className="font-medium text-ink">
+                              <span style={{ color: 'var(--f-text-soft)' }}>Andel av inntekter</span>
+                              <span className="font-medium" style={{ color: 'var(--f-text-body)' }}>
                                 {Math.round((summary.expenses / summary.income) * 100)}%
                               </span>
                             </div>
@@ -353,37 +354,30 @@ export function BudgetYearsPage({
                       </div>
 
                       {/* Net */}
-                      <div className={`rounded-2xl border p-4 ${
-                        summary.net >= 0
-                          ? 'border-moss/40 bg-moss/5'
-                          : 'border-rose-200 bg-rose-50/50'
-                      }`}>
+                      <div className="rounded-2xl p-4" style={{
+                        background: summary.net >= 0 ? 'rgba(63,217,160,0.06)' : 'rgba(240,120,96,0.06)',
+                        border: summary.net >= 0 ? '1px solid var(--f-border-green)' : '1px solid var(--f-danger-border)',
+                      }}>
                         <div className="flex items-center gap-2 mb-2">
-                          <div className={`rounded-lg p-2 ${
-                            summary.net >= 0 ? 'bg-moss/20' : 'bg-rose-100'
-                          }`}>
+                          <div className="rounded-lg p-2" style={{ background: summary.net >= 0 ? 'var(--f-green-bg)' : 'var(--f-danger-bg)' }}>
                             {summary.net >= 0 ? (
-                              <FiTrendingUp className="h-5 w-5 text-moss" />
+                              <IconTrendingUp size={18} stroke={1.6} style={{ color: 'var(--f-green-text)' }} />
                             ) : (
-                              <FiTrendingDown className="h-5 w-5 text-rose-700" />
+                              <IconTrendingDown size={18} stroke={1.6} style={{color:"var(--f-danger)"}} />
                             )}
                           </div>
                           <div className="flex-1">
-                            <p className="text-xs font-medium text-ink-subtle uppercase tracking-wider">Netto</p>
-                            <p className={`text-xl font-semibold mt-0.5 ${
-                              summary.net >= 0 ? 'text-moss' : 'text-rose-700'
-                            }`}>
+                            <p className="text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--f-text-subtle)' }}>Netto</p>
+                            <p className="text-xl font-semibold mt-0.5" style={{ color: summary.net >= 0 ? 'var(--f-green-text)' : 'var(--f-danger-text)' }}>
                               {formatCurrencyFn(summary.net)}
                             </p>
                           </div>
                         </div>
                         {summary.income > 0 && (
-                          <div className="mt-3 pt-3 border-t border-sand/40">
+                          <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--f-border-faint)' }}>
                             <div className="flex items-center justify-between text-xs">
-                              <span className="text-ink-soft">Margin</span>
-                              <span className={`font-medium ${
-                                summary.net >= 0 ? 'text-moss' : 'text-rose-700'
-                              }`}>
+                              <span style={{ color: 'var(--f-text-soft)' }}>Margin</span>
+                              <span className="font-medium" style={{ color: summary.net >= 0 ? 'var(--f-green-text)' : 'var(--f-danger-text)' }}>
                                 {summary.net >= 0 ? '+' : ''}{Math.round((summary.net / summary.income) * 100)}%
                               </span>
                             </div>

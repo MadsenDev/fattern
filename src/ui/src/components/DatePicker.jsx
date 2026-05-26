@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { FiCalendar, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
-import { formatDate } from '../utils/formatDate';
+import { IconCalendar, IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 
 // Auto-format date input to dd.mm.yyyy
 function formatDateInput(value) {
@@ -186,16 +185,15 @@ export function DatePicker({ value, onChange, placeholder = 'dd.mm.yyyy', requir
           key={day}
           type="button"
           onClick={() => handleCalendarSelect(date)}
-          className={`
-            h-8 w-8 rounded-lg text-sm transition-colors
-            ${isSelected 
-              ? 'bg-brand-700 text-white font-semibold' 
-              : isToday
-              ? 'bg-brand-100 text-brand-700 font-medium'
-              : 'text-ink hover:bg-cloud'
-            }
-            ${!isCurrentMonth ? 'opacity-30' : ''}
-          `}
+          className="h-8 w-8 rounded-lg text-sm transition-colors"
+          style={{
+            background: isSelected ? 'var(--f-green-bg)' : isToday ? 'rgba(63,217,160,0.1)' : 'transparent',
+            color: isSelected ? 'var(--f-green-text)' : isToday ? 'var(--f-green-text-dim)' : 'var(--f-text-body)',
+            fontWeight: isSelected || isToday ? 600 : 400,
+            opacity: !isCurrentMonth ? 0.3 : 1,
+          }}
+          onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; }}
+          onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = isToday ? 'rgba(63,217,160,0.1)' : 'transparent'; }}
         >
           {day}
         </button>
@@ -208,11 +206,15 @@ export function DatePicker({ value, onChange, placeholder = 'dd.mm.yyyy', requir
   const calendarContent = isOpen ? (
     <div
       ref={calendarRef}
-      className="absolute z-[9999] mt-1 rounded-2xl border border-sand/60 bg-white shadow-lg"
+      className="absolute z-[9999] mt-1 rounded-2xl overflow-hidden"
       style={{
         top: `${dropdownPosition.top}px`,
         left: `${dropdownPosition.left}px`,
         width: `${Math.max(dropdownPosition.width, 280)}px`,
+        background: 'rgba(12,22,18,0.96)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid var(--f-border)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
       }}
     >
       <div className="p-4">
@@ -221,26 +223,32 @@ export function DatePicker({ value, onChange, placeholder = 'dd.mm.yyyy', requir
           <button
             type="button"
             onClick={handlePrevMonth}
-            className="rounded-lg p-1.5 text-ink-subtle hover:bg-cloud"
+            className="rounded-lg p-1.5 transition"
+            style={{ color: 'var(--f-text-subtle)', background: 'transparent' }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.07)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
           >
-            <FiChevronLeft className="h-4 w-4" />
+            <IconChevronLeft size={15} stroke={1.8} />
           </button>
-          <div className="text-sm font-semibold text-ink">
+          <div className="text-sm font-semibold" style={{ color: 'var(--f-text)' }}>
             {monthNames[calendarDate.getMonth()]} {calendarDate.getFullYear()}
           </div>
           <button
             type="button"
             onClick={handleNextMonth}
-            className="rounded-lg p-1.5 text-ink-subtle hover:bg-cloud"
+            className="rounded-lg p-1.5 transition"
+            style={{ color: 'var(--f-text-subtle)', background: 'transparent' }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.07)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
           >
-            <FiChevronRight className="h-4 w-4" />
+            <IconChevronRight size={15} stroke={1.8} />
           </button>
         </div>
 
         {/* Day names */}
         <div className="mb-2 grid grid-cols-7 gap-1">
           {dayNames.map((day) => (
-            <div key={day} className="text-center text-xs font-medium text-ink-subtle py-1">
+            <div key={day} className="text-center text-xs font-medium py-1" style={{ color: 'var(--f-text-label)' }}>
               {day}
             </div>
           ))}
@@ -252,7 +260,7 @@ export function DatePicker({ value, onChange, placeholder = 'dd.mm.yyyy', requir
         </div>
 
         {/* Today button */}
-        <div className="mt-4 pt-4 border-t border-sand/60">
+        <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--f-border-subtle)' }}>
           <button
             type="button"
             onClick={() => {
@@ -260,7 +268,7 @@ export function DatePicker({ value, onChange, placeholder = 'dd.mm.yyyy', requir
               today.setHours(0, 0, 0, 0);
               handleCalendarSelect(today);
             }}
-            className="w-full rounded-lg bg-cloud px-3 py-2 text-sm font-medium text-ink hover:bg-sand/60"
+            className="f-btn-ghost w-full rounded-lg px-3 py-2 text-sm font-medium"
           >
             Velg i dag
           </button>
@@ -286,9 +294,12 @@ export function DatePicker({ value, onChange, placeholder = 'dd.mm.yyyy', requir
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-ink-subtle hover:bg-cloud"
+          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1.5 transition"
+          style={{ color: 'var(--f-text-subtle)' }}
+          onMouseEnter={e => e.currentTarget.style.color = 'var(--f-text-soft)'}
+          onMouseLeave={e => e.currentTarget.style.color = 'var(--f-text-subtle)'}
         >
-          <FiCalendar className="h-4 w-4" />
+          <IconCalendar size={15} stroke={1.8} />
         </button>
       </div>
       {isOpen && createPortal(calendarContent, document.body)}

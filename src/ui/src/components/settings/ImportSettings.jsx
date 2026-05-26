@@ -102,88 +102,89 @@ export function ImportSettings({ onRefreshData }) {
     <>
       <div className="space-y-6">
         <div>
-          <h3 className="text-sm font-semibold text-ink mb-1">{t('settings.import.title')}</h3>
-          <p className="text-xs text-ink-subtle mb-4">Importer kunder, produkter og fakturaer fra CSV eller SAF-T</p>
+          <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--f-text-body)' }}>{t('settings.import.title')}</h3>
+          <p className="text-xs mb-4" style={{ color: 'var(--f-text-subtle)' }}>Importer kunder, produkter og fakturaer fra CSV eller SAF-T</p>
         </div>
 
         <div className="space-y-4">
-          {/* CSV Import */}
-          <div className="rounded-lg border border-sand/60 bg-white p-6">
-            <h4 className="text-sm font-semibold text-ink mb-2">CSV Import</h4>
-            <p className="text-xs text-ink-subtle mb-4">
-              Importer kunder eller produkter fra CSV-filer. Du kan mappe kolonner manuelt eller bruke AI-auto-mapping (Supporter Pack).
+          {/* CSV-import */}
+          <div className="rounded-lg p-6" style={{ border: '1px solid var(--f-border-subtle)', background: 'rgba(255,255,255,0.03)' }}>
+            <h4 className="text-sm font-semibold mb-2" style={{ color: 'var(--f-text-body)' }}>CSV-import</h4>
+            <p className="text-xs mb-4" style={{ color: 'var(--f-text-subtle)' }}>
+              Importer kunder eller produkter fra CSV-filer. Du kan mappe kolonner manuelt eller bruke automatisk AI-kolonnemapping (Supporter-pakken).
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setCsvImportModal({ isOpen: true, type: 'customer' })}
-                className="rounded-lg bg-brand-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-800"
+                className="f-btn-primary rounded-lg px-4 py-2 text-sm font-medium"
               >
                 Importer kunder
               </button>
               <button
                 onClick={() => setCsvImportModal({ isOpen: true, type: 'product' })}
-                className="rounded-lg bg-brand-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-800"
+                className="f-btn-primary rounded-lg px-4 py-2 text-sm font-medium"
               >
                 Importer produkter
               </button>
             </div>
           </div>
 
-          {/* SAF-T Import */}
-          <div className="rounded-lg border border-sand/60 bg-white p-6">
-            <h4 className="text-sm font-semibold text-ink mb-1">{t('settings.import.saft_title')}</h4>
-            <p className="text-xs text-ink-subtle mb-1">{t('settings.import.saft_description')}</p>
-            <p className="text-xs text-ink-subtle mb-4 italic">{t('settings.import.saft_systems')}</p>
+          {/* SAF-T-import */}
+          <div className="rounded-lg p-6" style={{ border: '1px solid var(--f-border-subtle)', background: 'rgba(255,255,255,0.03)' }}>
+            <h4 className="text-sm font-semibold mb-1" style={{ color: 'var(--f-text-body)' }}>{t('settings.import.saft_title')}</h4>
+            <p className="text-xs mb-1" style={{ color: 'var(--f-text-subtle)' }}>{t('settings.import.saft_description')}</p>
+            <p className="text-xs mb-4 italic" style={{ color: 'var(--f-text-subtle)' }}>{t('settings.import.saft_systems')}</p>
 
             {!saftPreview ? (
-              /* Step 1: File selection */
+              /* Steg 1: Velg fil */
               <button
                 onClick={handleSAFTSelect}
-                className="rounded-lg bg-brand-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-800"
+                className="f-btn-primary rounded-lg px-4 py-2 text-sm font-medium"
               >
                 {t('settings.import.select_file')}
               </button>
             ) : (
-              /* Step 2: Preview + options */
+              /* Steg 2: Forhåndsvisning og valg */
               <div className="space-y-4">
-                <div className="rounded-xl border border-brand-200 bg-brand-50/40 p-4 space-y-2 text-sm">
+                <div className="rounded-xl p-4 space-y-2 text-sm" style={{ border: '1px solid var(--f-border-green)', background: 'var(--f-green-bg)' }}>
                   <div className="flex justify-between">
-                    <span className="text-ink-subtle">{t('settings.import.preview_file')}:</span>
-                    <span className="font-medium text-ink truncate max-w-[240px]">{saftFileName}</span>
+                    <span style={{ color: 'var(--f-text-subtle)' }}>{t('settings.import.preview_file')}:</span>
+                    <span className="font-medium truncate max-w-[240px]" style={{ color: 'var(--f-text-body)' }}>{saftFileName}</span>
                   </div>
                   {saftPreview.dateRange?.start && (
                     <div className="flex justify-between">
-                      <span className="text-ink-subtle">{t('settings.import.preview_period')}:</span>
-                      <span className="font-medium text-ink">
+                      <span style={{ color: 'var(--f-text-subtle)' }}>{t('settings.import.preview_period')}:</span>
+                      <span className="font-medium" style={{ color: 'var(--f-text-body)' }}>
                         {saftPreview.dateRange.start} → {saftPreview.dateRange.end}
                       </span>
                     </div>
                   )}
                   <div className="flex justify-between">
-                    <span className="text-ink-subtle">{t('settings.import.preview_customers')}:</span>
-                    <span className="font-medium text-ink">{saftPreview.customerCount ?? 0}</span>
+                    <span style={{ color: 'var(--f-text-subtle)' }}>{t('settings.import.preview_customers')}:</span>
+                    <span className="font-medium" style={{ color: 'var(--f-text-body)' }}>{saftPreview.customerCount ?? 0}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-ink-subtle">{t('settings.import.preview_expenses')}:</span>
-                    <span className="font-medium text-ink">
+                    <span style={{ color: 'var(--f-text-subtle)' }}>{t('settings.import.preview_expenses')}:</span>
+                    <span className="font-medium" style={{ color: 'var(--f-text-body)' }}>
                       {(saftPreview.transactionCount ?? 0)} ({t('settings.import.preview_expenses')} etter filtrering)
                     </span>
                   </div>
                 </div>
 
-                {/* Options */}
+                {/* Valg */}
                 <div className="space-y-2">
                   {[
                     { key: 'importCustomers', label: t('settings.import.import_customers') },
                     { key: 'importExpenses', label: t('settings.import.import_expenses') },
                     { key: 'skipDuplicates', label: t('settings.import.skip_duplicates') },
                   ].map(({ key, label }) => (
-                    <label key={key} className="flex items-center gap-2 text-sm text-ink cursor-pointer">
+                    <label key={key} className="flex items-center gap-2 text-sm cursor-pointer" style={{ color: 'var(--f-text-body)' }}>
                       <input
                         type="checkbox"
                         checked={saftOptions[key]}
                         onChange={(e) => setSaftOptions((prev) => ({ ...prev, [key]: e.target.checked }))}
-                        className="h-4 w-4 rounded border-sand text-brand-600"
+                        className="h-4 w-4 rounded"
+                        style={{ accentColor: 'var(--f-green)' }}
                       />
                       {label}
                     </label>
@@ -194,14 +195,14 @@ export function ImportSettings({ onRefreshData }) {
                   <button
                     onClick={handleSAFTImport}
                     disabled={saftImporting}
-                    className="rounded-lg bg-brand-700 px-4 py-2 text-sm font-medium text-white hover:bg-brand-800 disabled:opacity-60"
+                    className="f-btn-primary rounded-lg px-4 py-2 text-sm font-medium disabled:opacity-60"
                   >
                     {saftImporting ? t('settings.import.importing') : t('settings.import.import_button')}
                   </button>
                   <button
                     onClick={handleSAFTCancel}
                     disabled={saftImporting}
-                    className="rounded-lg border border-sand/60 bg-white px-4 py-2 text-sm font-medium text-ink hover:bg-cloud"
+                    className="f-btn-ghost rounded-lg px-4 py-2 text-sm font-medium disabled:opacity-60"
                   >
                     {t('settings.import.cancel')}
                   </button>

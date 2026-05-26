@@ -59,7 +59,8 @@ module.exports = {
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['"Soehne"', 'Inter', 'system-ui', 'sans-serif']
+        display: ['"Soehne"', 'Inter', 'system-ui', 'sans-serif'],
+        mono: ['"DM Mono"', 'ui-monospace', 'monospace'],
       },
       boxShadow: {
         card: '0 10px 30px color-mix(in srgb, var(--color-ink) 12%, transparent)'

@@ -95,8 +95,8 @@ export function SettingsPage({ company, onCompanyUpdate, onOpenTemplateEditor, o
       const result = await dialogApi.showOpenDialog({
         title: 'Importer mal',
         filters: [
-          { name: 'Fattern Template', extensions: ['fattern-template'] },
-          { name: 'All Files', extensions: ['*'] },
+          { name: 'Fattern-mal', extensions: ['fattern-template'] },
+          { name: 'Alle filer', extensions: ['*'] },
         ],
         properties: ['openFile'],
       });
@@ -180,7 +180,7 @@ export function SettingsPage({ company, onCompanyUpdate, onOpenTemplateEditor, o
   const activeCategoryDescription = CATEGORY_DESCRIPTIONS[activeCategory] || '';
 
   return (
-    <div className="flex h-[calc(100vh-8rem)]">
+    <div className="flex" style={{ height: 'calc(100vh - 126px)' }}>
       <div className="flex w-full gap-6">
         <SettingsSidebar
           activeCategory={activeCategory}
@@ -190,10 +190,10 @@ export function SettingsPage({ company, onCompanyUpdate, onOpenTemplateEditor, o
 
         {/* Main Content */}
         <main className="flex-1 min-w-0">
-          <div className="rounded-2xl border border-sand/60 bg-white shadow-card overflow-hidden">
-            <div className="border-b border-sand/60 bg-gradient-to-br from-brand-50/40 to-transparent px-8 py-6">
-              <h2 className="text-2xl font-semibold text-ink">{activeCategoryLabel}</h2>
-              <p className="text-sm text-ink-soft mt-2">{activeCategoryDescription}</p>
+          <div className="f-glass rounded-2xl overflow-hidden">
+            <div className="px-8 py-6" style={{ borderBottom: '1px solid var(--f-border-subtle)', background: 'linear-gradient(135deg, rgba(45,180,130,0.05) 0%, transparent 60%)' }}>
+              <h2 className="text-2xl font-semibold" style={{ color: 'var(--f-text)' }}>{activeCategoryLabel}</h2>
+              <p className="text-sm mt-2" style={{ color: 'var(--f-text-soft)' }}>{activeCategoryDescription}</p>
             </div>
 
             <div className="p-8">

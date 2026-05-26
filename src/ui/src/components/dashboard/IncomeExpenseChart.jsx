@@ -19,8 +19,8 @@ function formatCurrencyShort(value) {
 const CustomTooltip = ({ active, payload, label, incomeLabel, expensesLabel }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-xl border border-sand/60 bg-white p-3 shadow-lg text-sm">
-      <p className="font-semibold text-ink mb-2">{label}</p>
+    <div className="rounded-xl p-3 shadow-lg text-sm" style={{ background: 'rgba(12,22,18,0.96)', border: '1px solid var(--f-border)', backdropFilter: 'blur(20px)' }}>
+      <p className="font-semibold mb-2" style={{ color: 'var(--f-text-body)' }}>{label}</p>
       {payload.map((entry) => (
         <p key={entry.name} style={{ color: entry.color }}>
           {entry.name === 'income' ? incomeLabel : expensesLabel}:{' '}
@@ -42,7 +42,7 @@ export function IncomeExpenseChart({ data = [] }) {
 
   if (!data.length) {
     return (
-      <div className="flex h-48 items-center justify-center text-sm text-ink-subtle">
+      <div className="flex h-48 items-center justify-center text-sm" style={{ color: 'var(--f-text-subtle)' }}>
         {t('dashboard_view.no_data_for_period')}
       </div>
     );
@@ -51,16 +51,16 @@ export function IncomeExpenseChart({ data = [] }) {
   return (
     <ResponsiveContainer width="100%" height={220}>
       <BarChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
         <XAxis
           dataKey="label"
-          tick={{ fontSize: 11, fill: '#6e8b97' }}
+          tick={{ fontSize: 11, fill: 'rgba(225,238,234,0.5)' }}
           tickLine={false}
           axisLine={false}
         />
         <YAxis
           tickFormatter={formatCurrencyShort}
-          tick={{ fontSize: 11, fill: '#6e8b97' }}
+          tick={{ fontSize: 11, fill: 'rgba(225,238,234,0.5)' }}
           tickLine={false}
           axisLine={false}
           width={48}
@@ -69,11 +69,11 @@ export function IncomeExpenseChart({ data = [] }) {
           content={<CustomTooltip incomeLabel={incomeLabel} expensesLabel={expensesLabel} />}
         />
         <Legend
-          wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
+          wrapperStyle={{ fontSize: 12, paddingTop: 8, color: 'rgba(225,238,234,0.7)' }}
           formatter={(value) => (value === 'income' ? incomeLabel : expensesLabel)}
         />
-        <Bar dataKey="income" name="income" fill="#2f8981" radius={[4, 4, 0, 0]} />
-        <Bar dataKey="expenses" name="expenses" fill="#e1f1eb" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="income" name="income" fill="#3fd9a0" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="expenses" name="expenses" fill="rgba(63,217,160,0.25)" radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );

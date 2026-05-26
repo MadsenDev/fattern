@@ -126,7 +126,7 @@ export function useTheme() {
     // Check if theme requires supporter pack
     const hasPremiumAccess = isSupporter || hasFeature('premium_themes');
     if (theme.premium && !hasPremiumAccess) {
-      throw new Error('This theme requires Supporter Pack');
+      throw new Error('Dette temaet krever Supporter-pakken');
     }
     
     // Apply accent color if provided and theme supports it
@@ -161,4 +161,3 @@ export function useTheme() {
     isSupporter,
   };
 }
-

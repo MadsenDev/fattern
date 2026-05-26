@@ -152,7 +152,8 @@ export function TemplateCanvas({
   return (
     <div
       ref={containerRef}
-      className="relative h-full w-full overflow-hidden bg-sand/30"
+      className="relative h-full w-full overflow-hidden"
+      style={{ background: 'rgba(4,10,8,0.6)' }}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
@@ -167,8 +168,8 @@ export function TemplateCanvas({
           top: '-5000px',
           width: '10000px',
           height: '10000px',
-          backgroundImage: `linear-gradient(to right, rgba(13, 62, 81, 0.1) 1px, transparent 1px),
-                            linear-gradient(to bottom, rgba(13, 62, 81, 0.1) 1px, transparent 1px)`,
+          backgroundImage: `linear-gradient(to right, rgba(63,217,160,0.07) 1px, transparent 1px),
+                            linear-gradient(to bottom, rgba(63,217,160,0.07) 1px, transparent 1px)`,
           backgroundSize: `${GRID_SIZE * zoomFactor}px ${GRID_SIZE * zoomFactor}px`,
           backgroundPosition: `${snappedPan.x % (GRID_SIZE * zoomFactor)}px ${snappedPan.y % (GRID_SIZE * zoomFactor)}px`,
         }}

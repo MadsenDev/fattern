@@ -1,4 +1,4 @@
-import { FiCheck, FiLock } from 'react-icons/fi';
+import { IconCheck, IconLock } from '@tabler/icons-react';
 import { useTheme } from '../../hooks/useTheme';
 import { useSupporterPack } from '../../hooks/useSupporterPack';
 import { useToast } from '../../hooks/useToast';
@@ -11,13 +11,13 @@ export function AppearanceSettings() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-sm font-semibold text-ink mb-1">Utseende</h3>
-        <p className="text-xs text-ink-subtle mb-4">Tilpass appens utseende og visning</p>
+        <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--f-text)' }}>Utseende</h3>
+        <p className="text-xs mb-4" style={{ color: 'var(--f-text-subtle)' }}>Tilpass appens utseende og visning</p>
       </div>
 
       <div className="space-y-4">
-        <div className="py-3 border-b border-sand/40">
-          <label className="text-xs font-medium text-ink-subtle uppercase tracking-wider mb-4 block">Tema</label>
+        <div className="py-3" style={{ borderBottom: '1px solid var(--f-border-faint)' }}>
+          <label className="f-label uppercase tracking-wider mb-4 block">Tema</label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {availableThemes.map((theme) => {
               const isSelected = currentTheme?.id === theme.id;
@@ -39,11 +39,11 @@ export function AppearanceSettings() {
                     }
                   }}
                   disabled={isLocked}
-                  className={`relative rounded-xl border-2 overflow-hidden transition-all ${
-                    isSelected
-                      ? 'border-brand-600 shadow-lg shadow-brand-600/20'
-                      : 'border-sand/60 hover:border-brand-300 hover:shadow-md'
-                  } ${isLocked ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
+                  className={`relative rounded-xl overflow-hidden transition-all ${isLocked ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
+                  style={{
+                    border: isSelected ? '2px solid var(--f-border-green)' : '2px solid var(--f-border)',
+                    boxShadow: isSelected ? '0 0 16px rgba(63,217,160,0.2)' : 'none',
+                  }}
                 >
                   {/* Theme Preview */}
                   <div 
@@ -105,36 +105,35 @@ export function AppearanceSettings() {
                     
                     {/* Lock Icon */}
                     {isLocked && (
-                      <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full p-1.5 shadow-sm">
-                        <FiLock className="h-3.5 w-3.5 text-ink-subtle" />
+                      <div className="absolute top-2 right-2 rounded-full p-1.5" style={{ background: 'rgba(10,18,14,0.8)', backdropFilter: 'blur(8px)' }}>
+                        <IconLock className="h-3.5 w-3.5" style={{ color: 'var(--f-text-subtle)' }} />
                       </div>
                     )}
-                    
+
                     {/* Selected Checkmark */}
                     {isSelected && (
-                      <div className="absolute top-2 right-2 bg-brand-600 rounded-full p-1.5 shadow-lg">
-                        <FiCheck className="h-3.5 w-3.5 text-white" />
+                      <div className="absolute top-2 right-2 rounded-full p-1.5" style={{ background: 'var(--f-green)', boxShadow: '0 0 8px rgba(63,217,160,0.5)' }}>
+                        <IconCheck className="h-3.5 w-3.5 text-white" />
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Card Footer */}
-                  <div className="p-4 bg-white">
+                  <div className="p-4" style={{ background: 'rgba(10,16,12,0.7)', borderTop: '1px solid var(--f-border-subtle)' }}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         <div
-                          className="w-3 h-3 rounded-full border border-sand/60 flex-shrink-0"
-                          style={{ backgroundColor: theme.colors.brand[600] }}
+                          className="w-3 h-3 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: theme.colors.brand[600], border: '1px solid var(--f-border)' }}
                         />
-                        <span className="text-sm font-semibold text-ink truncate">{theme.name}</span>
+                        <span className="text-sm font-semibold truncate" style={{ color: 'var(--f-text-body)' }}>{theme.name}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        {/* Accent color options for free themes - Supporter only */}
                         {theme.accentOptions && !isLocked && (
                           <div className="flex items-center gap-1.5">
                             {isSupporter ? (
                               theme.accentOptions.map((accent, idx) => {
-                                const isCurrentAccent = currentTheme?.id === theme.id && 
+                                const isCurrentAccent = currentTheme?.id === theme.id &&
                                   currentTheme?.colors?.accent === accent.color;
                                 return (
                                   <button
@@ -148,26 +147,25 @@ export function AppearanceSettings() {
                                         toast.error('Kunne ikke endre tema', error.message);
                                       }
                                     }}
-                                    className={`w-5 h-5 rounded-md border-2 transition-all hover:scale-110 ${
-                                      isCurrentAccent
-                                        ? 'border-ink shadow-sm scale-110 ring-1 ring-ink/20'
-                                        : 'border-sand/60 hover:border-ink/60'
-                                    }`}
-                                    style={{ backgroundColor: accent.color }}
+                                    className={`w-5 h-5 rounded-md border-2 transition-all hover:scale-110 ${isCurrentAccent ? 'scale-110' : ''}`}
+                                    style={{
+                                      backgroundColor: accent.color,
+                                      borderColor: isCurrentAccent ? 'var(--f-green)' : 'var(--f-border)',
+                                    }}
                                     title={accent.name}
                                   />
                                 );
                               })
                             ) : (
                               <div className="flex items-center gap-1 opacity-60" title="Krever Supporter-pakken">
-                                <FiLock className="h-3.5 w-3.5 text-ink-subtle" />
-                                <span className="text-xs text-ink-subtle">Aksentfarger</span>
+                                <IconLock className="h-3.5 w-3.5" style={{ color: 'var(--f-text-subtle)' }} />
+                                <span className="text-xs" style={{ color: 'var(--f-text-subtle)' }}>Aksentfarger</span>
                               </div>
                             )}
                           </div>
                         )}
                         {theme.premium && (
-                          <span className="text-xs font-medium text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full">
+                          <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ color: 'var(--f-green-text)', background: 'var(--f-green-bg)', border: '1px solid var(--f-border-green)' }}>
                             Premium
                           </span>
                         )}
@@ -179,8 +177,8 @@ export function AppearanceSettings() {
             })}
           </div>
           {!isSupporter && (
-            <p className="text-xs text-ink-subtle mt-4">
-              Låste temaer krever Supporter-pakken. <a href="#" className="text-brand-600 hover:underline">Les mer</a>
+            <p className="text-xs mt-4" style={{ color: 'var(--f-text-subtle)' }}>
+              Låste temaer krever Supporter-pakken. <a href="#" className="hover:underline" style={{ color: 'var(--f-green-text-dim)' }}>Les mer</a>
             </p>
           )}
         </div>

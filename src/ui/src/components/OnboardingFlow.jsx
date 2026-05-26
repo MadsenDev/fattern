@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 const defaultCompanyValues = {
   name: '',
@@ -99,26 +99,27 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.3 }}
-        className="fixed inset-0 z-[100] bg-ink/80 backdrop-blur-sm"
+        className="fixed inset-0 z-[100] backdrop-blur-sm"
+        style={{ background: 'rgba(4,10,8,0.85)' }}
       >
         <div className="flex h-full items-center justify-center px-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="w-full max-w-xl rounded-3xl bg-white p-8 shadow-2xl"
+            className="f-glass-hero w-full max-w-xl rounded-3xl p-8 shadow-2xl"
           >
             <div className="flex items-center gap-4">
               <img src="/fattern-monogram.svg" alt="Fattern" className="h-12 w-12 drop-shadow-xl" />
               <div>
-                <p className="text-xs uppercase tracking-[0.4em] text-ink-subtle">Oppstart</p>
-                <h2 className="text-2xl font-semibold text-ink">{current.title}</h2>
+                <p className="text-xs uppercase tracking-[0.4em]" style={{ color: 'var(--f-text-subtle)' }}>Oppstart</p>
+                <h2 className="text-2xl font-semibold" style={{ color: 'var(--f-text-body)' }}>{current.title}</h2>
               </div>
             </div>
-            <p className="mt-6 text-ink-soft">{current.description}</p>
+            <p className="mt-6" style={{ color: 'var(--f-text-soft)' }}>{current.description}</p>
             <div className="mt-10 flex justify-end">
               <button
-                className="rounded-2xl bg-brand-700 px-5 py-2 text-sm font-semibold text-white shadow-card"
+                className="f-btn-primary rounded-2xl px-5 py-2 text-sm font-semibold"
                 onClick={() => setStepIndex(1)}
               >
                 {current.actionLabel}
@@ -136,7 +137,8 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="fixed inset-0 z-[100] bg-ink/80 backdrop-blur-sm"
+      className="fixed inset-0 z-[100] backdrop-blur-sm"
+      style={{ background: 'rgba(4,10,8,0.85)' }}
     >
       <div className="flex h-full items-center justify-center px-4">
         <motion.div
@@ -145,22 +147,22 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.3, ease: 'easeOut' }}
-          className="w-full max-w-3xl rounded-3xl bg-white p-8 shadow-2xl"
+          className="f-glass-hero w-full max-w-3xl rounded-3xl p-8 shadow-2xl"
         >
           <div className="flex items-center gap-4">
             <img src="/fattern-monogram.svg" alt="Fattern" className="h-12 w-12 drop-shadow-xl" />
             <div>
-              <p className="text-xs uppercase tracking-[0.4em] text-ink-subtle">Oppstart</p>
-              <h2 className="text-2xl font-semibold text-ink">{current.title}</h2>
+              <p className="text-xs uppercase tracking-[0.4em]" style={{ color: 'var(--f-text-subtle)' }}>Oppstart</p>
+              <h2 className="text-2xl font-semibold" style={{ color: 'var(--f-text-body)' }}>{current.title}</h2>
             </div>
           </div>
-              <p className="mt-4 text-ink-soft">{current.description}</p>
+          <p className="mt-4" style={{ color: 'var(--f-text-soft)' }}>{current.description}</p>
 
           <form className="mt-8 grid gap-4 md:grid-cols-2" onSubmit={handleSubmit}>
             <div className="md:col-span-2">
-              <label className="text-sm font-medium text-ink">Selskapsnavn*</label>
+              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Selskapsnavn*</label>
               <input
-                className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+                className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
                 value={form.name}
                 onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
                 required
@@ -168,88 +170,91 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-ink">Organisasjonsnummer</label>
+              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Organisasjonsnummer</label>
               <input
-                className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm"
+                className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
                 value={form.org_number || ''}
                 onChange={(e) => setForm((prev) => ({ ...prev, org_number: e.target.value }))}
                 placeholder="999 888 777"
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-ink">E-post</label>
+              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>E-post</label>
               <input
-                className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm"
+                className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
                 value={form.contact_email || ''}
                 onChange={(e) => setForm((prev) => ({ ...prev, contact_email: e.target.value }))}
                 placeholder="hei@studio.no"
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-ink">Telefon</label>
+              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Telefon</label>
               <input
-                className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm"
+                className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
                 value={form.contact_number || ''}
                 onChange={(e) => setForm((prev) => ({ ...prev, contact_number: e.target.value }))}
                 placeholder="+47 98 76 54 32"
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-ink">Kontonummer</label>
+              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Kontonummer</label>
               <input
-                className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm"
+                className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
                 value={form.account_number || ''}
                 onChange={(e) => setForm((prev) => ({ ...prev, account_number: e.target.value }))}
                 placeholder="1234.56.78901"
               />
             </div>
             <div className="md:col-span-2">
-              <label className="text-sm font-medium text-ink">Adresse</label>
+              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Adresse</label>
               <input
-                className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm"
+                className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
                 value={form.address || ''}
                 onChange={(e) => setForm((prev) => ({ ...prev, address: e.target.value }))}
                 placeholder="Fatternveien 1"
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-ink">Postnummer</label>
+              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Postnummer</label>
               <input
-                className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm"
+                className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
                 value={form.post_number || ''}
                 onChange={(e) => setForm((prev) => ({ ...prev, post_number: e.target.value }))}
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-ink">Poststed</label>
+              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Poststed</label>
               <input
-                className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm"
+                className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
                 value={form.post_location || ''}
                 onChange={(e) => setForm((prev) => ({ ...prev, post_location: e.target.value }))}
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-ink">MVA-sats</label>
+              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>MVA-sats</label>
               <input
                 type="number"
                 step="0.01"
                 min="0"
                 max="1"
-                className="mt-2 w-full rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm"
+                className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
                 value={form.vat_rate}
                 onChange={(e) => setForm((prev) => ({ ...prev, vat_rate: e.target.value }))}
               />
-              <p className="mt-1 text-xs text-ink-subtle">0,25 tilsvarer 25 % MVA.</p>
+              <p className="mt-1 text-xs" style={{ color: 'var(--f-text-subtle)' }}>0,25 tilsvarer 25 % MVA.</p>
             </div>
 
             {error ? (
-              <p className="md:col-span-2 text-sm font-medium text-rose-600">{error}</p>
+              <p className="md:col-span-2 text-sm font-medium" style={{ color: 'var(--f-danger-text)' }}>{error}</p>
             ) : null}
 
             <div className="md:col-span-2 mt-4 flex items-center justify-between">
               <button
                 type="button"
-                className="text-sm font-medium text-ink-subtle hover:text-ink"
+                className="text-sm font-medium transition"
+                style={{ color: 'var(--f-text-subtle)' }}
+                onMouseEnter={e => e.currentTarget.style.color = 'var(--f-text-body)'}
+                onMouseLeave={e => e.currentTarget.style.color = 'var(--f-text-subtle)'}
                 onClick={() => {
                   markComplete();
                   onComplete?.(form);
@@ -259,7 +264,7 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
               </button>
               <button
                 type="submit"
-                className="rounded-2xl bg-brand-700 px-5 py-2 text-sm font-semibold text-white shadow-card disabled:opacity-50"
+                className="f-btn-primary rounded-2xl px-5 py-2 text-sm font-semibold disabled:opacity-50"
                 disabled={saving}
               >
                 {saving ? 'Lagrer …' : current.actionLabel}

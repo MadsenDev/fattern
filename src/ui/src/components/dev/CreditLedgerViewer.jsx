@@ -44,27 +44,27 @@ export function CreditLedgerViewer() {
   };
 
   if (loading) {
-    return <div className="text-sm text-ink-subtle">Laster...</div>;
+    return <div className="text-sm" style={{ color: 'var(--f-text-subtle)' }}>Laster...</div>;
   }
 
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-ink">Kredittbokføring</h3>
-        <p className="mt-1 text-sm text-ink-soft">
+        <h3 className="text-lg font-semibold" style={{ color: 'var(--f-text-body)' }}>Kredittbokføring</h3>
+        <p className="mt-1 text-sm" style={{ color: 'var(--f-text-soft)' }}>
           Viser alle kredittransaksjoner. Systemet bruker kryptografisk signering for å forhindre manipulasjon.
         </p>
       </div>
 
-      <div className="rounded-2xl border border-sand/60 bg-white p-4">
+      <div className="rounded-2xl p-4" style={{ border: '1px solid var(--f-border-subtle)', background: 'rgba(255,255,255,0.03)' }}>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-ink-subtle">Nåværende saldo</p>
-            <p className="text-2xl font-semibold text-ink">{balance} kreditter</p>
+            <p className="text-sm" style={{ color: 'var(--f-text-subtle)' }}>Nåværende saldo</p>
+            <p className="text-2xl font-semibold" style={{ color: 'var(--f-text-body)' }}>{balance} kreditter</p>
           </div>
           <button
             onClick={handleExport}
-            className="rounded-lg border border-sand/60 bg-white px-4 py-2 text-sm font-medium text-ink hover:bg-cloud"
+            className="f-btn-ghost rounded-lg px-4 py-2 text-sm font-medium"
           >
             Eksporter bokføring
           </button>
@@ -72,9 +72,9 @@ export function CreditLedgerViewer() {
       </div>
 
       <div>
-        <h4 className="text-sm font-semibold text-ink mb-3">Transaksjoner ({ledger.length})</h4>
+        <h4 className="text-sm font-semibold mb-3" style={{ color: 'var(--f-text-body)' }}>Transaksjoner ({ledger.length})</h4>
         {ledger.length === 0 ? (
-          <div className="rounded-lg border border-sand/60 bg-cloud/30 p-8 text-center text-sm text-ink-subtle">
+          <div className="rounded-lg p-8 text-center text-sm" style={{ border: '1px solid var(--f-border-subtle)', background: 'rgba(255,255,255,0.02)', color: 'var(--f-text-subtle)' }}>
             Ingen transaksjoner
           </div>
         ) : (
@@ -84,31 +84,28 @@ export function CreditLedgerViewer() {
               return (
                 <div
                   key={tx.id || index}
-                  className="flex items-center justify-between rounded-lg border border-sand/60 bg-white p-4"
+                  className="flex items-center justify-between rounded-lg p-4"
+                  style={{ border: '1px solid var(--f-border-subtle)', background: 'rgba(255,255,255,0.03)' }}
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <span className={`text-sm font-medium ${
-                        isPositive ? 'text-brand-700' : 'text-ink'
-                      }`}>
+                      <span className="text-sm font-medium" style={{ color: isPositive ? 'var(--f-green-text)' : 'var(--f-text-body)' }}>
                         {tx.type === 'purchase' && 'Kjøp'}
                         {tx.type === 'use' && 'Brukt'}
                         {tx.type === 'bonus' && 'Bonus'}
                         {tx.type === 'refund' && 'Refusjon'}
                       </span>
-                      <span className="text-xs text-ink-subtle">
+                      <span className="text-xs" style={{ color: 'var(--f-text-subtle)' }}>
                         {tx.timestamp ? new Date(tx.timestamp).toLocaleString('nb-NO') : '—'}
                       </span>
                     </div>
                     {tx.metadata?.purchase_proof && (
-                      <p className="text-xs text-ink-subtle mt-1">
+                      <p className="text-xs mt-1" style={{ color: 'var(--f-text-subtle)' }}>
                         Kjøpsbevis: {JSON.stringify(tx.metadata.purchase_proof)}
                       </p>
                     )}
                   </div>
-                  <div className={`text-sm font-semibold ${
-                    isPositive ? 'text-brand-700' : 'text-ink'
-                  }`}>
+                  <div className="text-sm font-semibold" style={{ color: isPositive ? 'var(--f-green-text)' : 'var(--f-text-body)' }}>
                     {isPositive ? '+' : '-'}{tx.amount}
                   </div>
                 </div>
@@ -118,12 +115,11 @@ export function CreditLedgerViewer() {
         )}
       </div>
 
-      <div className="rounded-lg bg-cloud/30 border border-sand/60 p-4">
-        <p className="text-xs text-ink-subtle">
-          <strong>Sikkerhet:</strong> Hver transaksjon er kryptografisk signert. Manipulasjon av bokføringen vil bli oppdaget og transaksjonen vil bli avvist.
+      <div className="rounded-lg p-4" style={{ border: '1px solid var(--f-border-subtle)', background: 'rgba(255,255,255,0.02)' }}>
+        <p className="text-xs" style={{ color: 'var(--f-text-soft)' }}>
+          <strong style={{ color: 'var(--f-text-body)' }}>Sikkerhet:</strong> Hver transaksjon er kryptografisk signert. Manipulasjon av bokføringen vil bli oppdaget og transaksjonen vil bli avvist.
         </p>
       </div>
     </div>
   );
 }
-

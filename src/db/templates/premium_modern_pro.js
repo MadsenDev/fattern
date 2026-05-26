@@ -1,16 +1,16 @@
 /**
- * Modern Pro Premium Template
- * Contemporary design with strong visual hierarchy, modern layout patterns, and bold typography
+ * Moderne Pro premium-mal
+ * Samtidsrettet design med tydelig hierarki, moderne layout og kraftig typografi
  */
 module.exports = {
   schemaVersion: 1,
   meta: {
     id: 'premium_modern_pro',
-    name: 'Modern Pro',
-    description: 'Contemporary design with strong visual hierarchy, modern layout patterns, and bold typography',
+    name: 'Moderne Pro',
+    description: 'Samtidsrettet design med tydelig hierarki, moderne layout og kraftig typografi',
     version: '1.0.0',
     premium: true,
-    tags: ['modern', 'bold', 'premium', 'norsk'],
+    tags: ['moderne', 'tydelig', 'premium', 'norsk'],
     createdAt: '2025-01-01T00:00:00.000Z',
     updatedAt: '2025-01-01T00:00:00.000Z',
   },
@@ -47,7 +47,7 @@ module.exports = {
       y: 65,
       width: 400,
       height: 55,
-      content: 'INVOICE',
+      content: 'FAKTURA',
       fontFamily: 'Inter',
       fontSize: 64,
       fontWeight: 900,
@@ -153,7 +153,7 @@ module.exports = {
       y: 220,
       width: 300,
       height: 14,
-      content: 'BILL TO',
+      content: 'FAKTURERES TIL',
       fontFamily: 'Inter',
       fontSize: 10,
       fontWeight: 700,
@@ -214,11 +214,11 @@ module.exports = {
       width: 684,
       height: 420,
       columns: [
-        { header: 'ITEM', field: 'description', width: 380, align: 'left' },
-        { header: 'QTY', field: 'quantity', width: 70, align: 'right' },
-        { header: 'PRICE', field: 'unit_price', width: 110, align: 'right' },
-        { header: 'VAT', field: 'vat_rate', width: 60, align: 'right' },
-        { header: 'TOTAL', field: 'line_total', width: 110, align: 'right' },
+        { header: 'VARE', field: 'description', width: 380, align: 'left' },
+        { header: 'ANT.', field: 'quantity', width: 70, align: 'right' },
+        { header: 'PRIS', field: 'unit_price', width: 110, align: 'right' },
+        { header: 'MVA', field: 'vat_rate', width: 60, align: 'right' },
+        { header: 'TOTALT', field: 'line_total', width: 110, align: 'right' },
       ],
       rowHeight: 32,
       maxRows: 11,
@@ -255,7 +255,7 @@ module.exports = {
       y: 815,
       width: 200,
       height: 20,
-      content: 'Subtotal',
+      content: 'Delsum',
       fontFamily: 'Inter',
       fontSize: 12,
       fontWeight: 600,
@@ -284,7 +284,7 @@ module.exports = {
       y: 845,
       width: 200,
       height: 20,
-      content: 'VAT',
+      content: 'MVA',
       fontFamily: 'Inter',
       fontSize: 12,
       fontWeight: 600,
@@ -325,7 +325,7 @@ module.exports = {
       y: 900,
       width: 200,
       height: 32,
-      content: 'TOTAL',
+      content: 'TOTALT',
       fontFamily: 'Inter',
       fontSize: 22,
       fontWeight: 900,
@@ -350,4 +350,3 @@ module.exports = {
     },
   ],
 };
-

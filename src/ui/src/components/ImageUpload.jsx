@@ -77,7 +77,7 @@ export function ImageUpload({ value, onChange, label = 'Bilde', maxSizeMB = 5, t
 
   return (
     <div>
-      <label className="text-sm font-medium text-ink">{label}</label>
+      <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{label}</label>
       <div className="mt-2 space-y-2">
         {value ? (
           <div className="space-y-2">
@@ -85,13 +85,17 @@ export function ImageUpload({ value, onChange, label = 'Bilde', maxSizeMB = 5, t
               <div className="relative inline-block">
                 <img
                   src={preview}
-                  alt="Preview"
-                  className="h-32 w-32 rounded-2xl border border-sand object-cover"
+                  alt="Forhåndsvisning"
+                  className="h-32 w-32 rounded-2xl object-cover"
+                  style={{ border: '1px solid var(--f-border-subtle)' }}
                 />
                 <button
                   type="button"
                   onClick={handleRemove}
-                  className="absolute -right-2 -top-2 rounded-full bg-rose-600 p-1 text-white shadow-lg hover:bg-rose-700"
+                  className="absolute -right-2 -top-2 rounded-full p-1 text-white shadow-lg transition"
+                  style={{ background: 'var(--f-danger-text)' }}
+                  onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
+                  onMouseLeave={e => e.currentTarget.style.opacity = '1'}
                   title="Fjern bilde"
                 >
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -100,20 +104,23 @@ export function ImageUpload({ value, onChange, label = 'Bilde', maxSizeMB = 5, t
                 </button>
               </div>
             ) : (
-              <div className="flex items-center justify-between rounded-lg border border-sand/60 bg-cloud/30 px-3 py-2">
+              <div className="flex items-center justify-between rounded-lg px-3 py-2" style={{ border: '1px solid var(--f-border-subtle)', background: 'rgba(255,255,255,0.03)' }}>
                 <div className="flex items-center gap-2">
-                  <svg className="h-5 w-5 text-ink-subtle" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-5 w-5" style={{ color: 'var(--f-text-subtle)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  <span className="text-sm text-ink">
+                  <span className="text-sm" style={{ color: 'var(--f-text-body)' }}>
                     {fileName || (value.startsWith('data:') ? 'Bilde valgt' : value.split('/').pop() || value)}
                   </span>
-                  {isSaving && <span className="text-xs text-ink-subtle">(lagrer...)</span>}
+                  {isSaving && <span className="text-xs" style={{ color: 'var(--f-text-subtle)' }}>(lagrer...)</span>}
                 </div>
                 <button
                   type="button"
                   onClick={handleRemove}
-                  className="rounded p-1 text-ink-subtle hover:bg-sand/60 hover:text-ink"
+                  className="rounded p-1 transition"
+                  style={{ color: 'var(--f-text-subtle)' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'var(--f-text-body)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--f-text-subtle)'; }}
                   title="Fjern bilde"
                 >
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -127,7 +134,10 @@ export function ImageUpload({ value, onChange, label = 'Bilde', maxSizeMB = 5, t
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="flex w-full items-center justify-center rounded-lg border-2 border-dashed border-sand bg-cloud/30 px-4 py-3 text-ink-subtle transition hover:border-brand-300 hover:bg-cloud/50"
+            className="flex w-full items-center justify-center rounded-lg border-2 border-dashed px-4 py-3 transition"
+            style={{ borderColor: 'var(--f-border)', color: 'var(--f-text-subtle)', background: 'rgba(255,255,255,0.02)' }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--f-border-green)'; e.currentTarget.style.color = 'var(--f-green-text)'; e.currentTarget.style.background = 'var(--f-green-bg)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--f-border)'; e.currentTarget.style.color = 'var(--f-text-subtle)'; e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}
           >
             <svg className="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -142,12 +152,11 @@ export function ImageUpload({ value, onChange, label = 'Bilde', maxSizeMB = 5, t
           onChange={handleFileSelect}
           className="hidden"
         />
-        {error && <p className="text-sm font-medium text-rose-600">{error}</p>}
+        {error && <p className="text-sm font-medium" style={{ color: 'var(--f-danger-text)' }}>{error}</p>}
         {!value && (
-          <p className="text-xs text-ink-subtle">JPG, PNG eller GIF. Maks {maxSizeMB}MB</p>
+          <p className="text-xs" style={{ color: 'var(--f-text-subtle)' }}>JPG, PNG eller GIF. Maks {maxSizeMB}MB</p>
         )}
       </div>
     </div>
   );
 }
-

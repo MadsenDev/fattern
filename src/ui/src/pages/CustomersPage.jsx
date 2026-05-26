@@ -63,9 +63,11 @@ export function CustomersPage({ customers, onEditCustomer, onDeleteCustomer, onC
         key: 'active',
         label: t('customer.status'),
         render: (active) => (
-          <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-            active ? 'bg-brand-50 text-brand-700' : 'bg-cloud text-ink-soft'
-          }`}>
+          <span className="inline-flex rounded-full px-3 py-1 text-xs font-semibold"
+            style={active
+              ? { background: 'var(--f-green-bg-pill)', color: 'var(--f-green-text)', border: '1px solid var(--f-border-green-pill)' }
+              : { background: 'rgba(255,255,255,0.06)', color: 'var(--f-text-subtle)', border: '1px solid var(--f-border)' }
+            }>
             {active ? t('common.active') : t('common.inactive')}
           </span>
         ),
@@ -81,14 +83,16 @@ export function CustomersPage({ customers, onEditCustomer, onDeleteCustomer, onC
           <div className="flex items-center justify-end gap-2">
             <button
               type="button"
-              className="text-sm font-medium text-accent hover:underline"
+              className="text-sm font-medium hover:underline"
+              style={{ color: 'var(--f-green-text)' }}
               onClick={() => onEditCustomer?.(customer)}
             >
               {t('customer.edit')}
             </button>
             <button
               type="button"
-              className="text-sm font-medium text-rose-600 hover:underline"
+              className="text-sm font-medium hover:underline"
+              style={{ color: 'var(--f-danger-text)' }}
               onClick={() => onDeleteCustomer?.(customer)}
             >
               {t('customer.delete')}
@@ -106,32 +110,30 @@ export function CustomersPage({ customers, onEditCustomer, onDeleteCustomer, onC
 
   return (
     <div className="space-y-6">
-      <header className="relative overflow-hidden rounded-3xl border border-sand/60 bg-white shadow-card">
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand-50/60 via-transparent to-transparent" />
+      <header className="f-glass rounded-3xl overflow-hidden" style={{ position: 'relative' }}>
+        <div className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(45,180,130,0.07) 0%, transparent 60%)' }} />
         <div className="relative z-10 p-6 lg:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-ink-subtle">{t('customer.title')}</p>
-              <h1 className="mt-3 text-3xl font-semibold text-ink">{t('customer.all_customers')}</h1>
-              <p className="mt-2 text-sm text-ink-soft">{t('customer.overview')}</p>
+              <p className="text-xs uppercase tracking-[0.3em]" style={{ color: 'var(--f-text-subtle)' }}>{t('customer.title')}</p>
+              <h1 className="mt-3 text-3xl font-semibold" style={{ color: 'var(--f-text)' }}>{t('customer.all_customers')}</h1>
+              <p className="mt-2 text-sm" style={{ color: 'var(--f-text-soft)' }}>{t('customer.overview')}</p>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex rounded-xl border border-sand bg-white p-1">
+              <div className="flex rounded-xl p-1" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid var(--f-border)' }}>
                 <button
                   type="button"
                   onClick={() => handleViewModeChange('table')}
-                  className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
-                    viewMode === 'table' ? 'bg-brand-700 text-white' : 'text-ink-soft hover:text-ink'
-                  }`}
+                  className="rounded-lg px-3 py-1.5 text-sm font-medium transition"
+                  style={viewMode === 'table' ? { background: 'var(--f-green-bg)', color: 'var(--f-green-text)' } : { color: 'var(--f-text-soft)' }}
                 >
                   {t('common.list')}
                 </button>
                 <button
                   type="button"
                   onClick={() => handleViewModeChange('card')}
-                  className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
-                    viewMode === 'card' ? 'bg-brand-700 text-white' : 'text-ink-soft hover:text-ink'
-                  }`}
+                  className="rounded-lg px-3 py-1.5 text-sm font-medium transition"
+                  style={viewMode === 'card' ? { background: 'var(--f-green-bg)', color: 'var(--f-green-text)' } : { color: 'var(--f-text-soft)' }}
                 >
                   {t('common.card')}
                 </button>
@@ -139,7 +141,7 @@ export function CustomersPage({ customers, onEditCustomer, onDeleteCustomer, onC
               <button
                 type="button"
                 onClick={() => onCreateCustomer?.()}
-                className="rounded-2xl bg-brand-700 px-5 py-2 text-sm font-semibold text-white shadow-card transition hover:-translate-y-0.5"
+                className="f-btn-primary rounded-2xl px-5 py-2 text-sm font-semibold"
               >
                 {t('customer.new')}
               </button>
@@ -148,7 +150,7 @@ export function CustomersPage({ customers, onEditCustomer, onDeleteCustomer, onC
         </div>
       </header>
 
-      <section className="rounded-3xl border border-sand/60 bg-white p-6 shadow-card">
+      <section className="f-glass rounded-3xl p-6">
         {/* Toolbar */}
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="flex-1">
@@ -157,13 +159,13 @@ export function CustomersPage({ customers, onEditCustomer, onDeleteCustomer, onC
           <select
             value={activeFilter}
             onChange={(e) => setActiveFilter(e.target.value)}
-            className="rounded-2xl border border-sand bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+            className="f-input rounded-xl px-4 py-2 text-sm"
           >
             {ACTIVE_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>{t(opt.labelKey)}</option>
             ))}
           </select>
-          <span className="whitespace-nowrap text-xs text-ink-subtle">
+          <span className="whitespace-nowrap text-xs" style={{ color: 'var(--f-text-subtle)' }}>
             {t('customer.showing', { count: filtered.length, total: (customers || []).length })}
           </span>
         </div>

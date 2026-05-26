@@ -7,12 +7,12 @@ export const lightTheme = {
   name: 'Lys',
   premium: false,
   accentOptions: [
-    { name: 'Teal', color: '#0d9488' }, // Default
-    { name: 'Blue', color: '#2563eb' },
-    { name: 'Green', color: '#16a34a' },
-    { name: 'Purple', color: '#9333ea' },
-    { name: 'Orange', color: '#d97706' },
-    { name: 'Pink', color: '#db2777' },
+    { name: 'Turkis', color: '#0d9488' }, // Standard
+    { name: 'Blå', color: '#2563eb' },
+    { name: 'Grønn', color: '#16a34a' },
+    { name: 'Lilla', color: '#9333ea' },
+    { name: 'Oransje', color: '#d97706' },
+    { name: 'Rosa', color: '#db2777' },
   ],
   colors: {
     // Brand colors - refined teal palette
@@ -47,4 +47,3 @@ export const lightTheme = {
     black: '#0f172a',
   },
 };
-

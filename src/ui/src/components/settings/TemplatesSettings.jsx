@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { FiLock, FiPackage } from 'react-icons/fi';
+import { IconLock, IconPackage } from '@tabler/icons-react';
 import { useToast } from '../../hooks/useToast';
 import { useSettings } from '../../hooks/useSettings';
 import { useSupporterPack } from '../../hooks/useSupporterPack';
@@ -81,8 +81,8 @@ export function TemplatesSettings({ onOpenTemplateEditor, onDeleteTemplate, onSe
         title: 'Eksporter mal',
         defaultPath: filename,
         filters: [
-          { name: 'Fattern Template', extensions: ['fattern-template'] },
-          { name: 'All Files', extensions: ['*'] },
+          { name: 'Fattern-mal', extensions: ['fattern-template'] },
+          { name: 'Alle filer', extensions: ['*'] },
         ],
       });
 
@@ -164,18 +164,18 @@ export function TemplatesSettings({ onOpenTemplateEditor, onDeleteTemplate, onSe
       
       <div className="flex-1 space-y-6">
       <div>
-        <h3 className="text-sm font-semibold text-ink mb-1">Fakturamaler</h3>
-        <p className="text-xs text-ink-subtle mb-4">Administrer og rediger faktura maler</p>
+        <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--f-text-body)' }}>Fakturamaler</h3>
+        <p className="text-xs mb-4" style={{ color: 'var(--f-text-subtle)' }}>Administrer og rediger faktura maler</p>
       </div>
 
       {loadingTemplates ? (
-        <div className="py-8 text-center text-sm text-ink-subtle">Laster maler...</div>
+        <div className="py-8 text-center text-sm" style={{ color: 'var(--f-text-subtle)' }}>Laster maler...</div>
       ) : (
         <>
           {filteredTemplates.length === 0 ? (
-            <div className="rounded-lg border border-sand/60 bg-white p-6 text-center">
-              <p className="text-sm text-ink-soft">
-                {templates.length === 0 
+            <div className="rounded-lg p-6 text-center" style={{ border: '1px solid var(--f-border-subtle)', background: 'rgba(255,255,255,0.02)' }}>
+              <p className="text-sm" style={{ color: 'var(--f-text-soft)' }}>
+                {templates.length === 0
                   ? 'Ingen maler funnet. Standard mal vil bli opprettet automatisk.'
                   : `Ingen maler funnet i kategorien "${activeFilter === 'all' ? 'Alle' : activeFilter === 'builtin' ? 'Innebygd' : activeFilter === 'premium' ? 'Premium' : 'Egendefinert'}"`}
               </p>
@@ -206,17 +206,17 @@ export function TemplatesSettings({ onOpenTemplateEditor, onDeleteTemplate, onSe
       )}
 
       {!hasPremiumTemplates && isSupporter && (
-        <div className="rounded-lg border border-brand-200 bg-brand-50/50 p-4">
+        <div className="rounded-lg p-4" style={{ border: '1px solid var(--f-border-green)', background: 'var(--f-green-bg)' }}>
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <h4 className="text-sm font-semibold text-ink mb-1">Premium maler</h4>
-              <p className="text-xs text-ink-soft mb-3">
+              <h4 className="text-sm font-semibold mb-1" style={{ color: 'var(--f-green-text)' }}>Premium maler</h4>
+              <p className="text-xs mb-3" style={{ color: 'var(--f-green-text-dim)' }}>
                 Opprett profesjonelle premium maler med avansert design og typografi.
               </p>
             </div>
             <button
               onClick={handleCreatePremiumTemplates}
-              className="rounded-lg bg-brand-700 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-brand-800 transition"
+              className="f-btn-primary rounded-lg px-4 py-2 text-xs font-semibold"
             >
               Opprett premium maler
             </button>
@@ -225,37 +225,37 @@ export function TemplatesSettings({ onOpenTemplateEditor, onDeleteTemplate, onSe
       )}
 
       {hasPremiumTemplates && !isSupporter && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-4">
+        <div className="rounded-lg p-4" style={{ border: '1px solid rgba(217,119,6,0.3)', background: 'rgba(217,119,6,0.08)' }}>
           <div className="flex items-start gap-3">
-            <FiLock className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <IconLock className="h-5 w-5 flex-shrink-0 mt-0.5" style={{ color: '#fbbf24' }} />
             <div className="flex-1">
-              <h4 className="text-sm font-semibold text-ink mb-1">Premium maler tilgjengelig</h4>
-              <p className="text-xs text-ink-soft">
-                For å bruke premium maler, trenger du en Supporter Pack. Disse malene har profesjonelt design og avansert typografi.
+              <h4 className="text-sm font-semibold mb-1" style={{ color: 'var(--f-text-body)' }}>Premium maler tilgjengelig</h4>
+              <p className="text-xs" style={{ color: 'var(--f-text-soft)' }}>
+                For å bruke premiummaler trenger du Supporter-pakken. Disse malene har profesjonelt design og avansert typografi.
               </p>
             </div>
           </div>
         </div>
       )}
 
-      <div className="pt-4 border-t border-sand/40">
-        <p className="text-xs text-ink-subtle mb-3">
+      <div className="pt-4" style={{ borderTop: '1px solid var(--f-border-faint)' }}>
+        <p className="text-xs mb-3" style={{ color: 'var(--f-text-subtle)' }}>
           Standard mal brukes automatisk når du genererer PDF-er. Du kan endre standard mal når som helst.
         </p>
         <div className="flex gap-2">
           {onImportTemplate && (
             <button
               onClick={onImportTemplate}
-              className="rounded-lg border border-brand-300 bg-brand-50 px-4 py-2 text-sm font-medium text-brand-700 hover:bg-brand-100 transition flex items-center gap-2"
+              className="f-btn-ghost rounded-lg px-4 py-2 text-sm font-medium flex items-center gap-2"
             >
-              <FiPackage className="h-4 w-4" />
+              <IconPackage className="h-4 w-4" />
               Importer mal
             </button>
           )}
           {onOpenTemplateEditor && (
             <button
               onClick={handleCreateNewTemplate}
-              className="rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white hover:bg-ink-soft transition"
+              className="f-btn-primary rounded-lg px-4 py-2 text-sm font-medium"
             >
               Opprett ny mal
             </button>
@@ -266,4 +266,3 @@ export function TemplatesSettings({ onOpenTemplateEditor, onDeleteTemplate, onSe
     </div>
   );
 }
-

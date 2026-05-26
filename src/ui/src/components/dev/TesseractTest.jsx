@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { createWorker } from 'tesseract.js';
-import { FiUpload, FiLoader } from 'react-icons/fi';
+import { IconUpload, IconLoader } from '@tabler/icons-react';
 
 export function TesseractTest() {
   const [image, setImage] = useState(null);
@@ -63,31 +63,34 @@ export function TesseractTest() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-ink">Tesseract.js OCR Test</h3>
-        <p className="mt-1 text-sm text-ink-soft">
-          Test Tesseract.js OCR ved å laste opp et bilde og se den ekstraherte teksten.
+        <h3 className="text-lg font-semibold" style={{ color: 'var(--f-text-body)' }}>Tesseract.js OCR-test</h3>
+        <p className="mt-1 text-sm" style={{ color: 'var(--f-text-soft)' }}>
+          Prøv Tesseract.js OCR ved å laste opp et bilde og se den ekstraherte teksten.
         </p>
       </div>
 
       <div className="space-y-4">
         <div>
-          <label className="text-sm font-medium text-ink">Velg bilde</label>
+          <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Velg bilde</label>
           <div className="mt-2">
             {!image ? (
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-sand bg-cloud/30 px-4 py-8 text-ink-subtle transition hover:border-brand-300 hover:bg-cloud/50"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed px-4 py-8 transition"
+                style={{ borderColor: 'var(--f-border)', background: 'rgba(255,255,255,0.02)', color: 'var(--f-text-subtle)' }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--f-border-green)'; e.currentTarget.style.color = 'var(--f-green-text)'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--f-border)'; e.currentTarget.style.color = 'var(--f-text-subtle)'; }}
               >
-                <FiUpload className="h-5 w-5" />
+                <IconUpload className="h-5 w-5" />
                 <span>Klikk for å laste opp bilde</span>
               </button>
             ) : (
               <div className="space-y-3">
-                <div className="relative rounded-2xl border border-sand/60 bg-cloud/30 overflow-hidden">
+                <div className="relative rounded-2xl overflow-hidden" style={{ border: '1px solid var(--f-border-subtle)', background: 'rgba(255,255,255,0.02)' }}>
                   <img
                     src={image}
-                    alt="Preview"
+                    alt="Forhåndsvisning"
                     className="w-full h-auto max-h-96 object-contain"
                   />
                 </div>
@@ -96,11 +99,11 @@ export function TesseractTest() {
                     type="button"
                     onClick={handleProcess}
                     disabled={loading}
-                    className="flex-1 rounded-2xl bg-brand-700 px-4 py-2 text-sm font-semibold text-white shadow-card disabled:opacity-60 flex items-center justify-center gap-2"
+                    className="f-btn-primary flex-1 rounded-2xl px-4 py-2 text-sm font-semibold disabled:opacity-60 flex items-center justify-center gap-2"
                   >
                     {loading ? (
                       <>
-                        <FiLoader className="h-4 w-4 animate-spin" />
+                        <IconLoader className="h-4 w-4 animate-spin" />
                         Prosesserer...
                       </>
                     ) : (
@@ -111,7 +114,7 @@ export function TesseractTest() {
                     type="button"
                     onClick={handleClear}
                     disabled={loading}
-                    className="rounded-2xl border border-sand/60 bg-white px-4 py-2 text-sm font-medium text-ink hover:bg-cloud disabled:opacity-60"
+                    className="f-btn-ghost rounded-2xl px-4 py-2 text-sm font-medium disabled:opacity-60"
                   >
                     Fjern bilde
                   </button>
@@ -129,20 +132,20 @@ export function TesseractTest() {
         </div>
 
         {error && (
-          <div className="rounded-lg bg-rose-50 border border-rose-200 p-3">
-            <p className="text-sm font-medium text-rose-600">{error}</p>
+          <div className="rounded-lg p-3" style={{ background: 'var(--f-danger-bg)', border: '1px solid var(--f-danger-border)' }}>
+            <p className="text-sm font-medium" style={{ color: 'var(--f-danger-text)' }}>{error}</p>
           </div>
         )}
 
         {result && (
           <div>
-            <label className="text-sm font-medium text-ink">Ekstrahert tekst</label>
-            <div className="mt-2 rounded-2xl border border-sand/60 bg-white p-4">
-              <pre className="whitespace-pre-wrap text-sm text-ink font-mono max-h-96 overflow-y-auto">
+            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Ekstrahert tekst</label>
+            <div className="mt-2 rounded-2xl p-4" style={{ border: '1px solid var(--f-border-subtle)', background: 'rgba(255,255,255,0.02)' }}>
+              <pre className="whitespace-pre-wrap text-sm font-mono max-h-96 overflow-y-auto" style={{ color: 'var(--f-text-body)' }}>
                 {result || '(Ingen tekst funnet)'}
               </pre>
             </div>
-            <p className="mt-2 text-xs text-ink-subtle">
+            <p className="mt-2 text-xs" style={{ color: 'var(--f-text-subtle)' }}>
               {result.length} tegn ekstrahert
             </p>
           </div>
@@ -151,4 +154,3 @@ export function TesseractTest() {
     </div>
   );
 }
-

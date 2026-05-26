@@ -1,16 +1,16 @@
 /**
- * Modern Minimal Template
- * Clean and spacious design with modern typography
+ * Moderne minimalistisk mal
+ * Ren og luftig design med moderne typografi
  */
 module.exports = {
   schemaVersion: 1,
   meta: {
     id: 'preset_modern_minimal',
-    name: 'Modern Minimal',
-    description: 'Clean and spacious design with modern typography',
+    name: 'Moderne minimalistisk',
+    description: 'Ren og luftig design med moderne typografi',
     version: '1.0.0',
     premium: false,
-    tags: ['minimal', 'modern', 'norsk'],
+    tags: ['minimal', 'moderne', 'norsk'],
     createdAt: '2025-01-01T00:00:00.000Z',
     updatedAt: '2025-01-01T00:00:00.000Z',
   },
@@ -324,4 +324,3 @@ module.exports = {
     },
   ],
 };
-

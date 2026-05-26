@@ -7,12 +7,12 @@ export const darkTheme = {
   name: 'Mørk',
   premium: false,
   accentOptions: [
-    { name: 'Teal', color: '#2dd4bf' }, // Default
-    { name: 'Blue', color: '#60a5fa' },
-    { name: 'Green', color: '#4ade80' },
-    { name: 'Purple', color: '#c084fc' },
-    { name: 'Orange', color: '#fb923c' },
-    { name: 'Pink', color: '#f472b6' },
+    { name: 'Turkis', color: '#2dd4bf' }, // Standard
+    { name: 'Blå', color: '#60a5fa' },
+    { name: 'Grønn', color: '#4ade80' },
+    { name: 'Lilla', color: '#c084fc' },
+    { name: 'Oransje', color: '#fb923c' },
+    { name: 'Rosa', color: '#f472b6' },
   ],
   colors: {
     // Brand colors - inverted for dark mode
@@ -47,4 +47,3 @@ export const darkTheme = {
     black: '#f1f5f9',
   },
 };
-

@@ -10,7 +10,7 @@ const sizeClasses = {
 
 export function Modal({ isOpen, onClose, title, description, children, footer, size = 'md' }) {
   const maxWidthClass = sizeClasses[size] || sizeClasses.md;
-  
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -19,7 +19,8 @@ export function Modal({ isOpen, onClose, title, description, children, footer, s
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-40 flex items-center justify-center bg-ink/70 backdrop-blur-sm px-4"
+          className="fixed inset-0 z-40 flex items-center justify-center px-4"
+          style={{ background: 'rgba(4,10,8,0.75)', backdropFilter: 'blur(6px)' }}
           onClick={onClose}
         >
           <motion.div
@@ -28,41 +29,52 @@ export function Modal({ isOpen, onClose, title, description, children, footer, s
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
             onClick={(e) => e.stopPropagation()}
-            className={`relative flex flex-col w-full ${maxWidthClass} max-h-[90vh] rounded-3xl border border-sand/70 bg-white shadow-2xl overflow-hidden`}
+            className={`relative flex flex-col w-full ${maxWidthClass} max-h-[90vh] rounded-3xl overflow-hidden f-glass-hero`}
           >
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute right-4 top-4 z-10 rounded-full border border-sand/60 bg-white/80 px-2 py-0.5 text-xs font-medium text-ink-subtle hover:text-ink"
-        >
-          Lukk
-        </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="absolute right-4 top-4 z-10 rounded-full px-2 py-0.5 text-xs font-medium transition"
+              style={{
+                background: 'rgba(255,255,255,0.08)',
+                border: '1px solid var(--f-border)',
+                color: 'var(--f-text-subtle)',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--f-text-body)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--f-text-subtle)')}
+            >
+              Lukk
+            </button>
 
-        {(title || description) && (
-          <header className="flex-shrink-0 px-6 pt-6 pb-4">
-            {title ? (
-              <h2 className="text-lg font-semibold text-ink">{title}</h2>
+            {(title || description) && (
+              <header
+                className="flex-shrink-0 px-6 pt-6 pb-4"
+                style={{ borderBottom: '1px solid var(--f-border-subtle)' }}
+              >
+                {title ? (
+                  <h2 className="text-lg font-semibold" style={{ color: 'var(--f-text)' }}>{title}</h2>
+                ) : null}
+                {description ? (
+                  <p className="mt-1 text-sm" style={{ color: 'var(--f-text-soft)' }}>{description}</p>
+                ) : null}
+              </header>
+            )}
+
+            <div className="flex-1 overflow-y-auto px-6">
+              <div className="space-y-4 text-sm py-5" style={{ color: 'var(--f-text-body)' }}>{children}</div>
+            </div>
+
+            {footer ? (
+              <footer
+                className="flex-shrink-0 px-6 pb-6 pt-4 flex items-center justify-end gap-3"
+                style={{ borderTop: '1px solid var(--f-border-subtle)', background: 'rgba(0,0,0,0.15)' }}
+              >
+                {footer}
+              </footer>
             ) : null}
-            {description ? (
-              <p className="mt-1 text-sm text-ink-soft">{description}</p>
-            ) : null}
-          </header>
-        )}
-
-        <div className="flex-1 overflow-y-auto px-6">
-          <div className="space-y-4 text-sm text-ink pb-4">{children}</div>
-        </div>
-
-        {footer ? (
-          <footer className="flex-shrink-0 px-6 pb-6 pt-4 flex items-center justify-end gap-3 border-t border-sand/40 bg-white">
-            {footer}
-          </footer>
-        ) : null}
           </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
   );
 }
-
-

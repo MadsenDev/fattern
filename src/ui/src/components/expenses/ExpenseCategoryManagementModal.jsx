@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Modal } from '../Modal';
 import { ExpenseCategoryModal } from './ExpenseCategoryModal';
 
@@ -59,7 +59,10 @@ export function ExpenseCategoryManagementModal({ isOpen, onClose, categories = [
           <div className="flex w-full items-center justify-between">
             <button
               type="button"
-              className="text-sm font-medium text-ink-subtle hover:text-ink"
+              className="text-sm font-medium transition"
+              style={{ color: 'var(--f-text-subtle)' }}
+              onMouseEnter={e => e.currentTarget.style.color = 'var(--f-text-body)'}
+              onMouseLeave={e => e.currentTarget.style.color = 'var(--f-text-subtle)'}
               onClick={onClose}
             >
               Lukk
@@ -67,7 +70,7 @@ export function ExpenseCategoryManagementModal({ isOpen, onClose, categories = [
             <button
               type="button"
               onClick={openCreateCategory}
-              className="rounded-2xl bg-brand-700 px-5 py-2 text-sm font-semibold text-white shadow-card"
+              className="f-btn-primary rounded-2xl px-5 py-2 text-sm font-semibold"
             >
               Ny kategori
             </button>
@@ -76,16 +79,16 @@ export function ExpenseCategoryManagementModal({ isOpen, onClose, categories = [
       >
         <div className="space-y-4">
           {categoryTree.length === 0 ? (
-            <p className="text-sm text-ink-subtle">Ingen kategorier opprettet ennå.</p>
+            <p className="text-sm" style={{ color: 'var(--f-text-subtle)' }}>Ingen kategorier opprettet ennå.</p>
           ) : (
             <div className="space-y-2">
               {categoryTree.map((category) => (
                 <div key={category.id} className="space-y-1">
-                  <div className="flex items-center justify-between rounded-lg border border-sand/60 bg-white px-4 py-3">
+                  <div className="flex items-center justify-between rounded-lg px-4 py-3" style={{ border: '1px solid var(--f-border-subtle)', background: 'rgba(255,255,255,0.03)' }}>
                     <div>
-                      <p className="text-sm font-medium text-ink">{category.name}</p>
+                      <p className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{category.name}</p>
                       {category.children.length > 0 && (
-                        <p className="mt-1 text-xs text-ink-subtle">
+                        <p className="mt-1 text-xs" style={{ color: 'var(--f-text-subtle)' }}>
                           {category.children.length} underkategori{category.children.length !== 1 ? 'er' : ''}
                         </p>
                       )}
@@ -94,14 +97,20 @@ export function ExpenseCategoryManagementModal({ isOpen, onClose, categories = [
                       <button
                         type="button"
                         onClick={() => openEditCategory(category)}
-                        className="text-sm font-medium text-accent hover:underline"
+                        className="text-sm font-medium transition"
+                        style={{ color: 'var(--f-green-text)' }}
+                        onMouseEnter={e => e.currentTarget.style.opacity = '0.8'}
+                        onMouseLeave={e => e.currentTarget.style.opacity = '1'}
                       >
                         Rediger
                       </button>
                       <button
                         type="button"
                         onClick={() => onDeleteCategory?.(category)}
-                        className="text-sm font-medium text-rose-600 hover:underline"
+                        className="text-sm font-medium transition"
+                        style={{ color: 'var(--f-danger-text)' }}
+                        onMouseEnter={e => e.currentTarget.style.opacity = '0.8'}
+                        onMouseLeave={e => e.currentTarget.style.opacity = '1'}
                       >
                         Slett
                       </button>
@@ -110,20 +119,26 @@ export function ExpenseCategoryManagementModal({ isOpen, onClose, categories = [
                   {category.children.length > 0 && (
                     <div className="ml-6 space-y-1">
                       {category.children.map((child) => (
-                        <div key={child.id} className="flex items-center justify-between rounded-lg border border-sand/40 bg-cloud/30 px-4 py-2">
-                          <p className="text-sm text-ink-soft">{child.name}</p>
+                        <div key={child.id} className="flex items-center justify-between rounded-lg px-4 py-2" style={{ border: '1px solid var(--f-border-faint)', background: 'rgba(255,255,255,0.02)' }}>
+                          <p className="text-sm" style={{ color: 'var(--f-text-soft)' }}>{child.name}</p>
                           <div className="flex items-center gap-2">
                             <button
                               type="button"
                               onClick={() => openEditCategory(child)}
-                              className="text-sm font-medium text-accent hover:underline"
+                              className="text-sm font-medium transition"
+                              style={{ color: 'var(--f-green-text)' }}
+                              onMouseEnter={e => e.currentTarget.style.opacity = '0.8'}
+                              onMouseLeave={e => e.currentTarget.style.opacity = '1'}
                             >
                               Rediger
                             </button>
                             <button
                               type="button"
                               onClick={() => onDeleteCategory?.(child)}
-                              className="text-sm font-medium text-rose-600 hover:underline"
+                              className="text-sm font-medium transition"
+                              style={{ color: 'var(--f-danger-text)' }}
+                              onMouseEnter={e => e.currentTarget.style.opacity = '0.8'}
+                              onMouseLeave={e => e.currentTarget.style.opacity = '1'}
                             >
                               Slett
                             </button>
@@ -149,4 +164,3 @@ export function ExpenseCategoryManagementModal({ isOpen, onClose, categories = [
     </>
   );
 }
-

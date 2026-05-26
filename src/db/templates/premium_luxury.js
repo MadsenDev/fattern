@@ -1,16 +1,16 @@
 /**
- * Luxury Premium Template
- * Ultra-refined design with sophisticated typography, generous whitespace, and elegant details
+ * Luksus premium-mal
+ * Raffinert design med sofistikert typografi, god luft og elegante detaljer
  */
 module.exports = {
   schemaVersion: 1,
   meta: {
     id: 'premium_luxury',
-    name: 'Luxury',
-    description: 'Ultra-refined design with sophisticated typography, generous whitespace, and elegant details',
+    name: 'Luksus',
+    description: 'Raffinert design med sofistikert typografi, god luft og elegante detaljer',
     version: '1.0.0',
     premium: true,
-    tags: ['luxury', 'elegant', 'premium', 'norsk'],
+    tags: ['luksus', 'elegant', 'premium', 'norsk'],
     createdAt: '2025-01-01T00:00:00.000Z',
     updatedAt: '2025-01-01T00:00:00.000Z',
   },
@@ -47,7 +47,7 @@ module.exports = {
       y: 95,
       width: 400,
       height: 60,
-      content: 'INVOICE',
+      content: 'FAKTURA',
       fontFamily: 'Inter',
       fontSize: 56,
       fontWeight: 100,
@@ -63,7 +63,7 @@ module.exports = {
       y: 175,
       width: 180,
       height: 11,
-      content: 'Invoice Number',
+      content: 'Fakturanummer',
       fontFamily: 'Inter',
       fontSize: 9,
       fontWeight: 500,
@@ -94,7 +94,7 @@ module.exports = {
       y: 230,
       width: 180,
       height: 11,
-      content: 'Date Issued',
+      content: 'Fakturadato',
       fontFamily: 'Inter',
       fontSize: 9,
       fontWeight: 500,
@@ -225,7 +225,7 @@ module.exports = {
       y: 320,
       width: 200,
       height: 12,
-      content: 'Bill To',
+      content: 'Faktureres til',
       fontFamily: 'Inter',
       fontSize: 9,
       fontWeight: 600,
@@ -301,11 +301,11 @@ module.exports = {
       width: 554,
       height: 350,
       columns: [
-        { header: 'Description', field: 'description', width: 280, align: 'left' },
-        { header: 'Qty', field: 'quantity', width: 70, align: 'right' },
-        { header: 'Unit Price', field: 'unit_price', width: 100, align: 'right' },
-        { header: 'VAT', field: 'vat_rate', width: 50, align: 'right' },
-        { header: 'Amount', field: 'line_total', width: 100, align: 'right' },
+        { header: 'Beskrivelse', field: 'description', width: 280, align: 'left' },
+        { header: 'Ant.', field: 'quantity', width: 70, align: 'right' },
+        { header: 'Enhetspris', field: 'unit_price', width: 100, align: 'right' },
+        { header: 'MVA', field: 'vat_rate', width: 50, align: 'right' },
+        { header: 'Beløp', field: 'line_total', width: 100, align: 'right' },
       ],
       rowHeight: 32,
       maxRows: 9,
@@ -344,7 +344,7 @@ module.exports = {
       y: 850,
       width: 150,
       height: 20,
-      content: 'Subtotal',
+      content: 'Delsum',
       fontFamily: 'Inter',
       fontSize: 11,
       fontWeight: 500,
@@ -374,7 +374,7 @@ module.exports = {
       y: 880,
       width: 150,
       height: 20,
-      content: 'VAT',
+      content: 'MVA',
       fontFamily: 'Inter',
       fontSize: 11,
       fontWeight: 500,
@@ -416,7 +416,7 @@ module.exports = {
       y: 940,
       width: 150,
       height: 28,
-      content: 'Total Amount',
+      content: 'Totalt beløp',
       fontFamily: 'Inter',
       fontSize: 16,
       fontWeight: 700,
@@ -456,4 +456,3 @@ module.exports = {
     },
   ],
 };
-

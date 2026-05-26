@@ -1,26 +1,50 @@
 import { useTranslation } from 'react-i18next';
-import { FiSearch, FiX } from 'react-icons/fi';
+import { IconSearch, IconX } from '@tabler/icons-react';
 
 export function SearchBar({ value, onChange, placeholder }) {
   const { t } = useTranslation();
   return (
-    <div className="relative">
-      <FiSearch className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-subtle" />
+    <div style={{ position: 'relative' }}>
+      <IconSearch
+        size={15}
+        stroke={1.8}
+        style={{
+          position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)',
+          color: 'var(--f-text-subtle)', pointerEvents: 'none',
+        }}
+      />
       <input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder || t('common.search')}
-        className="w-full rounded-2xl border border-sand bg-white py-2 pl-9 pr-9 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-200"
+        style={{
+          width: '100%',
+          borderRadius: 10,
+          border: '1px solid var(--f-border)',
+          background: 'var(--f-surface)',
+          backdropFilter: 'blur(12px)',
+          color: 'var(--f-text-body)',
+          fontSize: 13,
+          padding: '7px 34px',
+          outline: 'none',
+          transition: 'border-color 0.15s',
+        }}
+        onFocus={e => (e.target.style.borderColor = 'var(--f-border-green)')}
+        onBlur={e  => (e.target.style.borderColor = 'var(--f-border)')}
       />
       {value && (
         <button
           type="button"
           onClick={() => onChange('')}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-subtle hover:text-ink"
           aria-label="Tøm søk"
+          style={{
+            position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
+            background: 'none', border: 'none', cursor: 'pointer',
+            color: 'var(--f-text-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
         >
-          <FiX className="h-4 w-4" />
+          <IconX size={14} stroke={2} />
         </button>
       )}
     </div>

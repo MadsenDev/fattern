@@ -1,4 +1,4 @@
-import { FiCheck } from 'react-icons/fi';
+import { IconCheck } from '@tabler/icons-react';
 
 export function Checkbox({ checked, onChange, label, description, disabled = false, className = '' }) {
   return (
@@ -14,30 +14,30 @@ export function Checkbox({ checked, onChange, label, description, disabled = fal
           className="sr-only"
         />
         <div
-          className={`relative flex h-5 w-5 items-center justify-center rounded-xl border-2 transition-all duration-200 shadow-sm ${
-            checked
-              ? 'bg-brand-700 border-brand-700 text-white shadow-brand-700/20'
-              : 'bg-white border-sand/60 text-transparent group-hover:border-brand-400 group-hover:bg-brand-50/50'
-          } ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'} ${
-            !disabled && !checked ? 'group-hover:shadow-md' : ''
-          }`}
+          className="relative flex h-5 w-5 items-center justify-center rounded-md transition-all duration-200"
+          style={{
+            background: checked ? 'var(--f-green-bg)' : 'rgba(255,255,255,0.06)',
+            border: checked ? '1.5px solid var(--f-border-green)' : '1.5px solid var(--f-border)',
+            color: checked ? 'var(--f-green-text)' : 'transparent',
+            boxShadow: checked ? '0 0 8px rgba(63,217,160,0.2)' : 'none',
+          }}
         >
-          {checked && (
-            <FiCheck className="h-3.5 w-3.5 transition-all duration-200" style={{ strokeWidth: 2.5 }} />
-          )}
+          {checked && <IconCheck size={12} stroke={2.8} />}
         </div>
       </div>
       <div className="flex-1 min-w-0 pt-0.5">
         {label && (
-          <span className={`block text-sm font-medium transition-colors ${checked ? 'text-ink' : 'text-ink-soft'}`}>
+          <span
+            className="block text-sm font-medium transition-colors"
+            style={{ color: checked ? 'var(--f-text-body)' : 'var(--f-text-soft)' }}
+          >
             {label}
           </span>
         )}
         {description && (
-          <span className="mt-0.5 block text-xs text-ink-subtle">{description}</span>
+          <span className="mt-0.5 block text-xs" style={{ color: 'var(--f-text-subtle)' }}>{description}</span>
         )}
       </div>
     </label>
   );
 }
-
