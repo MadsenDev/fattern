@@ -8,6 +8,7 @@ const MONTH_NAMES_NO = [
 ];
 
 function monthLabel(yyyyMm) {
+  if (yyyyMm === 'ukjent') return 'Ukjent dato';
   const [year, month] = yyyyMm.split('-');
   return `${MONTH_NAMES_NO[parseInt(month, 10) - 1]} ${year}`;
 }

@@ -6,6 +6,7 @@ export function ExpenseDetailPanel({ expense, formatCurrency, onEdit, onDelete, 
   const [attachmentSrc, setAttachmentSrc] = useState(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const dialogRef = useRef(null);
+  const closeTimerRef = useRef(null);
 
   // Slide in when expense mounts
   useEffect(() => {
@@ -41,10 +42,15 @@ export function ExpenseDetailPanel({ expense, formatCurrency, onEdit, onDelete, 
     }
   }, [lightboxOpen]);
 
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    };
+  }, []);
+
   const handleClose = () => {
     setVisible(false);
-    // Wait for slide-out transition before clearing selection
-    setTimeout(() => onClose?.(), 220);
+    closeTimerRef.current = setTimeout(() => onClose?.(), 220);
   };
 
   if (!expense) return null;
