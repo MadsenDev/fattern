@@ -35,6 +35,8 @@ contextBridge.exposeInMainWorld('fattern', {
     listExpenseCategories: () => invoke('db:list-expense-categories'),
     listInvoices: (options) => invoke('db:list-invoices', options),
     listExpenses: (options) => invoke('db:list-expenses', options),
+    getExpenseCategoryBreakdown: (budgetYearId) =>
+      invoke('db:get-expense-category-breakdown', { budgetYearId }),
     listCustomers: () => invoke('db:list-customers'),
     listProducts: (options) => invoke('db:list-products', options),
     createProduct: (product) => invoke('db:create-product', product),
@@ -97,5 +99,8 @@ contextBridge.exposeInMainWorld('fattern', {
   saft: {
     parsePreview: (filepath) => invoke('saft:parse-preview', filepath),
     import: (filepath, options) => invoke('saft:import', filepath, options),
+  },
+  app: {
+    wipeAllData: () => invoke('app:wipe-all-data'),
   },
 });

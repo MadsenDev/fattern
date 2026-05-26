@@ -79,6 +79,9 @@ function registerDatabaseHandlers(database) {
   handle('db:update-expense-category', (categoryId, category) => database.updateExpenseCategory(categoryId, category));
   handle('db:delete-expense-category', (categoryId) => database.deleteExpenseCategory(categoryId));
   handle('db:list-expense-categories', () => database.listExpenseCategories());
+  handle('db:get-expense-category-breakdown', ({ budgetYearId }) =>
+    database.getExpenseCategoryBreakdown(budgetYearId)
+  );
   handle('db:list-invoices', ({ budgetYearId, limit } = {}) =>
     database.listInvoicesForBudgetYear(budgetYearId, limit)
   );
