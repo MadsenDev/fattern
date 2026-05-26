@@ -9,6 +9,11 @@ function toDateOnlyString(dateLike) {
   return `${year}-${month}-${day}`;
 }
 
+const CATEGORY_COLOR_PALETTE = [
+  '#3fd9a0', '#6ab0c8', '#c47eb0', '#e8a84a', '#e87a6a',
+  '#7ab0e8', '#a8c87a', '#c8a06a', '#8ab0c8', '#b8b0e8',
+];
+
 class FatternDatabase {
   constructor() {
     const { db } = initializeDatabase();
@@ -18,6 +23,50 @@ class FatternDatabase {
 
   close() {
     this.db?.close();
+  }
+
+  /**
+   * Wipes every table and re-initialises a clean database.
+   * Called only from the "Wipe all data" danger-zone action.
+   */
+  wipeAllData() {
+    const tables = [
+      'invoice_expense_links',
+      'invoice_items',
+      'invoices',
+      'expense_items',
+      'expenses',
+      'expense_categories',
+      'budget_years',
+      'products',
+      'customers',
+      'settings',
+      'companies',
+    ];
+
+    // Pragmas must run outside a transaction
+    this.db.pragma('foreign_keys = OFF');
+
+    const wipe = this.db.transaction(() => {
+      for (const table of tables) {
+        this.db.prepare(`DELETE FROM ${table}`).run();
+      }
+      // Reset auto-increment counters (sqlite_sequence only exists if any
+      // AUTOINCREMENT table has ever had a row — ignore if missing)
+      try {
+        this.db.prepare(`DELETE FROM sqlite_sequence`).run();
+      } catch (_) { /* table may not exist yet */ }
+    });
+
+    try {
+      wipe();
+    } finally {
+      this.db.pragma('foreign_keys = ON');
+    }
+
+    // Re-seed the essentials so the app starts in a clean but functional state
+    this.ensureCompany();
+    this.ensureCurrentBudgetYear();
   }
 
   /**
@@ -479,14 +528,22 @@ class FatternDatabase {
   }
 
   createExpenseCategory(category) {
+    // Auto-assign color from palette if not provided
+    let color = category.color || null;
+    if (!color) {
+      const count = this.db.prepare('SELECT COUNT(*) as n FROM expense_categories').get().n;
+      color = CATEGORY_COLOR_PALETTE[count % CATEGORY_COLOR_PALETTE.length];
+    }
+
     const insert = this.db.prepare(`
-      INSERT INTO expense_categories (name, parent_id)
-      VALUES (@name, @parent_id)
+      INSERT INTO expense_categories (name, parent_id, color)
+      VALUES (@name, @parent_id, @color)
     `);
 
     const info = insert.run({
       name: category.name,
       parent_id: category.parentId || null,
+      color,
     });
 
     return this.db.prepare('SELECT * FROM expense_categories WHERE id = ?').get(info.lastInsertRowid);
@@ -618,6 +675,7 @@ class FatternDatabase {
       id: categoryId,
       name: updates.name !== undefined ? updates.name : existing.name,
       parent_id: updates.parentId !== undefined ? (updates.parentId || null) : existing.parent_id,
+      color: updates.color !== undefined ? updates.color : existing.color,
     };
 
     this.db
@@ -625,6 +683,7 @@ class FatternDatabase {
         `UPDATE expense_categories
          SET name = @name,
              parent_id = @parent_id,
+             color = @color,
              updated_at = CURRENT_TIMESTAMP
          WHERE id = @id`
       )
@@ -705,7 +764,8 @@ class FatternDatabase {
     const query = `
       SELECT
         expenses.*,
-        expense_categories.name as category_name
+        expense_categories.name as category_name,
+        expense_categories.color as category_color
       FROM expenses
       LEFT JOIN expense_categories ON expense_categories.id = expenses.category_id
       WHERE expenses.date BETWEEN @start AND @end
@@ -721,12 +781,47 @@ class FatternDatabase {
       vendor: row.vendor || 'Ukjent leverandør',
       amount: row.amount ?? 0,
       category_name: row.category_name || null,
+      category_color: row.category_color || null,
       date: row.date,
       currency: row.currency || 'NOK',
       category_id: row.category_id,
       notes: row.notes,
       attachment_path: row.attachment_path,
     }));
+  }
+
+  getExpenseCategoryBreakdown(budgetYearId) {
+    const { start, end } = this.getBudgetYearRange(budgetYearId);
+
+    const rows = this.db.prepare(`
+      SELECT
+        ec.id,
+        ec.name,
+        ec.color,
+        COALESCE(SUM(e.amount), 0) AS total
+      FROM expense_categories ec
+      LEFT JOIN expenses e
+        ON e.category_id = ec.id
+        AND e.date BETWEEN @start AND @end
+      GROUP BY ec.id
+      ORDER BY total DESC
+    `).all({ start, end });
+
+    // Include uncategorised row
+    const uncatTotal = this.db.prepare(`
+      SELECT COALESCE(SUM(amount), 0) AS total
+      FROM expenses
+      WHERE category_id IS NULL
+        AND date BETWEEN @start AND @end
+    `).get({ start, end }).total;
+
+    const result = rows.filter((r) => r.total > 0);
+
+    if (uncatTotal > 0) {
+      result.push({ id: null, name: 'Ukategorisert', color: '#555555', total: uncatTotal });
+    }
+
+    return result;
   }
 
   listCustomers() {
