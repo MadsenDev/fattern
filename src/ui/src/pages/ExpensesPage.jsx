@@ -5,7 +5,7 @@ import { ExpenseCategorySidebar } from '../components/expenses/ExpenseCategorySi
 import { SearchBar } from '../components/SearchBar';
 import { useSearch } from '../hooks/useSearch';
 
-export function ExpensesPage({ expenses, expenseCategories = [], formatCurrency: fmt, onCreateExpense, onEditExpense, onDeleteExpense, onManageCategories }) {
+export function ExpensesPage({ expenses, breakdown = [], expenseCategories = [], formatCurrency: fmt, onCreateExpense, onEditExpense, onDeleteExpense, onManageCategories }) {
   const { t } = useTranslation();
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
 
