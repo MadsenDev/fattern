@@ -82,7 +82,7 @@
     --f-border-green:  rgba(45,180,130,0.35);
     --f-border-green-pill: rgba(63,217,160,0.2);
 
-    /* Green accent */
+    /* Green accent — set dynamically by applyTheme() from colors.accent */
     --f-green:         #3fd9a0;
     --f-green-dim:     rgba(63,217,160,0.35);
     --f-green-bright:  rgba(63,217,160,0.9);
@@ -92,6 +92,8 @@
     --f-green-text:    rgba(80,220,160,0.95);
     --f-green-text-dim: rgba(63,217,160,0.7);
     --f-green-shadow:  rgba(45,180,130,0.3);
+    --f-border-green:  rgba(45,180,130,0.35);
+    --f-border-green-pill: rgba(63,217,160,0.2);
 
     /* Blue / purple accents */
     --f-blue:          rgba(80,140,220,0.9);
@@ -132,6 +134,16 @@
     --f-topbar-h: 40px;
     --f-rail-w:   52px;
     --f-bottom-h: 38px;
+
+    /* Glass hero (modals, hero cards) */
+    --f-glass-hero-bg:           rgba(255,255,255,0.05);
+    --f-glass-hero-border:       rgba(255,255,255,0.1);
+    --f-glass-hero-inner-shadow: rgba(255,255,255,0.1);
+    --f-glass-hero-outer-shadow: rgba(0,0,0,0.25);
+
+    /* Scrollbar */
+    --f-scrollbar-thumb:       rgba(255,255,255,0.12);
+    --f-scrollbar-thumb-hover: rgba(255,255,255,0.22);
   }
 
   /* ─── Ambient dark background applied globally ─── */
@@ -153,8 +165,8 @@
 /* ─── Scrollbar ─── */
 ::-webkit-scrollbar          { width: 3px; }
 ::-webkit-scrollbar-track    { background: transparent; }
-::-webkit-scrollbar-thumb    { background: rgba(255,255,255,0.12); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+::-webkit-scrollbar-thumb    { background: var(--f-scrollbar-thumb, rgba(255,255,255,0.12)); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--f-scrollbar-thumb-hover, rgba(255,255,255,0.22)); }
 
 /* ─── Legacy Tailwind component utilities (kept for inner pages) ─── */
 @layer components {
@@ -177,10 +189,12 @@
   }
 
   .f-glass-hero {
-    background: rgba(255,255,255,0.05);
+    background: var(--f-glass-hero-bg, rgba(255,255,255,0.05));
     backdrop-filter: blur(24px) saturate(1.5);
-    border: 1px solid rgba(255,255,255,0.1);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.1);
+    border: 1px solid var(--f-glass-hero-border, rgba(255,255,255,0.1));
+    box-shadow:
+      0 8px 32px var(--f-glass-hero-outer-shadow, rgba(0,0,0,0.25)),
+      inset 0 1px 0 var(--f-glass-hero-inner-shadow, rgba(255,255,255,0.1));
   }
 
   /* ── Form inputs ── */

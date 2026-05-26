@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   IconChartBar,
@@ -42,6 +42,8 @@ import { useCustomers } from './hooks/useCustomers';
 import { useProducts } from './hooks/useProducts';
 import { useTheme } from './hooks/useTheme';
 import { useSettings } from './hooks/useSettings';
+import { useSupporterPack } from './hooks/useSupporterPack';
+import { useKonamiCode } from './hooks/useKonamiCode';
 import i18n from './i18n/config';
 
 function hasCompletedOnboarding() {
@@ -90,6 +92,21 @@ function App() {
   const [customersRefreshKey, setCustomersRefreshKey] = useState(0);
   const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, item: null, type: null, onConfirm: null, onDeactivate: null, showDeactivate: false });
   const { toasts, toast, removeToast } = useToast();
+  const { isSupporter, activateSupporterPack, deactivateSupporterPack } = useSupporterPack();
+
+  const handleKonami = useCallback(async () => {
+    if (isSupporter) {
+      deactivateSupporterPack();
+      toast('👋 Supporter-modus deaktivert', 'info');
+    } else {
+      await activateSupporterPack({
+        features: ['premium_themes', 'premium_templates', 'ai', 'ai_csv_mapping'],
+      });
+      toast('🎉 Supporter-modus aktivert!', 'success');
+    }
+  }, [isSupporter, activateSupporterPack, deactivateSupporterPack, toast]);
+
+  useKonamiCode(handleKonami);
 
   const {
     company,

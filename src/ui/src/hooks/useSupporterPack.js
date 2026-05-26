@@ -103,6 +103,17 @@ export function useSupporterPack() {
     }
   };
 
+  const deactivateSupporterPack = () => {
+    try {
+      localStorage.removeItem(SUPPORTER_KEY);
+      setIsSupporter(false);
+      setFeatures([]);
+      setAiCredits(0);
+    } catch (error) {
+      console.error('Failed to deactivate supporter pack', error);
+    }
+  };
+
   const hasFeature = (featureName) => {
     if (!isSupporter) return false;
     return features.includes(featureName);
@@ -132,6 +143,7 @@ export function useSupporterPack() {
     activateSupporterPack,
     hasFeature,
     useAiCredit,
+    deactivateSupporterPack,
   };
 }
 
