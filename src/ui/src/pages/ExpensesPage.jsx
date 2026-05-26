@@ -1,49 +1,78 @@
+// src/ui/src/pages/ExpensesPage.jsx
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ExpenseCard } from '../components/expenses/ExpenseCard';
-import { ExpenseCategorySidebar } from '../components/expenses/ExpenseCategorySidebar';
-import { SearchBar } from '../components/SearchBar';
-import { useSearch } from '../hooks/useSearch';
+import { ExpenseBreakdownBar } from '../components/expenses/ExpenseBreakdownBar';
+import { ExpenseCategoryChips } from '../components/expenses/ExpenseCategoryChips';
+import { ExpenseTimeline } from '../components/expenses/ExpenseTimeline';
+import { ExpenseDetailPanel } from '../components/expenses/ExpenseDetailPanel';
 
-export function ExpensesPage({ expenses, breakdown = [], expenseCategories = [], formatCurrency: fmt, onCreateExpense, onEditExpense, onDeleteExpense, onManageCategories }) {
+export function ExpensesPage({
+  expenses = [],
+  breakdown = [],
+  expenseCategories = [],
+  formatCurrency: fmt,
+  onCreateExpense,
+  onEditExpense,
+  onDeleteExpense,
+  onManageCategories,
+}) {
   const { t } = useTranslation();
-  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  const [activeCategoryId, setActiveCategoryId] = useState(null);
+  const [query, setQuery] = useState('');
+  const [selectedExpenseId, setSelectedExpenseId] = useState(null);
+  const panelOpen = selectedExpenseId !== null;
 
-  // Filter by category first
-  const filteredByCategory = useMemo(() => {
-    if (!selectedCategoryId) return expenses || [];
-    return (expenses || []).filter((expense) => expense.category_id === selectedCategoryId);
-  }, [expenses, selectedCategoryId]);
+  // Filter by category then search
+  const filteredExpenses = useMemo(() => {
+    let list = expenses;
+    if (activeCategoryId !== null) {
+      list = list.filter((e) => e.category_id === activeCategoryId);
+    }
+    if (query.trim()) {
+      const q = query.toLowerCase();
+      list = list.filter(
+        (e) =>
+          (e.vendor || '').toLowerCase().includes(q) ||
+          (e.notes || '').toLowerCase().includes(q) ||
+          (e.category_name || '').toLowerCase().includes(q),
+      );
+    }
+    return list;
+  }, [expenses, activeCategoryId, query]);
 
-  // Then search within the category result
-  const { query, setQuery, results: filteredExpenses } = useSearch(filteredByCategory, ['vendor', 'notes']);
+  const totalAmount = useMemo(() => expenses.reduce((s, e) => s + (e.amount || 0), 0), [expenses]);
 
-  const selectedCategoryName = useMemo(() => {
-    if (!selectedCategoryId) return t('expense.all_expenses_label');
-    const category = expenseCategories.find((c) => c.id === selectedCategoryId);
-    return category?.name || t('expense.unknown_category');
-  }, [selectedCategoryId, expenseCategories, t]);
+  const selectedExpense = useMemo(
+    () => (selectedExpenseId ? expenses.find((e) => e.id === selectedExpenseId) || null : null),
+    [selectedExpenseId, expenses],
+  );
 
-  const emptyMessage = query
-    ? t('expense.no_results', { query })
-    : selectedCategoryId
-      ? t('expense.try_other_category')
-      : t('expense.register_first');
+  const handleSelectCategory = (id) => {
+    setActiveCategoryId((prev) => (prev === id ? null : id));
+  };
+
+  const handleDeleteExpense = async (expenseId) => {
+    await onDeleteExpense?.(expenseId);
+    setSelectedExpenseId(null);
+  };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
+      {/* Page header */}
       <header className="f-glass rounded-3xl overflow-hidden" style={{ position: 'relative' }}>
         <div className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(45,180,130,0.07) 0%, transparent 60%)' }} />
         <div className="relative z-10 p-6 lg:p-8">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.3em]" style={{ color: 'var(--f-text-subtle)' }}>{t('expense.title')}</p>
-              <h1 className="mt-3 text-3xl font-semibold" style={{ color: 'var(--f-text)' }}>{selectedCategoryName}</h1>
-              <p className="mt-2 text-sm" style={{ color: 'var(--f-text-soft)' }}>
+              <p className="text-xs uppercase tracking-[0.3em]" style={{ color: 'var(--f-text-subtle)' }}>
+                {t('expense.title')}
+              </p>
+              <h1 className="mt-2 text-3xl font-semibold" style={{ color: 'var(--f-text)' }}>
+                {fmt ? fmt(totalAmount) : totalAmount}
+              </h1>
+              <p className="mt-1 text-sm" style={{ color: 'var(--f-text-soft)' }}>
                 {filteredExpenses.length}{' '}
-                {filteredExpenses.length === 1
-                  ? t('expense.expense_singular')
-                  : t('expense.expense_plural')}
+                {filteredExpenses.length === 1 ? t('expense.expense_singular') : t('expense.expense_plural')}
               </p>
             </div>
             <div className="flex gap-3">
@@ -66,48 +95,46 @@ export function ExpensesPage({ expenses, breakdown = [], expenseCategories = [],
         </div>
       </header>
 
-      <div className="flex gap-6">
-        {/* Category Sidebar */}
-        <div className="w-64 flex-shrink-0">
-          <div className="f-glass rounded-3xl overflow-hidden" style={{ minHeight: '600px' }}>
-            <ExpenseCategorySidebar
-              categories={expenseCategories}
-              selectedCategoryId={selectedCategoryId}
-              onSelectCategory={setSelectedCategoryId}
+      {/* Main content + detail panel */}
+      <div style={{ display: 'flex', gap: 16, position: 'relative', alignItems: 'flex-start' }}>
+        {/* Main column */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="f-glass rounded-3xl p-6 space-y-4">
+            {breakdown.length > 0 && (
+              <ExpenseBreakdownBar
+                breakdown={breakdown}
+                activeCategory={activeCategoryId}
+                onSelectCategory={handleSelectCategory}
+              />
+            )}
+
+            <ExpenseCategoryChips
+              breakdown={breakdown}
+              activeCategory={activeCategoryId}
+              onSelectCategory={handleSelectCategory}
+              query={query}
+              onQueryChange={setQuery}
+            />
+
+            <ExpenseTimeline
+              expenses={filteredExpenses}
+              formatCurrency={fmt}
+              onSelectExpense={setSelectedExpenseId}
+              selectedExpenseId={selectedExpenseId}
             />
           </div>
         </div>
 
-        {/* Expenses Grid */}
-        <div className="flex-1 min-w-0">
-          <div className="f-glass rounded-3xl p-6">
-            {/* Search bar above grid */}
-            <div className="mb-4">
-              <SearchBar value={query} onChange={setQuery} />
-            </div>
-
-            {filteredExpenses.length === 0 ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="text-center">
-                  <p className="text-sm font-medium" style={{ color: 'var(--f-text-soft)' }}>{t('expense.empty')}</p>
-                  <p className="mt-1 text-xs" style={{ color: 'var(--f-text-subtle)' }}>{emptyMessage}</p>
-                </div>
-              </div>
-            ) : (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {filteredExpenses.map((expense) => (
-                  <ExpenseCard
-                    key={expense.id}
-                    expense={expense}
-                    formatCurrency={fmt}
-                    onEdit={onEditExpense}
-                    onDelete={onDeleteExpense}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+        {/* Detail panel */}
+        {panelOpen && (
+          <ExpenseDetailPanel
+            expense={selectedExpense}
+            formatCurrency={fmt}
+            onEdit={(expense) => onEditExpense?.(expense)}
+            onDelete={handleDeleteExpense}
+            onClose={() => setSelectedExpenseId(null)}
+          />
+        )}
       </div>
     </div>
   );
