@@ -81,6 +81,7 @@ const schemaStatements = [
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL,
     parent_id INTEGER REFERENCES expense_categories(id) ON DELETE SET NULL,
+    color TEXT,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
   );`,

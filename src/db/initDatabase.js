@@ -73,6 +73,15 @@ function applyMigrations(db) {
       console.warn('Migration warning (invoices.payment_date):', error.message);
     }
   }
+
+  // Add color column to expense_categories if it doesn't exist
+  try {
+    db.prepare('ALTER TABLE expense_categories ADD COLUMN color TEXT').run();
+  } catch (error) {
+    if (!error.message.includes('duplicate column')) {
+      console.warn('Migration warning (expense_categories.color):', error.message);
+    }
+  }
 }
 
 function initializeDatabase() {
