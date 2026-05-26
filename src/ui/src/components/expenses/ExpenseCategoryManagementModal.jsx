@@ -86,7 +86,21 @@ export function ExpenseCategoryManagementModal({ isOpen, onClose, categories = [
                 <div key={category.id} className="space-y-1">
                   <div className="flex items-center justify-between rounded-lg px-4 py-3" style={{ border: '1px solid var(--f-border-subtle)', background: 'rgba(255,255,255,0.03)' }}>
                     <div>
-                      <p className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{category.name}</p>
+                      <p className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                          <span
+                            style={{
+                              width: 10,
+                              height: 10,
+                              borderRadius: '50%',
+                              background: category.color || '#888888',
+                              flexShrink: 0,
+                              display: 'inline-block',
+                            }}
+                          />
+                          {category.name}
+                        </span>
+                      </p>
                       {category.children.length > 0 && (
                         <p className="mt-1 text-xs" style={{ color: 'var(--f-text-subtle)' }}>
                           {category.children.length} underkategori{category.children.length !== 1 ? 'er' : ''}
@@ -120,7 +134,21 @@ export function ExpenseCategoryManagementModal({ isOpen, onClose, categories = [
                     <div className="ml-6 space-y-1">
                       {category.children.map((child) => (
                         <div key={child.id} className="flex items-center justify-between rounded-lg px-4 py-2" style={{ border: '1px solid var(--f-border-faint)', background: 'rgba(255,255,255,0.02)' }}>
-                          <p className="text-sm" style={{ color: 'var(--f-text-soft)' }}>{child.name}</p>
+                          <p className="text-sm" style={{ color: 'var(--f-text-soft)' }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                              <span
+                                style={{
+                                  width: 10,
+                                  height: 10,
+                                  borderRadius: '50%',
+                                  background: child.color || '#888888',
+                                  flexShrink: 0,
+                                  display: 'inline-block',
+                                }}
+                              />
+                              {child.name}
+                            </span>
+                          </p>
                           <div className="flex items-center gap-2">
                             <button
                               type="button"
