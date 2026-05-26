@@ -1,25 +1,32 @@
 import { useEffect, useState } from 'react';
 
 export function useExpenses(budgetYearId, options = {}) {
-  const [data, setData] = useState(null);
+  const [expenses, setExpenses] = useState(null);
+  const [breakdown, setBreakdown] = useState(null);
   const [isLoading, setLoading] = useState(false);
   const { limit, refreshKey } = options;
 
   useEffect(() => {
     const api = typeof window !== 'undefined' ? window.fattern?.db : null;
     if (!api?.listExpenses || !budgetYearId) {
-      setData(null);
+      setExpenses(null);
+      setBreakdown(null);
       return;
     }
 
     let cancelled = false;
     setLoading(true);
 
-    api
-      .listExpenses({ budgetYearId, limit })
-      .then((rows) => {
+    Promise.all([
+      api.listExpenses({ budgetYearId, limit }),
+      api.getExpenseCategoryBreakdown
+        ? api.getExpenseCategoryBreakdown(budgetYearId)
+        : Promise.resolve([]),
+    ])
+      .then(([rows, breakdownRows]) => {
         if (!cancelled) {
-          setData(rows);
+          setExpenses(rows);
+          setBreakdown(breakdownRows);
         }
       })
       .catch((error) => {
@@ -34,6 +41,5 @@ export function useExpenses(budgetYearId, options = {}) {
     };
   }, [budgetYearId, limit, refreshKey]);
 
-  return { expenses: data, isLoading };
+  return { expenses, breakdown, isLoading };
 }
-

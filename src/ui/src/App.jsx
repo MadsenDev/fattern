@@ -6,7 +6,6 @@ import {
   IconCoin,
   IconReceipt,
 } from '@tabler/icons-react';
-import { LoadingScreen } from './components/LoadingScreen';
 import { OnboardingFlow } from './components/OnboardingFlow';
 import { Layout } from './components/layout/Layout';
 import { TitleBar } from './components/TitleBar';
@@ -125,7 +124,7 @@ function App() {
   const { invoices: liveInvoices } = useInvoices(selectedBudgetYearId, { limit: 10, refreshKey: invoicesRefreshKey });
   const { invoices: allInvoices } = useInvoices(selectedBudgetYearId, { limit: null, refreshKey: invoicesRefreshKey });
   const { expenses: liveExpenses } = useExpenses(selectedBudgetYearId, { limit: 10, refreshKey: expensesRefreshKey });
-  const { expenses: allExpenses } = useExpenses(selectedBudgetYearId, { limit: null, refreshKey: expensesRefreshKey });
+  const { expenses: allExpenses, breakdown: expenseBreakdown } = useExpenses(selectedBudgetYearId, { limit: null, refreshKey: expensesRefreshKey });
   const { customers } = useCustomers(customersRefreshKey);
   const { products } = useProducts({ includeInactive: true, refreshKey: productsRefreshKey });
 
@@ -856,6 +855,7 @@ function App() {
         return (
           <ExpensesPage
             expenses={allExpenses || []}
+            breakdown={expenseBreakdown || []}
             expenseCategories={expenseCategories || []}
             formatCurrency={formatCurrency}
             onCreateExpense={openCreateExpenseModal}
@@ -904,6 +904,7 @@ function App() {
             onRefreshData={() => {
               setCustomersRefreshKey((prev) => prev + 1);
               setProductsRefreshKey((prev) => prev + 1);
+              refreshMetadata();
             }}
           />
         );
@@ -964,6 +965,7 @@ function App() {
             workflowShortcuts={workflowShortcuts}
             activeNavItem={currentPage}
             onNavigate={setCurrentPage}
+            badges={{ Fakturaer: (summary.overdue ?? 0) > 0 }}
           >
             <AnimatePresence mode="wait">
               <motion.div
