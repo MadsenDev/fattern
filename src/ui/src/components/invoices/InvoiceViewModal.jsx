@@ -197,7 +197,7 @@ function LinkedExpensesTab({ invoiceId, budgetYearId, formatCurrency: fmt }) {
 
 // ─── Main Modal ─────────────────────────────────────────────────────────────
 
-export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGeneratePDF, formatCurrency: fmt, budgetYearId, company }) {
+export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGeneratePDF, formatCurrency: fmt, budgetYearId, company, onStatusChange }) {
   const { t } = useTranslation();
   const [generatingPdf, setGeneratingPdf] = useState(false);
   const [activeTab, setActiveTab] = useState('details');
@@ -478,6 +478,7 @@ export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGenerateP
       invoice={invoice}
       company={company}
       onClose={() => setSendEmailOpen(false)}
+      onStatusChange={onStatusChange}
     />
     </>
   );

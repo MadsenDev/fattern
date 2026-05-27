@@ -13,7 +13,7 @@ function getEmailApi() {
   return typeof window !== 'undefined' ? window.fattern?.email ?? null : null;
 }
 
-export function SendEmailModal({ isOpen, invoice, company, onClose }) {
+export function SendEmailModal({ isOpen, invoice, company, onClose, onStatusChange }) {
   const { toast } = useToast();
 
   const [smtpConfigured, setSmtpConfigured] = useState(false);
@@ -77,6 +77,14 @@ export function SendEmailModal({ isOpen, invoice, company, onClose }) {
         subject: form.subject,
         message: form.message,
       });
+
+      // Mark invoice as sent (only if it's still draft/overdue)
+      const dbApi = typeof window !== 'undefined' ? window.fattern?.db : null;
+      if (dbApi && invoice.status === 'draft') {
+        await dbApi.updateInvoiceStatus(invoiceId, 'sent', null);
+        onStatusChange?.('sent');
+      }
+
       setSent(true);
       toast.success('E-post sendt', `Faktura sendt til ${form.to}`);
       setTimeout(onClose, 1200);

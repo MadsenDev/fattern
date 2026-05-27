@@ -1084,6 +1084,7 @@ function App() {
           openEditInvoiceModal(invoice);
         }}
         onGeneratePDF={handleViewInvoiceGeneratePDF}
+        onStatusChange={() => setInvoicesRefreshKey((prev) => prev + 1)}
       />
       <ConfirmModal
         isOpen={deleteConfirm.isOpen}
