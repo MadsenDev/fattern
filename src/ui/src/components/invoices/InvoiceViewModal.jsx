@@ -3,8 +3,89 @@ import { useTranslation } from 'react-i18next';
 import { Modal } from '../Modal';
 import { StatusBadge } from '../StatusBadge';
 import { formatDate } from '../../utils/formatDate';
-import { IconEdit, IconDownload, IconX, IconPlus, IconSend } from '@tabler/icons-react';
+import { IconEdit, IconDownload, IconX, IconPlus, IconSend, IconFileText, IconMail, IconPencil, IconCircleCheck, IconAlertCircle, IconClockHour4 } from '@tabler/icons-react';
 import { SendEmailModal } from './SendEmailModal';
+
+// ─── Event Log Tab ──────────────────────────────────────────────────────────
+
+const EVENT_CONFIG = {
+  created:        { icon: IconFileText,    color: 'var(--f-green-text)',    label: 'Opprettet' },
+  updated:        { icon: IconPencil,      color: 'var(--f-text-soft)',     label: 'Redigert' },
+  status_changed: { icon: IconCircleCheck, color: 'var(--f-blue-text)',     label: 'Status endret' },
+  pdf_generated:  { icon: IconDownload,    color: 'var(--f-text-soft)',     label: 'PDF generert' },
+  email_sent:     { icon: IconMail,        color: 'var(--f-green-text)',    label: 'E-post sendt' },
+  overdue:        { icon: IconAlertCircle, color: 'var(--f-warn)',          label: 'Forfalt' },
+};
+
+function InvoiceEventLog({ invoiceId }) {
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!invoiceId) return;
+    const api = typeof window !== 'undefined' ? window.fattern?.db : null;
+    if (!api?.getInvoiceEvents) { setLoading(false); return; }
+    api.getInvoiceEvents(invoiceId)
+      .then((rows) => setEvents(rows || []))
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [invoiceId]);
+
+  if (loading) {
+    return <p className="text-sm text-center py-8" style={{ color: 'var(--f-text-subtle)' }}>Laster...</p>;
+  }
+
+  if (events.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 gap-2">
+        <IconClockHour4 className="h-8 w-8 opacity-20" style={{ color: 'var(--f-text-subtle)' }} />
+        <p className="text-sm" style={{ color: 'var(--f-text-subtle)' }}>Ingen hendelser registrert ennå</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative">
+      {/* Timeline spine */}
+      <div
+        className="absolute left-[19px] top-2 bottom-2"
+        style={{ width: 1, background: 'var(--f-border-subtle)' }}
+      />
+      <div className="space-y-1">
+        {events.map((event, i) => {
+          const cfg = EVENT_CONFIG[event.type] || { icon: IconClockHour4, color: 'var(--f-text-subtle)', label: event.type };
+          const Icon = cfg.icon;
+          const ts = event.created_at ? new Date(event.created_at) : null;
+          const isLast = i === events.length - 1;
+          return (
+            <div key={event.id} className={`flex gap-4 ${isLast ? 'pb-0' : 'pb-1'}`}>
+              {/* Icon dot */}
+              <div
+                className="relative z-10 w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{ background: 'var(--f-surface-elevated)', border: '1px solid var(--f-border)' }}
+              >
+                <Icon className="h-4 w-4" style={{ color: cfg.color }} />
+              </div>
+              {/* Content */}
+              <div className="flex-1 min-w-0 pt-2 pb-3">
+                <p className="text-sm font-medium leading-snug" style={{ color: 'var(--f-text-body)' }}>
+                  {event.description}
+                </p>
+                {ts && (
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--f-text-subtle)' }}>
+                    {ts.toLocaleDateString('nb-NO', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    {' · '}
+                    {ts.toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 function getDbApi() {
   if (typeof window === 'undefined') return null;
@@ -240,8 +321,9 @@ export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGenerateP
   const invoiceId = invoice.dbId || invoice.id;
 
   const tabs = [
-    { id: 'details', label: 'Detaljer' },
+    { id: 'details',  label: 'Detaljer' },
     { id: 'expenses', label: t('invoice.linked_expenses.tab') },
+    { id: 'log',      label: 'Logg' },
   ];
 
   return (
@@ -470,6 +552,10 @@ export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGenerateP
           budgetYearId={budgetYearId}
           formatCurrency={fmt}
         />
+      )}
+
+      {activeTab === 'log' && (
+        <InvoiceEventLog invoiceId={invoiceId} />
       )}
     </Modal>
 

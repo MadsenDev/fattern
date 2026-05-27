@@ -165,6 +165,7 @@ app.whenReady().then(() => {
           const template = templateStorage.loadTemplate(templateId);
           if (template) {
             const filepath = await generateTemplatePDF(template, invoice, company, customer);
+            database.logInvoiceEvent(invoiceId, 'pdf_generated', 'PDF generert');
             return { success: true, filepath };
           }
           // Template not found, fall back to default generator
@@ -177,6 +178,7 @@ app.whenReady().then(() => {
 
       // Use the default PDF generator (either no templateId provided, or template not found/failed)
       const filepath = await generateInvoicePDF(invoice, company, customer);
+      database.logInvoiceEvent(invoiceId, 'pdf_generated', 'PDF generert');
       return { success: true, filepath };
     } catch (error) {
       console.error('PDF generation error:', error);

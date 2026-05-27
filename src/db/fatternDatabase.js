@@ -327,6 +327,7 @@ class FatternDatabase {
     });
 
     const invoiceId = transaction();
+    this.logInvoiceEvent(invoiceId, 'created', 'Faktura opprettet');
     return this.db.prepare('SELECT * FROM invoices WHERE id = ?').get(invoiceId);
   }
 
@@ -440,6 +441,7 @@ class FatternDatabase {
     });
 
     transaction();
+    this.logInvoiceEvent(invoiceId, 'updated', 'Faktura redigert');
     return this.getInvoice(invoiceId);
   }
 
@@ -448,6 +450,8 @@ class FatternDatabase {
     if (!existing) {
       throw new Error('Invoice not found');
     }
+
+    const prevStatus = existing.status;
 
     this.db
       .prepare(
@@ -463,6 +467,17 @@ class FatternDatabase {
         payment_date: paymentDate ? toDateOnlyString(paymentDate) : null,
       });
 
+    const statusLabels = {
+      draft: 'Utkast', sent: 'Sendt', paid: 'Betalt',
+      overdue: 'Forfalt', cancelled: 'Kansellert',
+    };
+    const from = statusLabels[prevStatus] || prevStatus;
+    const to   = statusLabels[status]     || status;
+    const desc = paymentDate
+      ? `Status endret: ${from} → ${to} (betalt ${toDateOnlyString(paymentDate)})`
+      : `Status endret: ${from} → ${to}`;
+    this.logInvoiceEvent(invoiceId, 'status_changed', desc, { from: prevStatus, to: status });
+
     return this.getInvoice(invoiceId);
   }
 
@@ -475,6 +490,34 @@ class FatternDatabase {
     // Items will be deleted via CASCADE
     this.db.prepare('DELETE FROM invoices WHERE id = ?').run(invoiceId);
     return true;
+  }
+
+  // ─── Invoice event log ───────────────────────────────────────────────────────
+
+  logInvoiceEvent(invoiceId, type, description, metadata = null) {
+    try {
+      this.db.prepare(
+        `INSERT INTO invoice_events (invoice_id, type, description, metadata)
+         VALUES (?, ?, ?, ?)`
+      ).run(invoiceId, type, description, metadata ? JSON.stringify(metadata) : null);
+    } catch (err) {
+      // Never let logging break the main operation
+      console.warn('[invoice_events] Failed to log event:', err.message);
+    }
+  }
+
+  getInvoiceEvents(invoiceId) {
+    try {
+      const rows = this.db.prepare(
+        `SELECT * FROM invoice_events WHERE invoice_id = ? ORDER BY created_at ASC`
+      ).all(invoiceId);
+      return rows.map((r) => ({
+        ...r,
+        metadata: r.metadata ? JSON.parse(r.metadata) : null,
+      }));
+    } catch {
+      return [];
+    }
   }
 
   addExpense(expense) {

@@ -54,6 +54,8 @@ contextBridge.exposeInMainWorld('fattern', {
     getUnlinkedExpenses: (budgetYearId) => invoke('db:get-unlinked-expenses', budgetYearId),
     linkExpenseToInvoice: (invoiceId, expenseId) => invoke('db:link-expense-to-invoice', invoiceId, expenseId),
     unlinkExpenseFromInvoice: (invoiceId, expenseId) => invoke('db:unlink-expense-from-invoice', invoiceId, expenseId),
+    getInvoiceEvents: (invoiceId) => invoke('db:get-invoice-events', invoiceId),
+    logInvoiceEvent: (invoiceId, type, description, metadata) => invoke('db:log-invoice-event', invoiceId, type, description, metadata),
   },
   system: {
     getLocale: () => invoke('system:get-locale'),

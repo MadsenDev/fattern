@@ -123,6 +123,14 @@ const schemaStatements = [
   `CREATE TABLE IF NOT EXISTS settings (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
+  );`,
+  `CREATE TABLE IF NOT EXISTS invoice_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    invoice_id INTEGER NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,
+    type TEXT NOT NULL,
+    description TEXT NOT NULL,
+    metadata TEXT,
+    created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
   );`
 ];
 

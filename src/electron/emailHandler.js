@@ -187,6 +187,7 @@ function registerEmailHandlers(ipcMain, database) {
       ],
     });
 
+    database.logInvoiceEvent(invoiceId, 'email_sent', `E-post sendt til ${to}`, { to, subject });
     return { ok: true };
   });
 
