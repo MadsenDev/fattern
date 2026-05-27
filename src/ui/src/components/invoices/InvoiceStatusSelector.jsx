@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import {
   IconFile,
   IconSend,
@@ -10,21 +11,22 @@ import {
 } from '@tabler/icons-react';
 import { statusBadge } from '../../data/mockData.jsx';
 
-const STATUS_OPTIONS = [
-  { value: 'draft',     label: 'Kladd',      Icon: IconFile         },
-  { value: 'sent',      label: 'Sendt',       Icon: IconSend         },
-  { value: 'paid',      label: 'Betalt',      Icon: IconCircleCheck  },
-  { value: 'overdue',   label: 'Forfalt',     Icon: IconAlertCircle  },
-  { value: 'cancelled', label: 'Kansellert',  Icon: IconX            },
+const STATUS_OPTION_DEFS = [
+  { value: 'draft',     labelKey: 'status.draft',     Icon: IconFile         },
+  { value: 'sent',      labelKey: 'status.sent',       Icon: IconSend         },
+  { value: 'paid',      labelKey: 'status.paid',       Icon: IconCircleCheck  },
+  { value: 'overdue',   labelKey: 'status.overdue',    Icon: IconAlertCircle  },
+  { value: 'cancelled', labelKey: 'status.cancelled',  Icon: IconX            },
 ];
 
 export function InvoiceStatusSelector({ invoice, onStatusChange, showModal }) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [pos, setPos] = useState({ top: 0, left: 0 });
   const btnRef = useRef(null);
   const dropRef = useRef(null);
 
-  const current = STATUS_OPTIONS.find((o) => o.value === invoice.status) || STATUS_OPTIONS[0];
+  const currentDef = STATUS_OPTION_DEFS.find((o) => o.value === invoice.status) || STATUS_OPTION_DEFS[0];
   const badgeClass = statusBadge[invoice.status] || 'f-pill-draft';
 
   // Position dropdown below the badge
@@ -79,7 +81,7 @@ export function InvoiceStatusSelector({ invoice, onStatusChange, showModal }) {
         padding: 4,
       }}
     >
-      {STATUS_OPTIONS.map(({ value, label, Icon }) => {
+      {STATUS_OPTION_DEFS.map(({ value, labelKey, Icon }) => {
         const isActive = value === invoice.status;
         return (
           <button
@@ -98,7 +100,7 @@ export function InvoiceStatusSelector({ invoice, onStatusChange, showModal }) {
             onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--f-text-soft)'; }}}
           >
             <Icon size={13} stroke={1.8} />
-            {label}
+            {t(labelKey)}
           </button>
         );
       })}
@@ -111,7 +113,7 @@ export function InvoiceStatusSelector({ invoice, onStatusChange, showModal }) {
       <button
         ref={btnRef}
         onClick={open}
-        title="Endre status"
+        title={t('invoice.status')}
         className={badgeClass}
         style={{
           display: 'inline-flex', alignItems: 'center', gap: 5,
@@ -124,8 +126,8 @@ export function InvoiceStatusSelector({ invoice, onStatusChange, showModal }) {
           background: 'inherit',
         }}
       >
-        <current.Icon size={12} stroke={2} />
-        {current.label}
+        <currentDef.Icon size={12} stroke={2} />
+        {t(currentDef.labelKey)}
         <IconChevronDown size={10} stroke={2} style={{ opacity: 0.5, marginLeft: 1 }} />
       </button>
       {dropdown}

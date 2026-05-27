@@ -2,6 +2,7 @@
  * 52 px icon-only navigation rail.
  * Icons come from @tabler/icons-react; tooltips are pure CSS.
  */
+import { useTranslation } from 'react-i18next';
 import {
   IconLayoutDashboard,
   IconFileInvoice,
@@ -11,6 +12,17 @@ import {
   IconCalendarStats,
   IconSettings,
 } from '@tabler/icons-react';
+
+/* Map nav labels (internal identifiers, always Norwegian) → i18n keys */
+const NAV_KEY_MAP = {
+  'Oversikt':      'nav.overview',
+  'Fakturaer':     'nav.invoices',
+  'Utgifter':      'nav.expenses',
+  'Kunder':        'nav.customers',
+  'Produkter':     'nav.products',
+  'Budsjettår':    'nav.budget_years',
+  'Innstillinger': 'nav.settings',
+};
 
 /* Map nav labels → icon components */
 const ICON_MAP = {
@@ -45,7 +57,9 @@ function Divider() {
 }
 
 function RailItem({ label, isActive, onClick, badge }) {
+  const { t } = useTranslation();
   const icon = ICON_MAP[label];
+  const displayLabel = NAV_KEY_MAP[label] ? t(NAV_KEY_MAP[label]) : label;
 
   return (
     /* Tooltip wrapper — pure CSS, no JS needed */
@@ -60,7 +74,7 @@ function RailItem({ label, isActive, onClick, badge }) {
 
       <button
         onClick={() => onClick?.(label)}
-        aria-label={label}
+        aria-label={displayLabel}
         style={{
           width: 36, height: 36, borderRadius: 10,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -132,7 +146,7 @@ function RailItem({ label, isActive, onClick, badge }) {
             borderRightColor: 'var(--f-tooltip-border)',
           }}
         />
-        {label}
+        {displayLabel}
       </div>
     </div>
   );

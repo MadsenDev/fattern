@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { IconMail, IconLock, IconCheck, IconAlertCircle, IconRefresh } from '@tabler/icons-react';
 import { useToast } from '../../hooks/useToast';
 
@@ -7,6 +8,7 @@ function getEmailApi() {
 }
 
 export function EmailSettings() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [form, setForm] = useState({
     host: '',
@@ -53,9 +55,9 @@ export function EmailSettings() {
       await api.saveConfig(form);
       setHasStoredPassword(hasStoredPassword || Boolean(form.password));
       setForm((f) => ({ ...f, password: '' }));
-      toast.success('E-postinnstillinger lagret', 'SMTP-konfigurasjon er oppdatert');
+      toast.success(t('settings.email.saved'), t('settings.email.saved_desc'));
     } catch (err) {
-      toast.error('Kunne ikke lagre', err.message);
+      toast.error(t('settings.email.save_error'), err.message);
     } finally {
       setSaving(false);
     }
@@ -70,11 +72,11 @@ export function EmailSettings() {
     try {
       await api.testConnection(form);
       setTestStatus('ok');
-      toast.success('Tilkobling vellykket', `Tilkoblet ${form.host}:${form.port}`);
+      toast.success(t('settings.email.test_success'), t('settings.email.test_connected', { host: form.host, port: form.port }));
     } catch (err) {
       setTestStatus('error');
-      setTestError(err.message || 'Tilkobling mislyktes');
-      toast.error('Tilkobling mislyktes', err.message);
+      setTestError(err.message || t('settings.email.test_fail'));
+      toast.error(t('settings.email.test_error'), err.message);
     } finally {
       setTesting(false);
     }
@@ -83,15 +85,15 @@ export function EmailSettings() {
   const isConfigured = form.host && form.user && (hasStoredPassword || form.password);
 
   if (loading) {
-    return <div className="text-sm py-4" style={{ color: 'var(--f-text-subtle)' }}>Laster...</div>;
+    return <div className="text-sm py-4" style={{ color: 'var(--f-text-subtle)' }}>{t('common.loading')}</div>;
   }
 
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--f-text)' }}>E-postutsendelse</h3>
+        <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--f-text)' }}>{t('settings.email.title')}</h3>
         <p className="text-xs mb-4" style={{ color: 'var(--f-text-subtle)' }}>
-          Koble til din egen e-postserver for å sende fakturaer direkte som PDF-vedlegg.
+          {t('settings.email.connect_to_desc')}
         </p>
       </div>
 
@@ -101,17 +103,17 @@ export function EmailSettings() {
           style={{ background: 'var(--f-warn-bg)', border: '1px solid var(--f-warn-border)', color: 'var(--f-warn)' }}
         >
           <IconAlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
-          <span>Systemet støtter ikke kryptert lagring. Passordet lagres i klartekst.</span>
+          <span>{t('settings.email.encryption_unavailable')}</span>
         </div>
       )}
 
       <div className="space-y-4 py-3" style={{ borderBottom: '1px solid var(--f-border-faint)' }}>
-        <label className="f-label uppercase tracking-wider block">SMTP-server</label>
+        <label className="f-label uppercase tracking-wider block">{t('settings.email.smtp_server')}</label>
 
         {/* Host + Port */}
         <div className="flex gap-3">
           <div className="flex-1">
-            <label className="block text-xs mb-1" style={{ color: 'var(--f-text-subtle)' }}>Server</label>
+            <label className="block text-xs mb-1" style={{ color: 'var(--f-text-subtle)' }}>{t('settings.email.server_label')}</label>
             <input
               className="f-input w-full text-sm rounded-lg px-3 py-2"
               placeholder="smtp.gmail.com"
@@ -121,7 +123,7 @@ export function EmailSettings() {
             />
           </div>
           <div style={{ width: 100 }}>
-            <label className="block text-xs mb-1" style={{ color: 'var(--f-text-subtle)' }}>Port</label>
+            <label className="block text-xs mb-1" style={{ color: 'var(--f-text-subtle)' }}>{t('settings.email.port_label')}</label>
             <input
               className="f-input w-full text-sm rounded-lg px-3 py-2"
               placeholder="587"
@@ -152,12 +154,12 @@ export function EmailSettings() {
               }}
             />
           </button>
-          <span className="text-sm" style={{ color: 'var(--f-text-body)' }}>SSL/TLS (port 465)</span>
+          <span className="text-sm" style={{ color: 'var(--f-text-body)' }}>{t('settings.email.ssl_label')}</span>
         </div>
 
         {/* User + Password */}
         <div>
-          <label className="block text-xs mb-1" style={{ color: 'var(--f-text-subtle)' }}>Brukernavn / e-postadresse</label>
+          <label className="block text-xs mb-1" style={{ color: 'var(--f-text-subtle)' }}>{t('settings.email.username_short')}</label>
           <input
             className="f-input w-full text-sm rounded-lg px-3 py-2"
             type="email"
@@ -171,9 +173,9 @@ export function EmailSettings() {
 
         <div>
           <label className="block text-xs mb-1" style={{ color: 'var(--f-text-subtle)' }}>
-            Passord
+            {t('settings.email.password')}
             {hasStoredPassword && !form.password && (
-              <span className="ml-2 opacity-60">(lagret — la stå tom for å beholde)</span>
+              <span className="ml-2 opacity-60">{t('settings.email.password_stored_hint')}</span>
             )}
           </label>
           <div className="relative">
@@ -184,7 +186,7 @@ export function EmailSettings() {
             <input
               className="f-input w-full text-sm rounded-lg pl-9 pr-3 py-2"
               type="password"
-              placeholder={hasStoredPassword ? '••••••••' : 'Passord eller app-passord'}
+              placeholder={hasStoredPassword ? '••••••••' : t('settings.email.password_placeholder')}
               value={form.password}
               onChange={(e) => handleChange('password', e.target.value)}
               style={{ color: 'var(--f-text-body)' }}
@@ -192,12 +194,14 @@ export function EmailSettings() {
             />
           </div>
           <p className="text-xs mt-1.5" style={{ color: 'var(--f-text-subtle)' }}>
-            Tips: Gmail krever et <a
+            {t('settings.email.gmail_tip').split(t('settings.email.gmail_app_password'))[0]}
+            <a
               href="#"
-              onClick={(e) => { e.preventDefault(); if (typeof window !== 'undefined') window.fattern ? require('electron')?.shell?.openExternal('https://support.google.com/accounts/answer/185833') : window.open('https://support.google.com/accounts/answer/185833'); }}
+              onClick={(e) => { e.preventDefault(); }}
               className="underline hover:opacity-80"
               style={{ color: 'var(--f-green-text-dim)' }}
-            >app-passord</a> hvis totrinnsverifisering er aktivert.
+            >{t('settings.email.gmail_app_password')}</a>
+            {t('settings.email.gmail_tip').split(t('settings.email.gmail_app_password'))[1] || ''}
           </p>
         </div>
       </div>
@@ -216,7 +220,7 @@ export function EmailSettings() {
             ? <IconCheck className="h-4 w-4 flex-shrink-0" />
             : <IconAlertCircle className="h-4 w-4 flex-shrink-0" />
           }
-          {testStatus === 'ok' ? 'Tilkobling vellykket!' : testError}
+          {testStatus === 'ok' ? t('settings.email.connection_ok') : testError}
         </div>
       )}
 
@@ -235,7 +239,7 @@ export function EmailSettings() {
           onMouseLeave={e => e.currentTarget.style.background = 'var(--f-btn-ghost-bg)'}
         >
           <IconRefresh className={`h-4 w-4 ${testing ? 'animate-spin' : ''}`} />
-          Test tilkobling
+          {testing ? t('settings.email.testing') : t('settings.email.test_button')}
         </button>
 
         <button
@@ -249,13 +253,13 @@ export function EmailSettings() {
           }}
         >
           <IconMail className="h-4 w-4" />
-          {saving ? 'Lagrer...' : 'Lagre innstillinger'}
+          {saving ? t('settings.email.saving') : t('settings.email.save_button')}
         </button>
       </div>
 
       {/* Quick-reference presets */}
       <div className="pt-2">
-        <label className="f-label uppercase tracking-wider block mb-3">Vanlige leverandører</label>
+        <label className="f-label uppercase tracking-wider block mb-3">{t('settings.email.quick_fill')}</label>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {[
             { name: 'Gmail',    host: 'smtp.gmail.com',    port: '587' },

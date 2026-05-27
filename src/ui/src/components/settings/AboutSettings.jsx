@@ -1,8 +1,10 @@
 import { IconCheck, IconStar, IconBolt, IconShield } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { APP_VERSION } from '../../utils/version';
 import { useSupporterPack } from '../../hooks/useSupporterPack';
 
 export function AboutSettings() {
+  const { t } = useTranslation();
   const { isSupporter, features, aiCredits } = useSupporterPack();
 
   return (
@@ -30,21 +32,20 @@ export function AboutSettings() {
             <div className="flex-1">
               <h3 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: 'var(--f-text)' }}>Fattern</h3>
               <p className="text-sm md:text-base mb-4 max-w-2xl" style={{ color: 'var(--f-text-soft)' }}>
-                En lokal-først faktureringsapplikasjon for norske bedrifter.
-                Designet for å være rask, privat og enkel å bruke.
+                {t('settings.about.description')}
               </p>
               <div className="flex flex-wrap gap-4 text-xs md:text-sm" style={{ color: 'var(--f-text-soft)' }}>
                 <div className="flex items-center gap-2">
-                  <span className="font-medium" style={{ color: 'var(--f-text-body)' }}>Versjon:</span>
+                  <span className="font-medium" style={{ color: 'var(--f-text-body)' }}>{t('settings.about.version')}</span>
                   <span className="font-mono">{APP_VERSION}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <IconShield className="h-4 w-4" style={{ color: 'var(--f-green-text-dim)' }} />
-                  <span>Lokal-først</span>
+                  <span>{t('settings.about.local_first')}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="font-medium" style={{ color: 'var(--f-text-body)' }}>Lisens:</span>
-                  <span>Åpen kildekode</span>
+                  <span className="font-medium" style={{ color: 'var(--f-text-body)' }}>{t('settings.about.license')}</span>
+                  <span>{t('settings.about.open_source')}</span>
                 </div>
               </div>
             </div>
@@ -70,11 +71,11 @@ export function AboutSettings() {
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
-                <h4 className="text-lg font-semibold" style={{ color: 'var(--f-text)' }}>Supporter-pakken</h4>
+                <h4 className="text-lg font-semibold" style={{ color: 'var(--f-text)' }}>{t('settings.about.supporter_pack')}</h4>
                 {isSupporter && (
                   <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium" style={{ background: 'var(--f-green-bg-pill)', color: 'var(--f-green-text)', border: '1px solid var(--f-border-green-pill)' }}>
                     <IconCheck className="h-3 w-3" />
-                    Aktivert
+                    {t('settings.about.supporter_activated')}
                   </span>
                 )}
               </div>
@@ -82,7 +83,7 @@ export function AboutSettings() {
               {isSupporter ? (
                 <div className="space-y-4 mt-4">
                   <div>
-                    <p className="text-sm font-medium mb-2" style={{ color: 'var(--f-text-body)' }}>Aktiverte funksjoner:</p>
+                    <p className="text-sm font-medium mb-2" style={{ color: 'var(--f-text-body)' }}>{t('settings.about.active_features')}</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                       {features.map((feature) => (
                         <div key={feature} className="flex items-center gap-2 text-sm" style={{ color: 'var(--f-text-soft)' }}>
@@ -96,12 +97,12 @@ export function AboutSettings() {
                   <div className="pt-4" style={{ borderTop: '1px solid var(--f-border-subtle)' }}>
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs mb-1" style={{ color: 'var(--f-text-subtle)' }}>AI-kreditter</p>
+                        <p className="text-xs mb-1" style={{ color: 'var(--f-text-subtle)' }}>{t('settings.about.ai_credits')}</p>
                         <p className="text-2xl font-bold" style={{ color: 'var(--f-text)' }}>{aiCredits.toLocaleString()}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-xs mb-1" style={{ color: 'var(--f-text-subtle)' }}>Status</p>
-                        <p className="text-sm font-semibold" style={{ color: 'var(--f-green)' }}>Aktiv</p>
+                        <p className="text-xs mb-1" style={{ color: 'var(--f-text-subtle)' }}>{t('settings.about.status')}</p>
+                        <p className="text-sm font-semibold" style={{ color: 'var(--f-green)' }}>{t('settings.about.active')}</p>
                       </div>
                     </div>
                   </div>
@@ -109,7 +110,7 @@ export function AboutSettings() {
               ) : (
                 <div className="mt-3">
                   <p className="text-sm mb-4" style={{ color: 'var(--f-text-soft)' }}>
-                    Støtt utviklingen av Fattern og få tilgang til eksklusive funksjoner, premium-temaer og AI-støtte.
+                    {t('settings.about.supporter_desc')}
                   </p>
                   <a
                     href="https://fattern.no/supporter"
@@ -118,7 +119,7 @@ export function AboutSettings() {
                     className="f-btn-primary inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors"
                   >
                     <IconStar className="h-4 w-4" />
-                    Lær mer om Supporter-pakken
+                    {t('settings.about.learn_more')}
                   </a>
                 </div>
               )}

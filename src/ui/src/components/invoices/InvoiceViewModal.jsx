@@ -8,17 +8,19 @@ import { SendEmailModal } from './SendEmailModal';
 
 // ─── Event Log Tab ──────────────────────────────────────────────────────────
 
+// EVENT_CONFIG: labels resolved via t() at render time (see InvoiceEventLog)
 const EVENT_CONFIG = {
-  created:             { icon: IconFileText,      color: 'var(--f-green-text)', label: 'Opprettet' },
-  updated:             { icon: IconPencil,        color: 'var(--f-text-soft)',  label: 'Redigert' },
-  updated_after_send:  { icon: IconAlertTriangle, color: 'var(--f-warn)',       label: 'Redigert etter utsending', warn: true },
-  status_changed:      { icon: IconCircleCheck,   color: 'var(--f-blue-text)', label: 'Status endret' },
-  pdf_generated:       { icon: IconDownload,      color: 'var(--f-text-soft)', label: 'PDF generert' },
-  email_sent:          { icon: IconMail,          color: 'var(--f-green-text)',label: 'E-post sendt' },
-  overdue:             { icon: IconAlertCircle,   color: 'var(--f-warn)',      label: 'Forfalt' },
+  created:             { icon: IconFileText,      color: 'var(--f-green-text)', labelKey: 'invoice_log.types.created' },
+  updated:             { icon: IconPencil,        color: 'var(--f-text-soft)',  labelKey: 'invoice_log.types.updated' },
+  updated_after_send:  { icon: IconAlertTriangle, color: 'var(--f-warn)',       labelKey: 'invoice_log.types.updated_after_send', warn: true },
+  status_changed:      { icon: IconCircleCheck,   color: 'var(--f-blue-text)', labelKey: 'invoice_log.types.status_changed' },
+  pdf_generated:       { icon: IconDownload,      color: 'var(--f-text-soft)', labelKey: 'invoice_log.types.pdf_generated' },
+  email_sent:          { icon: IconMail,          color: 'var(--f-green-text)',labelKey: 'invoice_log.types.email_sent' },
+  overdue:             { icon: IconAlertCircle,   color: 'var(--f-warn)',      labelKey: 'invoice_log.types.status_changed' },
 };
 
 function InvoiceEventLog({ invoiceId }) {
+  const { t } = useTranslation();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -33,14 +35,14 @@ function InvoiceEventLog({ invoiceId }) {
   }, [invoiceId]);
 
   if (loading) {
-    return <p className="text-sm text-center py-8" style={{ color: 'var(--f-text-subtle)' }}>Laster...</p>;
+    return <p className="text-sm text-center py-8" style={{ color: 'var(--f-text-subtle)' }}>{t('common.loading')}</p>;
   }
 
   if (events.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 gap-2">
         <IconClockHour4 className="h-8 w-8 opacity-20" style={{ color: 'var(--f-text-subtle)' }} />
-        <p className="text-sm" style={{ color: 'var(--f-text-subtle)' }}>Ingen hendelser registrert ennå</p>
+        <p className="text-sm" style={{ color: 'var(--f-text-subtle)' }}>{t('invoice_log.empty')}</p>
       </div>
     );
   }
@@ -54,7 +56,7 @@ function InvoiceEventLog({ invoiceId }) {
       />
       <div className="space-y-1">
         {events.map((event, i) => {
-          const cfg = EVENT_CONFIG[event.type] || { icon: IconClockHour4, color: 'var(--f-text-subtle)', label: event.type };
+          const cfg = EVENT_CONFIG[event.type] || { icon: IconClockHour4, color: 'var(--f-text-subtle)', labelKey: null };
           const Icon = cfg.icon;
           const ts = event.created_at ? new Date(event.created_at) : null;
           const isLast = i === events.length - 1;
@@ -357,9 +359,9 @@ export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGenerateP
   const invoiceId = invoice.dbId || invoice.id;
 
   const tabs = [
-    { id: 'details',  label: 'Detaljer' },
+    { id: 'details',  label: t('invoice.view.details_tab') },
     { id: 'expenses', label: t('invoice.linked_expenses.tab') },
-    { id: 'log',      label: 'Logg' },
+    { id: 'log',      label: t('invoice.view.log_tab') },
   ];
 
   return (
@@ -367,8 +369,8 @@ export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGenerateP
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={`Faktura ${invoice.invoice_number || invoice.id || ''}`}
-      description={invoice.customer_name ? `Kunde: ${invoice.customer_name}` : undefined}
+      title={t('invoice.view.title', { num: invoice.invoice_number || invoice.id || '' })}
+      description={invoice.customer_name ? `${t('invoice.view.customer_label')} ${invoice.customer_name}` : undefined}
       size="xl"
       footer={
         <div className="flex items-center justify-between w-full">
@@ -398,7 +400,7 @@ export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGenerateP
               className="f-btn-ghost rounded-2xl px-4 py-2 text-sm font-medium flex items-center gap-2"
             >
               <IconSend className="h-4 w-4" />
-              Send
+              {t('invoice.view.send')}
             </button>
             {onEdit && (
               <button
@@ -443,20 +445,20 @@ export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGenerateP
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
-                <label className="f-label uppercase tracking-wide">Fakturadato</label>
+                <label className="f-label uppercase tracking-wide">{t('invoice.view.invoice_date')}</label>
                 <p className="mt-1 text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>
                   {invoice.invoice_date ? formatDate(invoice.invoice_date) : '—'}
                 </p>
               </div>
               <div>
-                <label className="f-label uppercase tracking-wide">Forfallsdato</label>
+                <label className="f-label uppercase tracking-wide">{t('invoice.view.due_date')}</label>
                 <p className="mt-1 text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>
                   {invoice.due_date ? formatDate(invoice.due_date) : '—'}
                 </p>
               </div>
               {invoice.status === 'paid' && invoice.payment_date && (
                 <div>
-                  <label className="f-label uppercase tracking-wide">Betalingsdato</label>
+                  <label className="f-label uppercase tracking-wide">{t('invoice.view.payment_date')}</label>
                   <p className="mt-1 text-sm font-semibold" style={{ color: 'var(--f-green-text)' }}>
                     {formatDate(invoice.payment_date)}
                   </p>
@@ -464,7 +466,7 @@ export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGenerateP
               )}
               {invoice.start_date && invoice.end_date && (
                 <div>
-                  <label className="f-label uppercase tracking-wide">Periode</label>
+                  <label className="f-label uppercase tracking-wide">{t('invoice.view.period')}</label>
                   <p className="mt-1 text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>
                     {formatDate(invoice.start_date)} - {formatDate(invoice.end_date)}
                   </p>
@@ -474,25 +476,25 @@ export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGenerateP
             <div className="space-y-4">
               {invoice.your_reference && (
                 <div>
-                  <label className="f-label uppercase tracking-wide">Deres referanse</label>
+                  <label className="f-label uppercase tracking-wide">{t('invoice.view.your_reference')}</label>
                   <p className="mt-1 text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{invoice.your_reference}</p>
                 </div>
               )}
               {invoice.our_reference && (
                 <div>
-                  <label className="f-label uppercase tracking-wide">Vår referanse</label>
+                  <label className="f-label uppercase tracking-wide">{t('invoice.view.our_reference')}</label>
                   <p className="mt-1 text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{invoice.our_reference}</p>
                 </div>
               )}
               {invoice.delivery_reference && (
                 <div>
-                  <label className="f-label uppercase tracking-wide">Leveringsreferanse</label>
+                  <label className="f-label uppercase tracking-wide">{t('invoice.view.delivery_reference')}</label>
                   <p className="mt-1 text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{invoice.delivery_reference}</p>
                 </div>
               )}
               {invoice.reference && (
                 <div>
-                  <label className="f-label uppercase tracking-wide">Referanse</label>
+                  <label className="f-label uppercase tracking-wide">{t('invoice.view.reference')}</label>
                   <p className="mt-1 text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{invoice.reference}</p>
                 </div>
               )}
@@ -506,11 +508,11 @@ export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGenerateP
                 <table className="w-full">
                   <thead style={{ background: 'rgba(255,255,255,0.04)', borderBottom: '1px solid var(--f-border-subtle)' }}>
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--f-text-subtle)' }}>Beskrivelse</th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--f-text-subtle)' }}>Antall</th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--f-text-subtle)' }}>Enhetspris</th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--f-text-subtle)' }}>MVA %</th>
-                      <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--f-text-subtle)' }}>Total</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--f-text-subtle)' }}>{t('invoice.view.description')}</th>
+                      <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--f-text-subtle)' }}>{t('invoice.view.quantity')}</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--f-text-subtle)' }}>{t('invoice.view.unit_price')}</th>
+                      <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--f-text-subtle)' }}>{t('invoice.view.vat_pct')}</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--f-text-subtle)' }}>{t('invoice.view.total')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -540,7 +542,7 @@ export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGenerateP
             </div>
           ) : (
             <div className="rounded-2xl p-8 text-center text-sm" style={{ border: '1px solid var(--f-border-subtle)', background: 'rgba(255,255,255,0.02)', color: 'var(--f-text-subtle)' }}>
-              Ingen linjeelementer
+              {t('invoice.view.no_items')}
             </div>
           )}
 
@@ -548,24 +550,24 @@ export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGenerateP
           <div className="flex justify-end">
             <div className="w-full md:w-80 space-y-2">
               <div className="flex justify-between text-sm" style={{ color: 'var(--f-text-soft)' }}>
-                <span>Sum eks. mva:</span>
+                <span>{t('invoice.view.subtotal')}</span>
                 <span className="font-medium">{fmt(calculations.subtotal)}</span>
               </div>
               <div className="flex justify-between text-sm" style={{ color: 'var(--f-text-soft)' }}>
-                <span>MVA:</span>
+                <span>{t('invoice.view.vat')}</span>
                 <span className="font-medium">{fmt(calculations.vatTotal)}</span>
               </div>
               {invoice.credited && (
                 <div className="pt-2" style={{ borderTop: '1px solid var(--f-border-faint)' }}>
                   <div className="flex justify-between text-sm" style={{ color: 'var(--f-text-soft)' }}>
-                    <span>Kreditert:</span>
-                    <span className="font-medium" style={{ color: 'var(--f-danger-text)' }}>Ja</span>
+                    <span>{t('invoice.view.credited')}</span>
+                    <span className="font-medium" style={{ color: 'var(--f-danger-text)' }}>{t('invoice.view.credited_yes')}</span>
                   </div>
                 </div>
               )}
               <div className="pt-2" style={{ borderTop: '2px solid var(--f-border)' }}>
                 <div className="flex justify-between text-base font-semibold" style={{ color: 'var(--f-text-body)' }}>
-                  <span>Totalt:</span>
+                  <span>{t('invoice.view.grand_total')}</span>
                   <span>{fmt(calculations.total)}</span>
                 </div>
               </div>
@@ -575,7 +577,7 @@ export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGenerateP
           {/* Notes */}
           {invoice.notes && (
             <div className="rounded-2xl p-4" style={{ border: '1px solid var(--f-border-subtle)', background: 'rgba(255,255,255,0.02)' }}>
-              <label className="f-label uppercase tracking-wide">Notater</label>
+              <label className="f-label uppercase tracking-wide">{t('invoice.view.notes')}</label>
               <p className="mt-2 text-sm whitespace-pre-wrap" style={{ color: 'var(--f-text-body)' }}>{invoice.notes}</p>
             </div>
           )}

@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { IconEdit, IconX, IconDeviceFloppy } from '@tabler/icons-react';
 
 export function CompanySettings({ company, onCompanyUpdate }) {
+  const { t } = useTranslation();
   const [isEditingCompany, setIsEditingCompany] = useState(false);
   const [companyForm, setCompanyForm] = useState({
     name: '',
@@ -61,14 +63,14 @@ export function CompanySettings({ company, onCompanyUpdate }) {
     setSavingCompany(true);
 
     if (!companyForm.name.trim()) {
-      setCompanyError('Selskapsnavn er påkrevd');
+      setCompanyError(t('settings.company.validation_name'));
       setSavingCompany(false);
       return;
     }
 
     const vatRate = parseFloat(companyForm.vat_rate);
     if (isNaN(vatRate) || vatRate < 0 || vatRate > 100) {
-      setCompanyError('MVA-sats må være mellom 0 og 100');
+      setCompanyError(t('settings.company.validation_vat'));
       setSavingCompany(false);
       return;
     }
@@ -92,18 +94,20 @@ export function CompanySettings({ company, onCompanyUpdate }) {
       }
     } catch (error) {
       console.error('Kunne ikke lagre selskapinformasjon', error);
-      setCompanyError('Kunne ikke lagre endringer. Prøv igjen.');
+      setCompanyError(t('settings.company.save_error'));
     } finally {
       setSavingCompany(false);
     }
   };
 
+  const notSet = t('common.not_set');
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--f-text)' }}>Selskapinformasjon</h3>
-          <p className="text-xs" style={{ color: 'var(--f-text-subtle)' }}>Informasjon om ditt selskap som brukes i fakturaer og dokumenter</p>
+          <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--f-text)' }}>{t('settings.company.title')}</h3>
+          <p className="text-xs" style={{ color: 'var(--f-text-subtle)' }}>{t('settings.company.description')}</p>
         </div>
         {!isEditingCompany ? (
           <button
@@ -112,7 +116,7 @@ export function CompanySettings({ company, onCompanyUpdate }) {
             className="f-btn-ghost flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition"
           >
             <IconEdit className="h-3.5 w-3.5" />
-            Rediger
+            {t('common.edit')}
           </button>
         ) : (
           <div className="flex items-center gap-2">
@@ -123,7 +127,7 @@ export function CompanySettings({ company, onCompanyUpdate }) {
               className="f-btn-ghost flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition disabled:opacity-60"
             >
               <IconX className="h-3.5 w-3.5" />
-              Avbryt
+              {t('common.cancel')}
             </button>
             <button
               type="button"
@@ -132,7 +136,7 @@ export function CompanySettings({ company, onCompanyUpdate }) {
               className="f-btn-primary flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition disabled:opacity-60"
             >
               <IconDeviceFloppy className="h-3.5 w-3.5" />
-              {savingCompany ? 'Lagrer...' : 'Lagre'}
+              {savingCompany ? t('common.saving') : t('common.save')}
             </button>
           </div>
         )}
@@ -141,7 +145,7 @@ export function CompanySettings({ company, onCompanyUpdate }) {
       <div className="space-y-4">
         <div className="py-3" style={{ borderBottom: '1px solid var(--f-border-faint)' }}>
           <label className="f-label uppercase tracking-wider">
-            Selskapsnavn *
+            {t('settings.company.name')} *
           </label>
           {isEditingCompany ? (
             <input
@@ -149,16 +153,16 @@ export function CompanySettings({ company, onCompanyUpdate }) {
               value={companyForm.name}
               onChange={(e) => setCompanyForm({ ...companyForm, name: e.target.value })}
               className="f-input w-full rounded-lg px-3 py-2 text-sm"
-              placeholder="Ditt firmanavn"
+              placeholder={t('settings.company.name')}
             />
           ) : (
-            <p className="text-sm mt-1.5" style={{ color: 'var(--f-text-body)' }}>{company?.name || 'Ikke satt'}</p>
+            <p className="text-sm mt-1.5" style={{ color: 'var(--f-text-body)' }}>{company?.name || notSet}</p>
           )}
         </div>
 
         <div className="py-3" style={{ borderBottom: '1px solid var(--f-border-faint)' }}>
           <label className="f-label uppercase tracking-wider">
-            Organisasjonsnummer
+            {t('settings.company.org_number')}
           </label>
           {isEditingCompany ? (
             <input
@@ -169,14 +173,14 @@ export function CompanySettings({ company, onCompanyUpdate }) {
               placeholder="123 456 789"
             />
           ) : (
-            <p className="text-sm mt-1.5" style={{ color: 'var(--f-text-body)' }}>{company?.org_number || 'Ikke satt'}</p>
+            <p className="text-sm mt-1.5" style={{ color: 'var(--f-text-body)' }}>{company?.org_number || notSet}</p>
           )}
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="py-3" style={{ borderBottom: '1px solid var(--f-border-faint)' }}>
             <label className="f-label uppercase tracking-wider">
-              E-post
+              {t('settings.company.email')}
             </label>
             {isEditingCompany ? (
               <input
@@ -187,13 +191,13 @@ export function CompanySettings({ company, onCompanyUpdate }) {
                 placeholder="firma@example.com"
               />
             ) : (
-              <p className="text-sm mt-1.5" style={{ color: 'var(--f-text-body)' }}>{company?.contact_email || 'Ikke satt'}</p>
+              <p className="text-sm mt-1.5" style={{ color: 'var(--f-text-body)' }}>{company?.contact_email || notSet}</p>
             )}
           </div>
 
           <div className="py-3" style={{ borderBottom: '1px solid var(--f-border-faint)' }}>
             <label className="f-label uppercase tracking-wider">
-              Telefon
+              {t('settings.company.phone')}
             </label>
             {isEditingCompany ? (
               <input
@@ -204,30 +208,30 @@ export function CompanySettings({ company, onCompanyUpdate }) {
                 placeholder="+47 123 45 678"
               />
             ) : (
-              <p className="text-sm mt-1.5" style={{ color: 'var(--f-text-body)' }}>{company?.contact_number || 'Ikke satt'}</p>
+              <p className="text-sm mt-1.5" style={{ color: 'var(--f-text-body)' }}>{company?.contact_number || notSet}</p>
             )}
           </div>
         </div>
 
         <div className="py-3" style={{ borderBottom: '1px solid var(--f-border-faint)' }}>
-          <label className="f-label uppercase tracking-wider">Adresse</label>
+          <label className="f-label uppercase tracking-wider">{t('settings.company.address')}</label>
           {isEditingCompany ? (
             <input
               type="text"
               value={companyForm.address}
               onChange={(e) => setCompanyForm({ ...companyForm, address: e.target.value })}
               className="f-input w-full rounded-lg px-3 py-2 text-sm"
-              placeholder="Gateadresse"
+              placeholder={t('settings.company.address')}
             />
           ) : (
-            <p className="text-sm mt-1.5" style={{ color: 'var(--f-text-body)' }}>{company?.address || 'Ikke satt'}</p>
+            <p className="text-sm mt-1.5" style={{ color: 'var(--f-text-body)' }}>{company?.address || notSet}</p>
           )}
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="py-3" style={{ borderBottom: '1px solid var(--f-border-faint)' }}>
             <label className="f-label uppercase tracking-wider">
-              Postnummer
+              {t('settings.company.postal_code')}
             </label>
             {isEditingCompany ? (
               <input
@@ -238,13 +242,13 @@ export function CompanySettings({ company, onCompanyUpdate }) {
                 placeholder="0001"
               />
             ) : (
-              <p className="text-sm mt-1.5" style={{ color: 'var(--f-text-body)' }}>{company?.post_number || 'Ikke satt'}</p>
+              <p className="text-sm mt-1.5" style={{ color: 'var(--f-text-body)' }}>{company?.post_number || notSet}</p>
             )}
           </div>
 
           <div className="py-3" style={{ borderBottom: '1px solid var(--f-border-faint)' }}>
             <label className="f-label uppercase tracking-wider">
-              Poststed
+              {t('settings.company.city')}
             </label>
             {isEditingCompany ? (
               <input
@@ -255,7 +259,7 @@ export function CompanySettings({ company, onCompanyUpdate }) {
                 placeholder="Oslo"
               />
             ) : (
-              <p className="text-sm mt-1.5" style={{ color: 'var(--f-text-body)' }}>{company?.post_location || 'Ikke satt'}</p>
+              <p className="text-sm mt-1.5" style={{ color: 'var(--f-text-body)' }}>{company?.post_location || notSet}</p>
             )}
           </div>
         </div>
@@ -263,7 +267,7 @@ export function CompanySettings({ company, onCompanyUpdate }) {
         <div className="grid gap-4 md:grid-cols-2">
           <div className="py-3" style={{ borderBottom: '1px solid var(--f-border-faint)' }}>
             <label className="f-label uppercase tracking-wider">
-              Kontonummer
+              {t('settings.company.bank_account')}
             </label>
             {isEditingCompany ? (
               <input
@@ -274,13 +278,13 @@ export function CompanySettings({ company, onCompanyUpdate }) {
                 placeholder="1234 56 78901"
               />
             ) : (
-              <p className="text-sm mt-1.5" style={{ color: 'var(--f-text-body)' }}>{company?.account_number || 'Ikke satt'}</p>
+              <p className="text-sm mt-1.5" style={{ color: 'var(--f-text-body)' }}>{company?.account_number || notSet}</p>
             )}
           </div>
 
           <div className="py-3" style={{ borderBottom: '1px solid var(--f-border-faint)' }}>
             <label className="f-label uppercase tracking-wider">
-              Standard MVA-sats (%)
+              {t('settings.company.vat_rate_label')}
             </label>
             {isEditingCompany ? (
               <input
@@ -310,4 +314,3 @@ export function CompanySettings({ company, onCompanyUpdate }) {
     </div>
   );
 }
-

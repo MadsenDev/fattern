@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 const sizeClasses = {
   sm: 'max-w-md',
@@ -9,6 +10,7 @@ const sizeClasses = {
 };
 
 export function Modal({ isOpen, onClose, title, description, children, footer, size = 'md' }) {
+  const { t } = useTranslation();
   const maxWidthClass = sizeClasses[size] || sizeClasses.md;
 
   return (
@@ -43,7 +45,7 @@ export function Modal({ isOpen, onClose, title, description, children, footer, s
               onMouseEnter={e => (e.currentTarget.style.color = 'var(--f-text-body)')}
               onMouseLeave={e => (e.currentTarget.style.color = 'var(--f-text-subtle)')}
             >
-              Lukk
+              {t('common.close')}
             </button>
 
             {(title || description) && (

@@ -6,6 +6,7 @@
  * Fallback path: saves PDF to Downloads + opens mailto: link in system mail app
  */
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { IconX, IconMail, IconExternalLink, IconAlertCircle, IconCheck } from '@tabler/icons-react';
 import { useToast } from '../../hooks/useToast';
 
@@ -14,6 +15,7 @@ function getEmailApi() {
 }
 
 export function SendEmailModal({ isOpen, invoice, company, onClose, onStatusChange }) {
+  const { t } = useTranslation();
   const { toast } = useToast();
 
   const [smtpConfigured, setSmtpConfigured] = useState(false);
@@ -29,23 +31,25 @@ export function SendEmailModal({ isOpen, invoice, company, onClose, onStatusChan
     if (!isOpen || !invoice) return;
 
     const invoiceNum = invoice.invoice_number || invoice.id || '';
-    const companyName = company?.name || 'Oss';
+    const companyName = company?.name || 'Fattern';
     const customerEmail = invoice.customer_email || '';
     const dueDate = invoice.due_date
       ? new Date(invoice.due_date).toLocaleDateString('nb-NO')
       : '';
+    const customerName = invoice.customer_name ? ' ' + invoice.customer_name : '';
+    const dueStr = dueDate ? t('send_email.default_body_due', { date: dueDate }) : '';
 
     setForm({
       to: customerEmail,
-      subject: `Faktura ${invoiceNum} fra ${companyName}`,
+      subject: t('send_email.default_subject', { num: invoiceNum, company: companyName }),
       message: [
-        `Hei${invoice.customer_name ? ' ' + invoice.customer_name : ''},`,
+        t('send_email.default_body_greeting', { name: customerName }),
         '',
-        `Vedlagt finner du faktura ${invoiceNum}${dueDate ? ` med forfallsdato ${dueDate}` : ''}.`,
+        t('send_email.default_body_content', { num: invoiceNum, due: dueStr }),
         '',
-        'Ta gjerne kontakt hvis du har spørsmål.',
+        t('send_email.default_body_contact'),
         '',
-        `Med vennlig hilsen`,
+        t('send_email.default_body_regards'),
         companyName,
       ].join('\n'),
     });
@@ -60,7 +64,7 @@ export function SendEmailModal({ isOpen, invoice, company, onClose, onStatusChan
       .then((cfg) => setSmtpConfigured(!!(cfg.host && cfg.user && cfg.hasPassword)))
       .catch(() => setSmtpConfigured(false))
       .finally(() => setCheckingConfig(false));
-  }, [isOpen, invoice, company]);
+  }, [isOpen, invoice, company, t]);
 
   if (!isOpen || !invoice) return null;
 
@@ -78,7 +82,7 @@ export function SendEmailModal({ isOpen, invoice, company, onClose, onStatusChan
         message: form.message,
       });
 
-      // Mark invoice as sent (only if it's still draft/overdue)
+      // Mark invoice as sent (only if it's still draft)
       const dbApi = typeof window !== 'undefined' ? window.fattern?.db : null;
       if (dbApi && invoice.status === 'draft') {
         await dbApi.updateInvoiceStatus(invoiceId, 'sent', null);
@@ -86,10 +90,10 @@ export function SendEmailModal({ isOpen, invoice, company, onClose, onStatusChan
       }
 
       setSent(true);
-      toast.success('E-post sendt', `Faktura sendt til ${form.to}`);
+      toast.success(t('send_email.sent_success'), t('send_email.sent_success_desc', { to: form.to }));
       setTimeout(onClose, 1200);
     } catch (err) {
-      toast.error('Kunne ikke sende e-post', err.message);
+      toast.error(t('send_email.send_error'), err.message);
     } finally {
       setSending(false);
     }
@@ -106,15 +110,12 @@ export function SendEmailModal({ isOpen, invoice, company, onClose, onStatusChan
         subject: form.subject,
         message: form.message,
       });
-      toast.info(
-        'E-postprogram åpnet',
-        `PDF lagret til Nedlastinger. Husk å legge ved filen manuelt.`,
-      );
+      toast.info(t('send_email.mailto_opened'), t('send_email.mailto_desc'));
       if (result?.pdfPath) {
         console.info('PDF saved to:', result.pdfPath);
       }
     } catch (err) {
-      toast.error('Kunne ikke åpne e-postprogram', err.message);
+      toast.error(t('send_email.mailto_error'), err.message);
     } finally {
       setOpeningMailto(false);
     }
@@ -144,7 +145,7 @@ export function SendEmailModal({ isOpen, invoice, company, onClose, onStatusChan
             </div>
             <div>
               <h3 className="text-base font-semibold" style={{ color: 'var(--f-text-body)' }}>
-                Send faktura
+                {t('send_email.title')}
               </h3>
               <p className="text-xs" style={{ color: 'var(--f-text-subtle)' }}>
                 {invoice.invoice_number || invoice.id}
@@ -176,14 +177,7 @@ export function SendEmailModal({ isOpen, invoice, company, onClose, onStatusChan
               }}
             >
               <IconAlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
-              <span>
-                SMTP ikke konfigurert — du kan bruke <strong>Åpne i e-postprogram</strong> som
-                alternativ, eller{' '}
-                <a href="#" style={{ color: 'inherit', textDecoration: 'underline' }}>
-                  sett opp SMTP
-                </a>{' '}
-                i Innstillinger → E-post.
-              </span>
+              <span>{t('send_email.smtp_not_configured')}</span>
             </div>
           )}
 
@@ -198,19 +192,19 @@ export function SendEmailModal({ isOpen, invoice, company, onClose, onStatusChan
               }}
             >
               <IconCheck className="h-4 w-4 flex-shrink-0" />
-              E-post sendt!
+              {t('send_email.sent_success')}
             </div>
           )}
 
           {/* To */}
           <div>
             <label className="block text-xs mb-1.5 font-medium" style={{ color: 'var(--f-text-subtle)' }}>
-              Til
+              {t('send_email.to_label')}
             </label>
             <input
               className="f-input w-full text-sm rounded-xl px-3 py-2"
               type="email"
-              placeholder="kunde@eksempel.no"
+              placeholder={t('send_email.to_placeholder')}
               value={form.to}
               onChange={(e) => setForm((f) => ({ ...f, to: e.target.value }))}
               style={{ color: 'var(--f-text-body)' }}
@@ -221,7 +215,7 @@ export function SendEmailModal({ isOpen, invoice, company, onClose, onStatusChan
           {/* Subject */}
           <div>
             <label className="block text-xs mb-1.5 font-medium" style={{ color: 'var(--f-text-subtle)' }}>
-              Emne
+              {t('send_email.subject_label')}
             </label>
             <input
               className="f-input w-full text-sm rounded-xl px-3 py-2"
@@ -235,7 +229,7 @@ export function SendEmailModal({ isOpen, invoice, company, onClose, onStatusChan
           {/* Message */}
           <div>
             <label className="block text-xs mb-1.5 font-medium" style={{ color: 'var(--f-text-subtle)' }}>
-              Melding
+              {t('send_email.message_label')}
             </label>
             <textarea
               className="f-input w-full text-sm rounded-xl px-3 py-2 resize-none"
@@ -249,7 +243,7 @@ export function SendEmailModal({ isOpen, invoice, company, onClose, onStatusChan
           {/* Attachment note */}
           <p className="text-xs flex items-center gap-1.5" style={{ color: 'var(--f-text-muted)' }}>
             <IconMail className="h-3.5 w-3.5 flex-shrink-0" />
-            PDF-faktura legges ved automatisk
+            {t('send_email.attachment_note')}
           </p>
         </div>
 
@@ -271,10 +265,10 @@ export function SendEmailModal({ isOpen, invoice, company, onClose, onStatusChan
             }}
             onMouseEnter={e => { if (!openingMailto) e.currentTarget.style.background = 'var(--f-btn-ghost-hover)'; }}
             onMouseLeave={e => e.currentTarget.style.background = 'var(--f-btn-ghost-bg)'}
-            title="Lagrer PDF til Nedlastinger og åpner standard e-postprogram"
+            title={t('send_email.mailto_title')}
           >
             <IconExternalLink className="h-4 w-4" />
-            {openingMailto ? 'Åpner...' : 'Åpne i e-postprogram'}
+            {openingMailto ? t('send_email.opening') : t('send_email.mailto_button')}
           </button>
 
           <div className="flex items-center gap-2">
@@ -286,7 +280,7 @@ export function SendEmailModal({ isOpen, invoice, company, onClose, onStatusChan
               onMouseEnter={e => e.currentTarget.style.color = 'var(--f-text-body)'}
               onMouseLeave={e => e.currentTarget.style.color = 'var(--f-text-subtle)'}
             >
-              Avbryt
+              {t('common.cancel')}
             </button>
             <button
               type="button"
@@ -298,10 +292,10 @@ export function SendEmailModal({ isOpen, invoice, company, onClose, onStatusChan
                 border: `1px solid ${smtpConfigured ? 'var(--f-border-green)' : 'var(--f-border)'}`,
                 color: smtpConfigured ? '#fff' : 'var(--f-text-muted)',
               }}
-              title={!smtpConfigured ? 'Konfigurer SMTP i Innstillinger → E-post' : undefined}
+              title={!smtpConfigured ? t('send_email.smtp_configure_hint') : undefined}
             >
               <IconMail className="h-4 w-4" />
-              {sending ? 'Sender...' : 'Send via SMTP'}
+              {sending ? t('send_email.sending') : t('send_email.send_button')}
             </button>
           </div>
         </div>

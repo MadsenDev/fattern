@@ -1,19 +1,25 @@
 import { Modal } from './Modal';
+import { useTranslation } from 'react-i18next';
 
 export function ConfirmModal({
   isOpen,
   onClose,
   onConfirm,
   onDeactivate,
-  title = 'Bekreft handling',
+  title,
   description,
-  confirmLabel = 'Bekreft',
-  deactivateLabel = 'Deaktiver',
-  cancelLabel = 'Avbryt',
+  confirmLabel,
+  deactivateLabel,
+  cancelLabel,
   variant = 'danger', // 'danger' | 'warning' | 'info'
   isLoading = false,
   showDeactivate = false,
 }) {
+  const { t } = useTranslation();
+  const resolvedTitle = title ?? t('common.confirm');
+  const resolvedConfirmLabel = confirmLabel ?? t('common.confirm');
+  const resolvedDeactivateLabel = deactivateLabel ?? t('common.deactivate');
+  const resolvedCancelLabel = cancelLabel ?? t('common.cancel');
   const variantStyles = {
     danger: { button: 'f-btn-danger' },
     warning: { button: '' }, // inline amber styling
@@ -46,7 +52,7 @@ export function ConfirmModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={title}
+      title={resolvedTitle}
       description={description}
       footer={
         <div className="flex items-center justify-between w-full">
@@ -59,7 +65,7 @@ export function ConfirmModal({
             onClick={onClose}
             disabled={isLoading}
           >
-            {cancelLabel}
+            {resolvedCancelLabel}
           </button>
           <div className="flex gap-2">
             {showDeactivate && (
@@ -69,7 +75,7 @@ export function ConfirmModal({
                 disabled={isLoading}
                 className="f-btn-primary rounded-2xl px-5 py-2 text-sm font-semibold transition disabled:opacity-60"
               >
-                {isLoading ? 'Behandler...' : deactivateLabel}
+                {isLoading ? t('common.processing') : resolvedDeactivateLabel}
               </button>
             )}
             <button
@@ -79,7 +85,7 @@ export function ConfirmModal({
               className={`rounded-2xl px-5 py-2 text-sm font-semibold transition disabled:opacity-60 ${styles.button}`}
               style={variant === 'warning' ? { background: 'rgba(217,119,6,0.15)', color: '#fbbf24', border: '1px solid rgba(217,119,6,0.3)' } : {}}
             >
-              {isLoading ? 'Behandler...' : confirmLabel}
+              {isLoading ? t('common.processing') : resolvedConfirmLabel}
             </button>
           </div>
         </div>

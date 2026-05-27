@@ -53,7 +53,7 @@ function hasCompletedOnboarding() {
 function App() {
   // Initialize theme early
   useTheme();
-  const { getSetting } = useSettings();
+  const { getSetting, settings } = useSettings();
   
   const [isLoading, setIsLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
@@ -199,6 +199,16 @@ function App() {
     }
   }, [company]);
 
+  // Apply saved language preference from DB settings
+  useEffect(() => {
+    if (!settings) return;
+    const savedLang = settings['app.language'];
+    if (savedLang && ['nb', 'en'].includes(savedLang)) {
+      i18n.changeLanguage(savedLang);
+    }
+  }, [settings]);
+
+  // Fallback: use system locale only if no saved preference
   useEffect(() => {
     const api = typeof window !== 'undefined' ? window.fattern?.system : null;
     if (!api?.getLocale) return;
@@ -207,6 +217,10 @@ function App() {
       .getLocale()
       .then((locale) => {
         if (!locale) return;
+        // Only apply system locale if user hasn't saved a preference
+        const savedLang = getSetting('app.language', null);
+        if (savedLang) return; // saved preference takes priority
+
         const normalized = locale.split?.('-')[0] || locale;
         // Fattern is a Norwegian app — only switch language for Norwegian locales;
         // non-Norwegian system locales (e.g. en-US on Linux) keep the 'nb' default.

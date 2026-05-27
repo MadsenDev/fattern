@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { APP_VERSION } from '../../utils/version';
 
 /**
@@ -5,6 +6,8 @@ import { APP_VERSION } from '../../utils/version';
  * Shows the active company, workflow shortcuts, and connection/version status.
  */
 export function BottomBar({ company, onCreateInvoice, onRegisterPayment, onAddExpense }) {
+  const { t } = useTranslation();
+
   const displayName = company?.name && company.name !== 'Default Company'
     ? company.name
     : 'Fattern';
@@ -19,9 +22,9 @@ export function BottomBar({ company, onCreateInvoice, onRegisterPayment, onAddEx
     .slice(0, 2);
 
   const shortcuts = [
-    { label: 'Ny faktura',         key: '⌘ N', action: onCreateInvoice },
-    { label: 'Registrer betaling', key: '⌘ P', action: onRegisterPayment },
-    { label: 'Legg til utgift',    key: '⌘ E', action: onAddExpense },
+    { labelKey: 'layout.shortcut_new_invoice',       key: '⌘ N', action: onCreateInvoice },
+    { labelKey: 'layout.shortcut_register_payment',  key: '⌘ P', action: onRegisterPayment },
+    { labelKey: 'layout.shortcut_add_expense',       key: '⌘ E', action: onAddExpense },
   ];
 
   return (
@@ -75,9 +78,9 @@ export function BottomBar({ company, onCreateInvoice, onRegisterPayment, onAddEx
       </div>
 
       {/* Workflow shortcuts */}
-      {shortcuts.map(({ label, key, action }) => (
+      {shortcuts.map(({ labelKey, key, action }) => (
         <button
-          key={label}
+          key={labelKey}
           onClick={action}
           style={{
             display: 'flex', alignItems: 'center', gap: 6,
@@ -91,7 +94,7 @@ export function BottomBar({ company, onCreateInvoice, onRegisterPayment, onAddEx
           onMouseEnter={e => (e.currentTarget.style.background = 'var(--f-hover)')}
           onMouseLeave={e => (e.currentTarget.style.background = 'none')}
         >
-          <span style={{ fontSize: 11.5, color: 'var(--f-text-subtle)' }}>{label}</span>
+          <span style={{ fontSize: 11.5, color: 'var(--f-text-subtle)' }}>{t(labelKey)}</span>
           <span
             style={{
               fontSize: 10,
@@ -126,7 +129,7 @@ export function BottomBar({ company, onCreateInvoice, onRegisterPayment, onAddEx
             flexShrink: 0,
           }}
         />
-        lokal · v{APP_VERSION}
+        {t('layout.local')} · v{APP_VERSION}
       </div>
     </div>
   );
