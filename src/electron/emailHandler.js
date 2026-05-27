@@ -84,15 +84,22 @@ async function generatePdfForInvoice(database, invoiceId) {
     ? database.db.prepare('SELECT * FROM customers WHERE id = ?').get(invoice.customer_id)
     : null;
 
-  // Try to use the default template if available
+  // Try to use the user's default template (same logic as pdf:generate-invoice in main.js)
   try {
     const templateStorage = new TemplateStorage();
+    // Read the stored default template ID; fall back to 'default_invoice'
+    const defaultTemplateId = database.getSetting('invoice.defaultTemplate', 'default_invoice');
+    const template = templateStorage.loadTemplate(defaultTemplateId);
+    if (template) {
+      return await generateTemplatePDF(template, invoice, company, customer);
+    }
+    // If that ID isn't found, try the first available template
     const templates = templateStorage.listTemplates();
-    const defaultTemplate = templates.find(t => t.id === 'default_invoice') || templates[0];
-    if (defaultTemplate) {
-      const template = templateStorage.loadTemplate(defaultTemplate.id);
-      if (template) {
-        return await generateTemplatePDF(template, invoice, company, customer);
+    if (templates.length > 0) {
+      const firstId = templates[0].meta?.id || templates[0].id;
+      const firstTemplate = templateStorage.loadTemplate(firstId);
+      if (firstTemplate) {
+        return await generateTemplatePDF(firstTemplate, invoice, company, customer);
       }
     }
   } catch (err) {
