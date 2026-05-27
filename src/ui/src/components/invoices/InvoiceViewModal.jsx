@@ -3,18 +3,19 @@ import { useTranslation } from 'react-i18next';
 import { Modal } from '../Modal';
 import { StatusBadge } from '../StatusBadge';
 import { formatDate } from '../../utils/formatDate';
-import { IconEdit, IconDownload, IconX, IconPlus, IconSend, IconFileText, IconMail, IconPencil, IconCircleCheck, IconAlertCircle, IconClockHour4 } from '@tabler/icons-react';
+import { IconEdit, IconDownload, IconX, IconPlus, IconSend, IconFileText, IconMail, IconPencil, IconCircleCheck, IconAlertCircle, IconClockHour4, IconAlertTriangle } from '@tabler/icons-react';
 import { SendEmailModal } from './SendEmailModal';
 
 // ─── Event Log Tab ──────────────────────────────────────────────────────────
 
 const EVENT_CONFIG = {
-  created:        { icon: IconFileText,    color: 'var(--f-green-text)',    label: 'Opprettet' },
-  updated:        { icon: IconPencil,      color: 'var(--f-text-soft)',     label: 'Redigert' },
-  status_changed: { icon: IconCircleCheck, color: 'var(--f-blue-text)',     label: 'Status endret' },
-  pdf_generated:  { icon: IconDownload,    color: 'var(--f-text-soft)',     label: 'PDF generert' },
-  email_sent:     { icon: IconMail,        color: 'var(--f-green-text)',    label: 'E-post sendt' },
-  overdue:        { icon: IconAlertCircle, color: 'var(--f-warn)',          label: 'Forfalt' },
+  created:             { icon: IconFileText,      color: 'var(--f-green-text)', label: 'Opprettet' },
+  updated:             { icon: IconPencil,        color: 'var(--f-text-soft)',  label: 'Redigert' },
+  updated_after_send:  { icon: IconAlertTriangle, color: 'var(--f-warn)',       label: 'Redigert etter utsending', warn: true },
+  status_changed:      { icon: IconCircleCheck,   color: 'var(--f-blue-text)', label: 'Status endret' },
+  pdf_generated:       { icon: IconDownload,      color: 'var(--f-text-soft)', label: 'PDF generert' },
+  email_sent:          { icon: IconMail,          color: 'var(--f-green-text)',label: 'E-post sendt' },
+  overdue:             { icon: IconAlertCircle,   color: 'var(--f-warn)',      label: 'Forfalt' },
 };
 
 function InvoiceEventLog({ invoiceId }) {
@@ -62,12 +63,18 @@ function InvoiceEventLog({ invoiceId }) {
               {/* Icon dot */}
               <div
                 className="relative z-10 w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                style={{ background: 'var(--f-surface-elevated)', border: '1px solid var(--f-border)' }}
+                style={{
+                  background: cfg.warn ? 'var(--f-warn-bg)' : 'var(--f-surface-elevated)',
+                  border: `1px solid ${cfg.warn ? 'var(--f-warn-border)' : 'var(--f-border)'}`,
+                }}
               >
                 <Icon className="h-4 w-4" style={{ color: cfg.color }} />
               </div>
               {/* Content */}
-              <div className="flex-1 min-w-0 pt-2 pb-3">
+              <div
+                className={`flex-1 min-w-0 pt-2 pb-3 ${cfg.warn ? 'rounded-xl px-3 -mx-3' : ''}`}
+                style={cfg.warn ? { background: 'var(--f-warn-bg)', border: '1px solid var(--f-warn-border)', marginTop: 4 } : {}}
+              >
                 <p className="text-sm font-medium leading-snug" style={{ color: 'var(--f-text-body)' }}>
                   {event.description}
                 </p>

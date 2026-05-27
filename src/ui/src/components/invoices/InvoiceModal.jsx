@@ -312,6 +312,16 @@ export function InvoiceModal({ isOpen, mode = 'create', initialInvoice, onSubmit
 
             <div className="flex-1 overflow-y-auto p-6">
               <form id="invoice-form" onSubmit={handleSubmit} className="space-y-6">
+                {isEdit && ['sent', 'paid', 'overdue'].includes(initialInvoice?.status) && (
+                  <div className="rounded-xl px-4 py-3 text-sm flex items-start gap-2" style={{ background: 'var(--f-warn-bg)', border: '1px solid var(--f-warn-border)', color: 'var(--f-warn)' }}>
+                    <IconAlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                    <span>
+                      Denne fakturaen er allerede <strong>{initialInvoice.status === 'paid' ? 'betalt' : initialInvoice.status === 'overdue' ? 'forfalt' : 'sendt'}</strong>.
+                      Endringer vil registreres i loggen og kan ikke skjules.
+                    </span>
+                  </div>
+                )}
+
                 {error && (
                   <div className="rounded-xl px-4 py-3 text-sm" style={{ background: 'var(--f-danger-bg)', border: '1px solid var(--f-danger-border)', color: 'var(--f-danger-text)' }}>
                     {error}

@@ -483,13 +483,22 @@ class FatternDatabase {
     if (existingItems.length !== items.length)
       changes.push({ field: 'Linjer', from: String(existingItems.length), to: String(items.length) });
 
-    const desc = changes.length === 0
-      ? 'Faktura redigert'
-      : changes.length === 1
-        ? `Faktura redigert · ${changes[0].field}: ${changes[0].from} → ${changes[0].to}`
-        : `Faktura redigert · ${changes.length} felt endret`;
+    const postSend = ['sent', 'paid', 'overdue'].includes(existing.status);
+    const eventType = postSend ? 'updated_after_send' : 'updated';
+    const prefix = postSend ? 'Faktura redigert etter utsending' : 'Faktura redigert';
 
-    this.logInvoiceEvent(invoiceId, 'updated', desc, changes.length > 0 ? { changes } : null);
+    const desc = changes.length === 0
+      ? prefix
+      : changes.length === 1
+        ? `${prefix} · ${changes[0].field}: ${changes[0].from} → ${changes[0].to}`
+        : `${prefix} · ${changes.length} felt endret`;
+
+    this.logInvoiceEvent(
+      invoiceId,
+      eventType,
+      desc,
+      { ...(changes.length > 0 ? { changes } : {}), ...(postSend ? { statusAtEdit: existing.status } : {}) } || null,
+    );
     return this.getInvoice(invoiceId);
   }
 
