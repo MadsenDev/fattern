@@ -204,6 +204,18 @@ export function ExpenseDetailPanel({ expense, formatCurrency, onEdit, onDelete, 
           </div>
         )}
 
+        {/* Linked invoice */}
+        {expense.linked_invoice_id && (
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--f-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+              Lenket faktura
+            </div>
+            <p style={{ fontSize: 13, color: 'var(--f-text-soft)', margin: 0 }}>
+              Faktura #{expense.linked_invoice_id}
+            </p>
+          </div>
+        )}
+
         {/* Divider */}
         <div style={{ height: 1, background: 'var(--f-border)', marginBottom: 16 }} />
 

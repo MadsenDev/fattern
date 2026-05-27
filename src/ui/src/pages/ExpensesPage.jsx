@@ -21,11 +21,21 @@ export function ExpensesPage({
   const [selectedExpenseId, setSelectedExpenseId] = useState(null);
   const panelOpen = selectedExpenseId !== null;
 
+  // Replace null id for uncategorised row with a sentinel so it can be selected/deselected
+  const UNCATEGORISED_SENTINEL = '__uncategorised__';
+  const breakdownForUI = breakdown.map((c) =>
+    c.id === null ? { ...c, id: UNCATEGORISED_SENTINEL } : c
+  );
+
   // Filter by category then search
   const filteredExpenses = useMemo(() => {
     let list = expenses;
     if (activeCategoryId !== null) {
-      list = list.filter((e) => e.category_id === activeCategoryId);
+      if (activeCategoryId === UNCATEGORISED_SENTINEL) {
+        list = list.filter((e) => e.category_id == null);
+      } else {
+        list = list.filter((e) => e.category_id === activeCategoryId);
+      }
     }
     if (query.trim()) {
       const q = query.toLowerCase();
@@ -99,16 +109,16 @@ export function ExpensesPage({
         {/* Main column */}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div className="f-glass rounded-3xl p-6 space-y-4">
-            {breakdown.length > 0 && (
+            {breakdownForUI.length > 0 && (
               <ExpenseBreakdownBar
-                breakdown={breakdown}
+                breakdown={breakdownForUI}
                 activeCategory={activeCategoryId}
                 onSelectCategory={handleSelectCategory}
               />
             )}
 
             <ExpenseCategoryChips
-              breakdown={breakdown}
+              breakdown={breakdownForUI}
               activeCategory={activeCategoryId}
               onSelectCategory={handleSelectCategory}
               query={query}

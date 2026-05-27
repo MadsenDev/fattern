@@ -856,7 +856,6 @@ function App() {
           <ExpensesPage
             expenses={allExpenses || []}
             breakdown={expenseBreakdown || []}
-            expenseCategories={expenseCategories || []}
             formatCurrency={formatCurrency}
             onCreateExpense={openCreateExpenseModal}
             onEditExpense={openEditExpenseModal}
