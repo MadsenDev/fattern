@@ -1,28 +1,26 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '../Modal';
 import { Select } from '../Select';
 import { DatePicker } from '../DatePicker';
-import { formatDate } from '../../utils/formatDate';
 
 export function InvoiceStatusModal({ isOpen, invoice, onClose, onSubmit, initialStatus = null }) {
+  const { t } = useTranslation();
   const [status, setStatus] = useState(initialStatus || invoice?.status || 'draft');
   const [paymentDate, setPaymentDate] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  // Statuses that require a date
   const statusesRequiringDate = ['paid'];
 
   useEffect(() => {
     if (!isOpen) return;
     const newStatus = initialStatus || invoice?.status || 'draft';
     setStatus(newStatus);
-    
-    // If invoice already has payment_date, use it (DatePicker expects yyyy-mm-dd)
+
     if (invoice?.payment_date) {
       setPaymentDate(invoice.payment_date);
     } else if (statusesRequiringDate.includes(newStatus)) {
-      // If changing to paid and no date exists, default to today (yyyy-mm-dd format)
       const today = new Date();
       setPaymentDate(today.toISOString().split('T')[0]);
     } else {
@@ -36,10 +34,9 @@ export function InvoiceStatusModal({ isOpen, invoice, onClose, onSubmit, initial
     event.preventDefault();
     setError('');
 
-    // Validate date if required
     if (statusesRequiringDate.includes(status)) {
       if (!paymentDate) {
-        setError('Dato må fylles ut.');
+        setError(t('invoice_status.date_required'));
         return;
       }
     }
@@ -53,7 +50,7 @@ export function InvoiceStatusModal({ isOpen, invoice, onClose, onSubmit, initial
       onClose?.();
     } catch (err) {
       console.error('Kunne ikke oppdatere status', err);
-      const errorMessage = err?.message || 'Noe gikk galt under oppdatering. Prøv igjen.';
+      const errorMessage = err?.message || t('errors.generic');
       setError(errorMessage);
     } finally {
       setSaving(false);
@@ -61,11 +58,11 @@ export function InvoiceStatusModal({ isOpen, invoice, onClose, onSubmit, initial
   };
 
   const statusOptions = [
-    { value: 'draft', label: 'Kladd' },
-    { value: 'sent', label: 'Sendt' },
-    { value: 'paid', label: 'Betalt' },
-    { value: 'overdue', label: 'Forfalt' },
-    { value: 'cancelled', label: 'Kansellert' },
+    { value: 'draft', label: t('status.draft') },
+    { value: 'sent', label: t('status.sent') },
+    { value: 'paid', label: t('status.paid') },
+    { value: 'overdue', label: t('status.overdue') },
+    { value: 'cancelled', label: t('status.cancelled') },
   ];
 
   const requiresDate = statusesRequiringDate.includes(status);
@@ -74,8 +71,8 @@ export function InvoiceStatusModal({ isOpen, invoice, onClose, onSubmit, initial
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Endre fakturastatus"
-      description={`Oppdater status for faktura ${invoice?.invoice_number || invoice?.id || ''}`}
+      title={t('invoice_status.title')}
+      description={t('invoice_status.description', { num: invoice?.invoice_number || invoice?.id || '' })}
       footer={
         <>
           <button
@@ -87,7 +84,7 @@ export function InvoiceStatusModal({ isOpen, invoice, onClose, onSubmit, initial
             onClick={onClose}
             disabled={saving}
           >
-            Avbryt
+            {t('common.cancel')}
           </button>
           <button
             type="submit"
@@ -95,26 +92,26 @@ export function InvoiceStatusModal({ isOpen, invoice, onClose, onSubmit, initial
             className="f-btn-primary rounded-2xl px-5 py-2 text-sm font-semibold disabled:opacity-60"
             disabled={saving}
           >
-            {saving ? 'Lagrer …' : 'Oppdater status'}
+            {saving ? t('common.saving') : t('invoice_status.update_button')}
           </button>
         </>
       }
     >
       <form id="status-form" className="space-y-4" onSubmit={handleSubmit}>
         <div>
-          <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Status</label>
+          <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('invoice_status.status_label')}</label>
           <Select
             value={status}
             onChange={setStatus}
             options={statusOptions}
-            placeholder="Velg status"
+            placeholder={t('invoice_status.status_placeholder')}
           />
         </div>
 
         {requiresDate && (
           <div>
             <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>
-              {status === 'paid' ? 'Betalingsdato' : 'Dato'} *
+              {status === 'paid' ? t('invoice_status.payment_date_label') : t('invoice_status.date_label')} *
             </label>
             <DatePicker
               value={paymentDate}
@@ -124,7 +121,7 @@ export function InvoiceStatusModal({ isOpen, invoice, onClose, onSubmit, initial
               className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
             />
             <p className="mt-1 text-xs" style={{ color: 'var(--f-text-subtle)' }}>
-              {status === 'paid' ? 'Når ble fakturaen betalt?' : 'Dato for denne statusendringen'}
+              {status === 'paid' ? t('invoice_status.paid_question') : t('invoice_status.date_question')}
             </p>
           </div>
         )}
@@ -138,4 +135,3 @@ export function InvoiceStatusModal({ isOpen, invoice, onClose, onSubmit, initial
     </Modal>
   );
 }
-

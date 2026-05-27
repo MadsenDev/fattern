@@ -1,19 +1,22 @@
+import { useTranslation } from 'react-i18next';
 import { IconTypography, IconPhoto, IconDatabase, IconLayoutGrid, IconSquare } from '@tabler/icons-react';
 
-const paletteItems = [
-  { type: 'text', label: 'Tekst', icon: IconTypography },
-  { type: 'field', label: 'Felt', icon: IconDatabase },
-  { type: 'image', label: 'Bilde', icon: IconPhoto },
-  { type: 'table', label: 'Tabell', icon: IconLayoutGrid },
-  { type: 'shape', label: 'Form', icon: IconSquare },
-];
-
 export function TemplatePalette({ onAddElement }) {
+  const { t } = useTranslation();
+
+  const paletteItems = [
+    { type: 'text', label: t('template_editor.element_text'), icon: IconTypography },
+    { type: 'field', label: t('template_editor.element_field'), icon: IconDatabase },
+    { type: 'image', label: t('template_editor.element_image'), icon: IconPhoto },
+    { type: 'table', label: t('template_editor.element_table'), icon: IconLayoutGrid },
+    { type: 'shape', label: t('template_editor.element_shape'), icon: IconSquare },
+  ];
+
   return (
     <div className="w-64" style={{ borderRight: '1px solid var(--f-border-subtle)', background: 'rgba(8,16,12,0.6)' }}>
       <div className="p-4" style={{ borderBottom: '1px solid var(--f-border-subtle)' }}>
-        <h2 className="text-sm font-semibold" style={{ color: 'var(--f-text-body)' }}>Elementer</h2>
-        <p className="mt-1 text-xs" style={{ color: 'var(--f-text-subtle)' }}>Klikk for å legge til</p>
+        <h2 className="text-sm font-semibold" style={{ color: 'var(--f-text-body)' }}>{t('template_editor.palette_title')}</h2>
+        <p className="mt-1 text-xs" style={{ color: 'var(--f-text-subtle)' }}>{t('template_editor.palette_desc')}</p>
       </div>
       <div className="p-4 space-y-2">
         {paletteItems.map((item) => {
@@ -36,4 +39,3 @@ export function TemplatePalette({ onAddElement }) {
     </div>
   );
 }
-

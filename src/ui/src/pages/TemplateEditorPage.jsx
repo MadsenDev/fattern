@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { IconArrowLeft, IconDeviceFloppy, IconZoomIn, IconZoomOut, IconMaximize, IconEye, IconSettings } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
+import { IconArrowLeft, IconDeviceFloppy, IconZoomIn, IconZoomOut, IconEye, IconSettings } from '@tabler/icons-react';
 import { TemplateCanvas } from '../components/template/TemplateCanvas';
 import { TemplatePalette } from '../components/template/TemplatePalette';
 import { TemplateProperties } from '../components/template/TemplateProperties';
@@ -8,26 +9,23 @@ import { TemplateSettingsModal } from '../components/template/TemplateSettingsMo
 import { useTemplateHistory } from '../hooks/useTemplateHistory';
 
 export function TemplateEditorPage({ templateId, onClose }) {
+  const { t } = useTranslation();
   const [template, setTemplate] = useState(null);
   const [selectedElementId, setSelectedElementId] = useState(null);
   const [zoom, setZoom] = useState(() => {
-    // Calculate initial zoom to fit A4 page in viewport
-    // Account for: titlebar (2rem), editor toolbar (3rem), margins
-    const viewportHeight = window.innerHeight - 40 - 56; // titlebar (40) + toolbar (56)
-    const A4_HEIGHT = 1123; // A4 at 96 DPI
+    const viewportHeight = window.innerHeight - 40 - 56;
+    const A4_HEIGHT = 1123;
     const fitZoom = Math.floor((viewportHeight / A4_HEIGHT) * 100);
     return Math.min(100, Math.max(50, fitZoom));
   });
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [showPreview, setShowPreview] = useState(() => {
-    // Check if templateId contains preview parameter
     return templateId?.includes('?preview=true') || false;
   });
   const [showSettings, setShowSettings] = useState(false);
-  const { history, pushToHistory, undo, redo, canUndo, canRedo } = useTemplateHistory();
-  
-  // Extract actual templateId if it contains query params
+  const { pushToHistory, undo, redo, canUndo, canRedo } = useTemplateHistory();
+
   const actualTemplateId = templateId?.split('?')[0] || templateId;
 
   useEffect(() => {
@@ -45,7 +43,6 @@ export function TemplateEditorPage({ templateId, onClose }) {
 
       let loadedTemplate = await api.load(actualTemplateId);
       if (!loadedTemplate) {
-        // Create default if it doesn't exist
         loadedTemplate = await api.createDefault();
       }
 
@@ -63,9 +60,7 @@ export function TemplateEditorPage({ templateId, onClose }) {
     try {
       const api = window.fattern?.template;
       if (!api) return;
-
       await api.save(template);
-      // Show success toast or feedback
     } catch (error) {
       console.error('Failed to save template', error);
     }
@@ -74,7 +69,6 @@ export function TemplateEditorPage({ templateId, onClose }) {
   const handleSaveSettings = (updatedTemplate) => {
     setTemplate(updatedTemplate);
     pushToHistory(updatedTemplate);
-    // Auto-save when settings are updated
     handleSave();
   };
 
@@ -138,7 +132,7 @@ export function TemplateEditorPage({ templateId, onClose }) {
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center" style={{ background: 'var(--f-bg)' }}>
-        <p style={{ color: 'var(--f-text-subtle)' }}>Laster mal...</p>
+        <p style={{ color: 'var(--f-text-subtle)' }}>{t('template_editor.loading')}</p>
       </div>
     );
   }
@@ -146,7 +140,7 @@ export function TemplateEditorPage({ templateId, onClose }) {
   if (!template) {
     return (
       <div className="flex h-screen items-center justify-center" style={{ background: 'var(--f-bg)' }}>
-        <p style={{ color: 'var(--f-text-subtle)' }}>Kunne ikke laste mal</p>
+        <p style={{ color: 'var(--f-text-subtle)' }}>{t('template_editor.load_error')}</p>
       </div>
     );
   }
@@ -164,7 +158,7 @@ export function TemplateEditorPage({ templateId, onClose }) {
             onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--f-text-soft)'; }}
           >
             <IconArrowLeft className="h-4 w-4" />
-            Tilbake
+            {t('common.back')}
           </button>
           <div className="h-6 w-px" style={{ background: 'var(--f-border)' }} />
           <h1 className="text-sm font-semibold" style={{ color: 'var(--f-text-body)' }}>{template.meta?.name || template.name}</h1>
@@ -180,7 +174,7 @@ export function TemplateEditorPage({ templateId, onClose }) {
             onMouseEnter={e => { if (!e.currentTarget.disabled) e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
           >
-            Angre
+            {t('template_editor.undo')}
           </button>
           <button
             onClick={handleRedo}
@@ -190,7 +184,7 @@ export function TemplateEditorPage({ templateId, onClose }) {
             onMouseEnter={e => { if (!e.currentTarget.disabled) e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
           >
-            Gjør om
+            {t('template_editor.redo')}
           </button>
 
           <div className="h-6 w-px" style={{ background: 'var(--f-border)' }} />
@@ -232,7 +226,7 @@ export function TemplateEditorPage({ templateId, onClose }) {
               onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
             >
-              Tilpass
+              {t('template_editor.fit')}
             </button>
           </div>
 
@@ -247,7 +241,7 @@ export function TemplateEditorPage({ templateId, onClose }) {
             onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--f-text-soft)'; }}
           >
             <IconEye className="mr-2 inline h-4 w-4" />
-            {showPreview ? 'Rediger' : 'Forhåndsvisning'}
+            {showPreview ? t('template_editor.edit_mode') : t('template_editor.preview')}
           </button>
 
           <div className="h-6 w-px" style={{ background: 'var(--f-border)' }} />
@@ -259,10 +253,10 @@ export function TemplateEditorPage({ templateId, onClose }) {
             style={{ color: 'var(--f-text-soft)' }}
             onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'var(--f-text-body)'; }}
             onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--f-text-soft)'; }}
-            title="Mal innstillinger"
+            title={t('template_editor.settings_title')}
           >
             <IconSettings className="mr-2 inline h-4 w-4" />
-            Innstillinger
+            {t('template_editor.settings')}
           </button>
 
           <div className="h-6 w-px" style={{ background: 'var(--f-border)' }} />
@@ -273,7 +267,7 @@ export function TemplateEditorPage({ templateId, onClose }) {
             className="f-btn-primary rounded-lg px-4 py-1.5 text-sm font-medium"
           >
             <IconDeviceFloppy className="mr-2 inline h-4 w-4" />
-            Lagre
+            {t('template_editor.save')}
           </button>
         </div>
       </div>
@@ -285,10 +279,8 @@ export function TemplateEditorPage({ templateId, onClose }) {
         </div>
       ) : (
         <div className="flex flex-1 overflow-hidden">
-          {/* Palette (Left) */}
           <TemplatePalette onAddElement={handleAddElement} />
 
-          {/* Canvas (Center) */}
           <div className="flex-1 overflow-hidden">
             <TemplateCanvas
               template={template}
@@ -302,7 +294,6 @@ export function TemplateEditorPage({ templateId, onClose }) {
             />
           </div>
 
-          {/* Properties (Right) */}
           <TemplateProperties
             element={selectedElement}
             template={template}
@@ -311,7 +302,6 @@ export function TemplateEditorPage({ templateId, onClose }) {
         </div>
       )}
 
-      {/* Settings Modal */}
       <TemplateSettingsModal
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
@@ -323,6 +313,7 @@ export function TemplateEditorPage({ templateId, onClose }) {
 }
 
 // Helper function to create new elements
+// Note: column headers are invoice document content, kept in Norwegian
 function createElement(type) {
   const baseId = `element_${Date.now()}`;
   const baseElement = {
@@ -389,7 +380,7 @@ function createElement(type) {
       return {
         ...baseElement,
         type: 'shape',
-        shapeType: 'rectangle', // 'rectangle' | 'line' | 'circle'
+        shapeType: 'rectangle',
         width: 200,
         height: 100,
         backgroundColor: '#f0f8f5',
@@ -397,10 +388,9 @@ function createElement(type) {
         borderColor: '#d5e7e6',
         borderStyle: 'solid',
         borderRadius: 0,
-        zIndex: 0, // Shapes default to lower z-index
+        zIndex: 0,
       };
     default:
       return baseElement;
   }
 }
-

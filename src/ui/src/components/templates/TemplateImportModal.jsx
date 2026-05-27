@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { IconX, IconAlertCircle, IconCircleCheck, IconInfoCircle } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
+import { IconAlertCircle, IconCircleCheck, IconInfoCircle } from '@tabler/icons-react';
 import { Modal } from '../Modal';
 
 export function TemplateImportModal({ isOpen, onClose, onConfirm, templateMeta, validationIssues, warnings }) {
+  const { t } = useTranslation();
   if (!isOpen) return null;
 
   const hasErrors = validationIssues?.some(issue => issue.level === 'error') || false;
@@ -12,34 +13,34 @@ export function TemplateImportModal({ isOpen, onClose, onConfirm, templateMeta, 
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Importer mal"
+      title={t('template_import.title')}
       size="md"
     >
       <div className="space-y-4">
         {templateMeta && (
           <div className="space-y-3">
             <div>
-              <h4 className="text-sm font-semibold mb-2" style={{ color: 'var(--f-text-body)' }}>Mal informasjon</h4>
+              <h4 className="text-sm font-semibold mb-2" style={{ color: 'var(--f-text-body)' }}>{t('template_import.info_title')}</h4>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span style={{ color: 'var(--f-text-subtle)' }}>Navn:</span>
+                  <span style={{ color: 'var(--f-text-subtle)' }}>{t('template_import.name_label')}</span>
                   <span className="font-medium" style={{ color: 'var(--f-text-body)' }}>{templateMeta.name}</span>
                 </div>
                 {templateMeta.author && (
                   <div className="flex justify-between">
-                    <span style={{ color: 'var(--f-text-subtle)' }}>Forfatter:</span>
+                    <span style={{ color: 'var(--f-text-subtle)' }}>{t('template_import.author_label')}</span>
                     <span className="font-medium" style={{ color: 'var(--f-text-body)' }}>{templateMeta.author}</span>
                   </div>
                 )}
                 {templateMeta.version && (
                   <div className="flex justify-between">
-                    <span style={{ color: 'var(--f-text-subtle)' }}>Versjon:</span>
+                    <span style={{ color: 'var(--f-text-subtle)' }}>{t('template_import.version_label')}</span>
                     <span className="font-medium" style={{ color: 'var(--f-text-body)' }}>{templateMeta.version}</span>
                   </div>
                 )}
                 {templateMeta.tags && templateMeta.tags.length > 0 && (
                   <div className="flex justify-between items-start">
-                    <span style={{ color: 'var(--f-text-subtle)' }}>Tagger:</span>
+                    <span style={{ color: 'var(--f-text-subtle)' }}>{t('template_import.tags_label')}</span>
                     <div className="flex flex-wrap gap-1">
                       {templateMeta.tags.map((tag, idx) => (
                         <span key={idx} className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style={{ background: 'rgba(255,255,255,0.06)', color: 'var(--f-text-subtle)' }}>
@@ -64,7 +65,7 @@ export function TemplateImportModal({ isOpen, onClose, onConfirm, templateMeta, 
             <div className="flex items-start gap-2">
               <IconAlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" style={{ color: 'var(--f-danger-text)' }} />
               <div className="flex-1">
-                <h5 className="text-sm font-semibold mb-1" style={{ color: 'var(--f-danger-text)' }}>Valideringsfeil</h5>
+                <h5 className="text-sm font-semibold mb-1" style={{ color: 'var(--f-danger-text)' }}>{t('template_import.validation_errors')}</h5>
                 <ul className="text-xs space-y-1" style={{ color: 'var(--f-danger-text)' }}>
                   {validationIssues
                     .filter(issue => issue.level === 'error')
@@ -82,7 +83,7 @@ export function TemplateImportModal({ isOpen, onClose, onConfirm, templateMeta, 
             <div className="flex items-start gap-2">
               <IconInfoCircle className="h-5 w-5 flex-shrink-0 mt-0.5" style={{ color: '#fbbf24' }} />
               <div className="flex-1">
-                <h5 className="text-sm font-semibold mb-1" style={{ color: '#fbbf24' }}>Advarsler</h5>
+                <h5 className="text-sm font-semibold mb-1" style={{ color: '#fbbf24' }}>{t('template_import.warnings')}</h5>
                 <ul className="text-xs space-y-1" style={{ color: '#fcd34d' }}>
                   {warnings?.map((warning, idx) => (
                     <li key={idx}>• {warning}</li>
@@ -102,7 +103,7 @@ export function TemplateImportModal({ isOpen, onClose, onConfirm, templateMeta, 
           <div className="rounded-lg p-3" style={{ background: 'var(--f-green-bg)', border: '1px solid var(--f-border-green)' }}>
             <div className="flex items-start gap-2">
               <IconCircleCheck className="h-5 w-5 flex-shrink-0 mt-0.5" style={{ color: 'var(--f-green-text)' }} />
-              <p className="text-sm" style={{ color: 'var(--f-green-text)' }}>Malen ser ut til å være gyldig og klar for import.</p>
+              <p className="text-sm" style={{ color: 'var(--f-green-text)' }}>{t('template_import.valid_desc')}</p>
             </div>
           </div>
         )}
@@ -113,7 +114,7 @@ export function TemplateImportModal({ isOpen, onClose, onConfirm, templateMeta, 
           onClick={onClose}
           className="f-btn-ghost rounded-lg px-4 py-2 text-sm font-medium transition"
         >
-          Avbryt
+          {t('common.cancel')}
         </button>
         <button
           onClick={onConfirm}
@@ -121,10 +122,9 @@ export function TemplateImportModal({ isOpen, onClose, onConfirm, templateMeta, 
           className={`rounded-lg px-4 py-2 text-sm font-medium transition ${hasErrors ? 'cursor-not-allowed opacity-40' : 'f-btn-primary'}`}
           style={hasErrors ? { background: 'rgba(255,255,255,0.06)', color: 'var(--f-text-subtle)' } : {}}
         >
-          Importer
+          {t('template_import.import_button')}
         </button>
       </div>
     </Modal>
   );
 }
-

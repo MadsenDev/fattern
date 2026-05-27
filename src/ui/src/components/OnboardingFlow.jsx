@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 const defaultCompanyValues = {
   name: '',
@@ -24,6 +25,7 @@ function markComplete() {
 }
 
 export function OnboardingFlow({ initialCompany, onComplete }) {
+  const { t } = useTranslation();
   const [stepIndex, setStepIndex] = useState(0);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -37,15 +39,15 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
   const steps = [
     {
       id: 'intro',
-      title: 'Velkommen til Fattern',
-      description: 'Sett opp selskapsprofilen slik at fakturaene får riktig informasjon.',
-      actionLabel: 'Kom i gang',
+      title: t('onboarding_flow.intro_title'),
+      description: t('onboarding_flow.intro_desc'),
+      actionLabel: t('onboarding_flow.intro_action'),
     },
     {
       id: 'company',
-      title: 'Fortell oss om selskapet ditt',
-      description: 'Denne informasjonen brukes i appen og på fakturaer.',
-      actionLabel: 'Lagre og start',
+      title: t('onboarding_flow.company_title'),
+      description: t('onboarding_flow.company_desc'),
+      actionLabel: t('onboarding_flow.company_action'),
     },
   ];
 
@@ -69,7 +71,7 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
     };
 
     if (!payload.name) {
-      setError('Selskapsnavn må fylles ut.');
+      setError(t('onboarding_flow.validation'));
       setSaving(false);
       return;
     }
@@ -86,7 +88,7 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
       onComplete?.(updated);
     } catch (err) {
       console.error('Kunne ikke lagre selskap', err);
-      setError('Noe gikk galt under lagring. Prøv igjen.');
+      setError(t('onboarding_flow.error'));
     } finally {
       setSaving(false);
     }
@@ -112,7 +114,7 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
             <div className="flex items-center gap-4">
               <img src="/logo.png" alt="Fattern" className="h-12 w-12 drop-shadow-xl" />
               <div>
-                <p className="text-xs uppercase tracking-[0.4em]" style={{ color: 'var(--f-text-subtle)' }}>Oppstart</p>
+                <p className="text-xs uppercase tracking-[0.4em]" style={{ color: 'var(--f-text-subtle)' }}>{t('onboarding_flow.startup')}</p>
                 <h2 className="text-2xl font-semibold" style={{ color: 'var(--f-text-body)' }}>{current.title}</h2>
               </div>
             </div>
@@ -152,7 +154,7 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
           <div className="flex items-center gap-4">
             <img src="/logo.png" alt="Fattern" className="h-12 w-12 drop-shadow-xl" />
             <div>
-              <p className="text-xs uppercase tracking-[0.4em]" style={{ color: 'var(--f-text-subtle)' }}>Oppstart</p>
+              <p className="text-xs uppercase tracking-[0.4em]" style={{ color: 'var(--f-text-subtle)' }}>{t('onboarding_flow.startup')}</p>
               <h2 className="text-2xl font-semibold" style={{ color: 'var(--f-text-body)' }}>{current.title}</h2>
             </div>
           </div>
@@ -160,7 +162,7 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
 
           <form className="mt-8 grid gap-4 md:grid-cols-2" onSubmit={handleSubmit}>
             <div className="md:col-span-2">
-              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Selskapsnavn*</label>
+              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('onboarding_flow.company_name')}</label>
               <input
                 className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
                 value={form.name}
@@ -170,7 +172,7 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
               />
             </div>
             <div>
-              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Organisasjonsnummer</label>
+              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('onboarding_flow.registration_number')}</label>
               <input
                 className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
                 value={form.org_number || ''}
@@ -179,7 +181,7 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
               />
             </div>
             <div>
-              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>E-post</label>
+              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('onboarding_flow.email')}</label>
               <input
                 className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
                 value={form.contact_email || ''}
@@ -188,7 +190,7 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
               />
             </div>
             <div>
-              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Telefon</label>
+              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('onboarding_flow.phone')}</label>
               <input
                 className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
                 value={form.contact_number || ''}
@@ -197,7 +199,7 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
               />
             </div>
             <div>
-              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Kontonummer</label>
+              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('onboarding_flow.bank_account')}</label>
               <input
                 className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
                 value={form.account_number || ''}
@@ -206,7 +208,7 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Adresse</label>
+              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('onboarding_flow.address')}</label>
               <input
                 className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
                 value={form.address || ''}
@@ -215,7 +217,7 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
               />
             </div>
             <div>
-              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Postnummer</label>
+              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('onboarding_flow.postal_code')}</label>
               <input
                 className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
                 value={form.post_number || ''}
@@ -223,7 +225,7 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
               />
             </div>
             <div>
-              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Poststed</label>
+              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('onboarding_flow.city')}</label>
               <input
                 className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
                 value={form.post_location || ''}
@@ -231,7 +233,7 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
               />
             </div>
             <div>
-              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>MVA-sats</label>
+              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('onboarding_flow.vat_rate')}</label>
               <input
                 type="number"
                 step="0.01"
@@ -241,7 +243,7 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
                 value={form.vat_rate}
                 onChange={(e) => setForm((prev) => ({ ...prev, vat_rate: e.target.value }))}
               />
-              <p className="mt-1 text-xs" style={{ color: 'var(--f-text-subtle)' }}>0,25 tilsvarer 25 % MVA.</p>
+              <p className="mt-1 text-xs" style={{ color: 'var(--f-text-subtle)' }}>{t('onboarding_flow.025_equals_25_vat')}</p>
             </div>
 
             {error ? (
@@ -260,14 +262,14 @@ export function OnboardingFlow({ initialCompany, onComplete }) {
                   onComplete?.(form);
                 }}
               >
-                Hopp over
+                {t('onboarding_flow.skip')}
               </button>
               <button
                 type="submit"
                 className="f-btn-primary rounded-2xl px-5 py-2 text-sm font-semibold disabled:opacity-50"
                 disabled={saving}
               >
-                {saving ? 'Lagrer …' : current.actionLabel}
+                {saving ? t('common.saving') : current.actionLabel}
               </button>
             </div>
           </form>

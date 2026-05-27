@@ -1,13 +1,15 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { IconLock, IconPackage } from '@tabler/icons-react';
 import { useToast } from '../../hooks/useToast';
 import { useSettings } from '../../hooks/useSettings';
 import { useSupporterPack } from '../../hooks/useSupporterPack';
-import { getTemplateId, getTemplateName, getTemplateMeta, isTemplatePremium, isTemplateLocked, isTemplateDefault, isTemplateBuiltIn, isTemplateCustom } from '../../utils/templateUtils';
+import { getTemplateId, getTemplateName, isTemplatePremium, isTemplateDefault, isTemplateBuiltIn, isTemplateCustom } from '../../utils/templateUtils';
 import { TemplateCard } from './TemplateCard';
 import { TemplateFilterSidebar } from './TemplateFilterSidebar';
 
 export function TemplatesSettings({ onOpenTemplateEditor, onDeleteTemplate, onSetDefaultTemplate, onImportTemplate }) {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { getSetting } = useSettings();
   const { isSupporter } = useSupporterPack();
@@ -29,22 +31,19 @@ export function TemplatesSettings({ onOpenTemplateEditor, onDeleteTemplate, onSe
         return;
       }
 
-      // Ensure default template exists
       await api.createDefault();
-      
-      // Try to create presets (they won't be created if they already exist)
+
       try {
         await api.createPresets();
       } catch (error) {
         console.log('Presets may already exist:', error);
       }
 
-      // Load all templates
       const templateList = await api.list();
       setTemplates(templateList || []);
     } catch (error) {
       console.error('Failed to load templates', error);
-      toast.error('Kunne ikke laste maler', error.message);
+      toast.error(t('settings.templates.load_error'), error.message);
     } finally {
       setLoadingTemplates(false);
     }
@@ -59,11 +58,11 @@ export function TemplatesSettings({ onOpenTemplateEditor, onDeleteTemplate, onSe
       }
 
       await api.createPremium();
-      toast.success('Premium maler opprettet', 'De profesjonelle malene er nå tilgjengelige');
+      toast.success(t('settings.templates.premium_created'), t('settings.templates.premium_created_desc'));
       await loadTemplates();
     } catch (error) {
       console.error('Failed to create premium templates', error);
-      toast.error('Kunne ikke opprette premium maler', error.message);
+      toast.error(t('settings.templates.premium_create_error'), error.message);
     }
   };
 
@@ -73,26 +72,26 @@ export function TemplatesSettings({ onOpenTemplateEditor, onDeleteTemplate, onSe
       const dialogApi = window.fattern?.dialog;
       if (!api || !dialogApi) return;
 
-      const template = templates.find(t => getTemplateId(t) === templateId);
+      const template = templates.find(tmpl => getTemplateId(tmpl) === templateId);
       const templateName = getTemplateName(template) || templateId;
       const filename = `${templateName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.fattern-template`;
 
       const result = await dialogApi.showSaveDialog({
-        title: 'Eksporter mal',
+        title: t('settings.templates.export_title'),
         defaultPath: filename,
         filters: [
-          { name: 'Fattern-mal', extensions: ['fattern-template'] },
-          { name: 'Alle filer', extensions: ['*'] },
+          { name: t('settings_page.import_filter_name'), extensions: ['fattern-template'] },
+          { name: t('settings_page.import_all_files'), extensions: ['*'] },
         ],
       });
 
       if (result.canceled || !result.filePath) return;
 
       await api.exportPackage(templateId, result.filePath);
-      toast.success('Mal eksportert', `"${templateName}" er eksportert`);
+      toast.success(t('settings.templates.exported'), t('settings.templates.exported_desc', { name: templateName }));
     } catch (error) {
       console.error('Failed to export template', error);
-      toast.error('Kunne ikke eksportere mal', error.message);
+      toast.error(t('settings.templates.export_error'), error.message);
     }
   };
 
@@ -101,18 +100,18 @@ export function TemplatesSettings({ onOpenTemplateEditor, onDeleteTemplate, onSe
       const api = typeof window !== 'undefined' ? window.fattern?.template : null;
       if (!api) return;
 
-      const template = templates.find(t => getTemplateId(t) === templateId);
+      const template = templates.find(tmpl => getTemplateId(tmpl) === templateId);
       if (!template) return;
 
       const newId = `${templateId}_copy_${Date.now()}`;
-      const newName = `${getTemplateName(template)} (Kopi)`;
-      
+      const newName = `${getTemplateName(template)} (${t('settings.templates.copy_suffix')})`;
+
       await api.duplicate(templateId, newId, newName);
-      toast.success('Mal duplisert', `"${newName}" har blitt opprettet`);
+      toast.success(t('settings.templates.duplicated'), t('settings.templates.duplicated_desc', { name: newName }));
       await loadTemplates();
     } catch (error) {
       console.error('Failed to duplicate template', error);
-      toast.error('Kunne ikke duplisere mal', error.message);
+      toast.error(t('settings.templates.duplicate_error'), error.message);
     }
   };
 
@@ -121,147 +120,146 @@ export function TemplatesSettings({ onOpenTemplateEditor, onDeleteTemplate, onSe
       const api = typeof window !== 'undefined' ? window.fattern?.template : null;
       if (!api) return;
 
-      // Create a new template by duplicating the default
-      const defaultTemplate = templates.find(t => getTemplateId(t) === 'default_invoice') || templates[0];
+      const defaultTemplate = templates.find(tmpl => getTemplateId(tmpl) === 'default_invoice') || templates[0];
       if (defaultTemplate) {
-        const templateId = getTemplateId(defaultTemplate);
+        const srcId = getTemplateId(defaultTemplate);
         const newId = `template_${Date.now()}`;
-        const newName = 'Ny mal';
-        await api.duplicate(templateId, newId, newName);
-        toast.success('Ny mal opprettet', 'Du kan nå redigere den');
+        const newName = t('settings.templates.new_template_name');
+        await api.duplicate(srcId, newId, newName);
+        toast.success(t('settings.templates.created'), t('settings.templates.created_desc'));
         await loadTemplates();
         onOpenTemplateEditor?.(newId);
       } else {
-        // Fallback: just open the editor
         onOpenTemplateEditor?.('default_invoice');
       }
     } catch (error) {
       console.error('Failed to create new template', error);
-      toast.error('Kunne ikke opprette ny mal', error.message);
+      toast.error(t('settings.templates.create_error'), error.message);
     }
   };
 
-  // Filter templates based on active filter
   const filteredTemplates = useMemo(() => {
-    if (activeFilter === 'all') {
-      return templates;
-    } else if (activeFilter === 'builtin') {
-      return templates.filter(t => isTemplateBuiltIn(getTemplateId(t)));
-    } else if (activeFilter === 'premium') {
-      return templates.filter(t => isTemplatePremium(t));
-    } else if (activeFilter === 'custom') {
-      return templates.filter(t => isTemplateCustom(getTemplateId(t)));
-    }
+    if (activeFilter === 'all') return templates;
+    if (activeFilter === 'builtin') return templates.filter(tmpl => isTemplateBuiltIn(getTemplateId(tmpl)));
+    if (activeFilter === 'premium') return templates.filter(tmpl => isTemplatePremium(tmpl));
+    if (activeFilter === 'custom') return templates.filter(tmpl => isTemplateCustom(getTemplateId(tmpl)));
     return templates;
   }, [templates, activeFilter]);
 
-  const premiumTemplates = templates.filter(t => isTemplatePremium(t));
+  const premiumTemplates = templates.filter(tmpl => isTemplatePremium(tmpl));
   const hasPremiumTemplates = premiumTemplates.length > 0;
+
+  const filterLabel = (filter) => ({
+    all: t('common.all'),
+    builtin: t('settings.templates.filter_builtin'),
+    premium: t('settings.templates.filter_premium'),
+    custom: t('settings.templates.filter_custom'),
+  }[filter] || filter);
 
   return (
     <div className="flex gap-6">
       <TemplateFilterSidebar activeFilter={activeFilter} onFilterChange={setActiveFilter} />
-      
+
       <div className="flex-1 space-y-6">
-      <div>
-        <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--f-text-body)' }}>Fakturamaler</h3>
-        <p className="text-xs mb-4" style={{ color: 'var(--f-text-subtle)' }}>Administrer og rediger faktura maler</p>
-      </div>
-
-      {loadingTemplates ? (
-        <div className="py-8 text-center text-sm" style={{ color: 'var(--f-text-subtle)' }}>Laster maler...</div>
-      ) : (
-        <>
-          {filteredTemplates.length === 0 ? (
-            <div className="rounded-lg p-6 text-center" style={{ border: '1px solid var(--f-border-subtle)', background: 'rgba(255,255,255,0.02)' }}>
-              <p className="text-sm" style={{ color: 'var(--f-text-soft)' }}>
-                {templates.length === 0
-                  ? 'Ingen maler funnet. Standard mal vil bli opprettet automatisk.'
-                  : `Ingen maler funnet i kategorien "${activeFilter === 'all' ? 'Alle' : activeFilter === 'builtin' ? 'Innebygd' : activeFilter === 'premium' ? 'Premium' : 'Egendefinert'}"`}
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-              {filteredTemplates.map((template) => {
-                const templateId = getTemplateId(template);
-                const isDefault = isTemplateDefault(templateId, defaultTemplateId);
-                
-                return (
-                  <TemplateCard
-                    key={templateId}
-                    template={template}
-                    isDefault={isDefault}
-                    isSupporter={isSupporter}
-                    onSetDefault={() => onSetDefaultTemplate?.(templateId)}
-                    onEdit={() => onOpenTemplateEditor?.(templateId)}
-                    onExport={() => handleExportTemplate(templateId)}
-                    onDuplicate={() => handleDuplicateTemplate(templateId)}
-                    onDelete={() => onDeleteTemplate?.(templateId)}
-                  />
-                );
-              })}
-            </div>
-          )}
-        </>
-      )}
-
-      {!hasPremiumTemplates && isSupporter && (
-        <div className="rounded-lg p-4" style={{ border: '1px solid var(--f-border-green)', background: 'var(--f-green-bg)' }}>
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <h4 className="text-sm font-semibold mb-1" style={{ color: 'var(--f-green-text)' }}>Premium maler</h4>
-              <p className="text-xs mb-3" style={{ color: 'var(--f-green-text-dim)' }}>
-                Opprett profesjonelle premium maler med avansert design og typografi.
-              </p>
-            </div>
-            <button
-              onClick={handleCreatePremiumTemplates}
-              className="f-btn-primary rounded-lg px-4 py-2 text-xs font-semibold"
-            >
-              Opprett premium maler
-            </button>
-          </div>
+        <div>
+          <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--f-text-body)' }}>{t('settings.templates.title')}</h3>
+          <p className="text-xs mb-4" style={{ color: 'var(--f-text-subtle)' }}>{t('settings.templates.desc')}</p>
         </div>
-      )}
 
-      {hasPremiumTemplates && !isSupporter && (
-        <div className="rounded-lg p-4" style={{ border: '1px solid rgba(217,119,6,0.3)', background: 'rgba(217,119,6,0.08)' }}>
-          <div className="flex items-start gap-3">
-            <IconLock className="h-5 w-5 flex-shrink-0 mt-0.5" style={{ color: '#fbbf24' }} />
-            <div className="flex-1">
-              <h4 className="text-sm font-semibold mb-1" style={{ color: 'var(--f-text-body)' }}>Premium maler tilgjengelig</h4>
-              <p className="text-xs" style={{ color: 'var(--f-text-soft)' }}>
-                For å bruke premiummaler trenger du Supporter-pakken. Disse malene har profesjonelt design og avansert typografi.
-              </p>
+        {loadingTemplates ? (
+          <div className="py-8 text-center text-sm" style={{ color: 'var(--f-text-subtle)' }}>{t('settings.templates.loading')}</div>
+        ) : (
+          <>
+            {filteredTemplates.length === 0 ? (
+              <div className="rounded-lg p-6 text-center" style={{ border: '1px solid var(--f-border-subtle)', background: 'rgba(255,255,255,0.02)' }}>
+                <p className="text-sm" style={{ color: 'var(--f-text-soft)' }}>
+                  {templates.length === 0
+                    ? t('settings.templates.empty')
+                    : t('settings.templates.empty_filter', { filter: filterLabel(activeFilter) })}
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+                {filteredTemplates.map((template) => {
+                  const templateId = getTemplateId(template);
+                  const isDefault = isTemplateDefault(templateId, defaultTemplateId);
+
+                  return (
+                    <TemplateCard
+                      key={templateId}
+                      template={template}
+                      isDefault={isDefault}
+                      isSupporter={isSupporter}
+                      onSetDefault={() => onSetDefaultTemplate?.(templateId)}
+                      onEdit={() => onOpenTemplateEditor?.(templateId)}
+                      onExport={() => handleExportTemplate(templateId)}
+                      onDuplicate={() => handleDuplicateTemplate(templateId)}
+                      onDelete={() => onDeleteTemplate?.(templateId)}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </>
+        )}
+
+        {!hasPremiumTemplates && isSupporter && (
+          <div className="rounded-lg p-4" style={{ border: '1px solid var(--f-border-green)', background: 'var(--f-green-bg)' }}>
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h4 className="text-sm font-semibold mb-1" style={{ color: 'var(--f-green-text)' }}>{t('settings.templates.premium_title')}</h4>
+                <p className="text-xs mb-3" style={{ color: 'var(--f-green-text-dim)' }}>
+                  {t('settings.templates.premium_desc')}
+                </p>
+              </div>
+              <button
+                onClick={handleCreatePremiumTemplates}
+                className="f-btn-primary rounded-lg px-4 py-2 text-xs font-semibold"
+              >
+                {t('settings.templates.create_premium_button')}
+              </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <div className="pt-4" style={{ borderTop: '1px solid var(--f-border-faint)' }}>
-        <p className="text-xs mb-3" style={{ color: 'var(--f-text-subtle)' }}>
-          Standard mal brukes automatisk når du genererer PDF-er. Du kan endre standard mal når som helst.
-        </p>
-        <div className="flex gap-2">
-          {onImportTemplate && (
-            <button
-              onClick={onImportTemplate}
-              className="f-btn-ghost rounded-lg px-4 py-2 text-sm font-medium flex items-center gap-2"
-            >
-              <IconPackage className="h-4 w-4" />
-              Importer mal
-            </button>
-          )}
-          {onOpenTemplateEditor && (
-            <button
-              onClick={handleCreateNewTemplate}
-              className="f-btn-primary rounded-lg px-4 py-2 text-sm font-medium"
-            >
-              Opprett ny mal
-            </button>
-          )}
+        {hasPremiumTemplates && !isSupporter && (
+          <div className="rounded-lg p-4" style={{ border: '1px solid rgba(217,119,6,0.3)', background: 'rgba(217,119,6,0.08)' }}>
+            <div className="flex items-start gap-3">
+              <IconLock className="h-5 w-5 flex-shrink-0 mt-0.5" style={{ color: '#fbbf24' }} />
+              <div className="flex-1">
+                <h4 className="text-sm font-semibold mb-1" style={{ color: 'var(--f-text-body)' }}>{t('settings.templates.premium_available_title')}</h4>
+                <p className="text-xs" style={{ color: 'var(--f-text-soft)' }}>
+                  {t('settings.templates.premium_available_desc')}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="pt-4" style={{ borderTop: '1px solid var(--f-border-faint)' }}>
+          <p className="text-xs mb-3" style={{ color: 'var(--f-text-subtle)' }}>
+            {t('settings.templates.default_hint')}
+          </p>
+          <div className="flex gap-2">
+            {onImportTemplate && (
+              <button
+                onClick={onImportTemplate}
+                className="f-btn-ghost rounded-lg px-4 py-2 text-sm font-medium flex items-center gap-2"
+              >
+                <IconPackage className="h-4 w-4" />
+                {t('settings.templates.import_button')}
+              </button>
+            )}
+            {onOpenTemplateEditor && (
+              <button
+                onClick={handleCreateNewTemplate}
+                className="f-btn-primary rounded-lg px-4 py-2 text-sm font-medium"
+              >
+                {t('settings.templates.create_button')}
+              </button>
+            )}
+          </div>
         </div>
-      </div>
       </div>
     </div>
   );

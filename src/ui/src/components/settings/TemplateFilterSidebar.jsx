@@ -1,38 +1,41 @@
+import { useTranslation } from 'react-i18next';
 import { IconLayoutGrid, IconPackage, IconStar, IconFileText } from '@tabler/icons-react';
 
-const FILTER_CATEGORIES = [
-  {
-    id: 'all',
-    label: 'Alle',
-    description: 'Vis alle maler',
-    icon: IconLayoutGrid,
-  },
-  {
-    id: 'builtin',
-    label: 'Innebygd',
-    description: 'Standard og forhåndsdefinerte',
-    icon: IconPackage,
-  },
-  {
-    id: 'premium',
-    label: 'Premium',
-    description: 'Profesjonelle maler',
-    icon: IconStar,
-  },
-  {
-    id: 'custom',
-    label: 'Egendefinert',
-    description: 'Importerte og egne maler',
-    icon: IconFileText,
-  },
-];
-
 export function TemplateFilterSidebar({ activeFilter, onFilterChange }) {
+  const { t } = useTranslation();
+
+  const FILTER_CATEGORIES = [
+    {
+      id: 'all',
+      label: t('common.all'),
+      description: t('settings.templates.filter_all_desc'),
+      icon: IconLayoutGrid,
+    },
+    {
+      id: 'builtin',
+      label: t('settings.templates.filter_builtin'),
+      description: t('settings.templates.filter_builtin_desc'),
+      icon: IconPackage,
+    },
+    {
+      id: 'premium',
+      label: t('settings.templates.filter_premium'),
+      description: t('settings.templates.filter_premium_desc'),
+      icon: IconStar,
+    },
+    {
+      id: 'custom',
+      label: t('settings.templates.filter_custom'),
+      description: t('settings.templates.filter_custom_desc'),
+      icon: IconFileText,
+    },
+  ];
+
   return (
     <aside className="w-56 flex-shrink-0">
       <div className="f-glass rounded-2xl p-3">
         <div className="mb-2 px-2 py-1.5">
-          <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--f-text-subtle)' }}>Filtrer</p>
+          <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--f-text-subtle)' }}>{t('settings.templates.filter_heading')}</p>
         </div>
         <nav className="space-y-1">
           {FILTER_CATEGORIES.map((category) => {
@@ -75,4 +78,3 @@ export function TemplateFilterSidebar({ activeFilter, onFilterChange }) {
     </aside>
   );
 }
-
