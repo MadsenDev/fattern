@@ -6,6 +6,7 @@ const { registerDatabaseHandlers } = require('./dbHandlers');
 const { registerTemplateHandlers } = require('./templateHandlers');
 const { generateInvoicePDF } = require('./pdfGenerator');
 const { generateTemplatePDF } = require('./templatePdfGenerator');
+const { registerEmailHandlers } = require('./emailHandler');
 
 const isDev = Boolean(process.env.VITE_DEV_SERVER_URL);
 let database;
@@ -74,6 +75,9 @@ app.whenReady().then(() => {
   
   // Register template handlers
   registerTemplateHandlers(ipcMain);
+
+  // Register email handlers
+  registerEmailHandlers(ipcMain, database);
   
   // File dialogs for template import/export
   ipcMain.handle('dialog:show-open-dialog', async (event, options) => {

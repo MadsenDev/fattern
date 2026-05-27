@@ -5,6 +5,7 @@
 
 const defaultTemplate = require('./default');
 const presetModernMinimal = require('./preset_modern_minimal');
+const presetNordiskPro = require('./preset_nordisk_pro');
 const premiumLuxury = require('./premium_luxury');
 const premiumModernPro = require('./premium_modern_pro');
 const premiumClassicElite = require('./premium_classic_elite');
@@ -14,6 +15,7 @@ module.exports = {
   default: defaultTemplate,
   presets: [
     presetModernMinimal,
+    presetNordiskPro,
     // Additional preset templates will be added here
   ],
   premium: [

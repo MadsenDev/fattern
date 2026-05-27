@@ -2,7 +2,7 @@
  * Token factories for --f-* CSS custom properties.
  *
  * Each theme supplies its bg/radial overrides; everything else
- * (surfaces, borders, text, status, glass, scrollbar) is shared
+ * (surfaces, borders, text, status, glass, component tokens) is shared
  * per colour-scheme so all light themes look consistent and all
  * dark themes look consistent.
  *
@@ -11,7 +11,7 @@
  */
 
 const SHARED_LIGHT = {
-  // Glass surfaces — white-based frosted glass
+  // Glass surfaces — frosted white
   '--f-surface':          'rgba(255,255,255,0.60)',
   '--f-surface-hover':    'rgba(255,255,255,0.75)',
   '--f-surface-elevated': 'rgba(255,255,255,0.70)',
@@ -20,39 +20,62 @@ const SHARED_LIGHT = {
   '--f-surface-bottom':   'rgba(255,255,255,0.55)',
 
   // Borders — dark-on-light (low alpha)
-  '--f-border':        'rgba(0,0,0,0.07)',
-  '--f-border-subtle': 'rgba(0,0,0,0.05)',
-  '--f-border-faint':  'rgba(0,0,0,0.04)',
-  '--f-border-top':    'rgba(0,0,0,0.07)',
+  '--f-border':            'rgba(0,0,0,0.07)',
+  '--f-border-subtle':     'rgba(0,0,0,0.05)',
+  '--f-border-faint':      'rgba(0,0,0,0.04)',
+  '--f-border-top':        'rgba(0,0,0,0.07)',
+  '--f-border-green-pill': 'rgba(26,144,104,0.20)',
 
-  // Blue status accents (used for "sent" status pills)
+  // Blue status accents (for "sent" status pills)
   '--f-blue':        'rgba(40,100,200,0.90)',
   '--f-blue-bg':     'rgba(40,100,200,0.09)',
   '--f-blue-border': 'rgba(40,100,200,0.18)',
   '--f-blue-text':   '#1555a0',
 
-  // Text — dark on light for readability
+  // Text — dark for readability on light backgrounds
   '--f-text':        'rgba(26,31,28,0.90)',
   '--f-text-body':   'rgba(26,31,28,0.82)',
-  '--f-text-soft':   'rgba(26,31,28,0.45)',
-  '--f-text-subtle': 'rgba(0,0,0,0.28)',
-  '--f-text-muted':  'rgba(0,0,0,0.20)',
-  '--f-text-label':  'rgba(0,0,0,0.35)',
+  '--f-text-soft':   'rgba(0,0,0,0.50)',
+  '--f-text-subtle': 'rgba(0,0,0,0.32)',
+  '--f-text-muted':  'rgba(0,0,0,0.22)',
+  '--f-text-label':  'rgba(0,0,0,0.38)',
 
-  // Status — warm/rich for white backgrounds
+  // Status — warm/rich on white backgrounds
   '--f-warn':          '#b07010',
   '--f-warn-bg':       'rgba(176,112,16,0.10)',
   '--f-warn-border':   'rgba(176,112,16,0.18)',
   '--f-danger':        '#b83820',
-  '--f-danger-bg':     'rgba(184,56,32,0.09)',
-  '--f-danger-border': 'rgba(184,56,32,0.18)',
-  '--f-danger-text':   'rgba(160,48,32,0.90)',
+  '--f-danger-bg':     'rgba(200,60,30,0.09)',
+  '--f-danger-border': 'rgba(200,60,30,0.18)',
+  '--f-danger-text':   '#a03020',
 
-  // Glass hero (modals, hero card)
-  '--f-glass-hero-bg':           'rgba(255,255,255,0.70)',
-  '--f-glass-hero-border':       'rgba(255,255,255,0.90)',
-  '--f-glass-hero-inner-shadow': 'rgba(255,255,255,0.90)',
-  '--f-glass-hero-outer-shadow': 'rgba(0,0,0,0.07)',
+  // Hover tints
+  '--f-hover':          'rgba(0,0,0,0.04)',
+  '--f-hover-elevated': 'rgba(0,0,0,0.07)',
+
+  // Tooltip / popover
+  '--f-tooltip-bg':     'rgba(255,255,255,0.96)',
+  '--f-tooltip-border': 'rgba(0,0,0,0.10)',
+  '--f-tooltip-text':   '#1a1f1c',
+  '--f-tooltip-shadow': 'rgba(0,0,0,0.12)',
+
+  // Nav badge dot border (should match surface-rail)
+  '--f-badge-border': 'rgba(240,247,243,0.9)',
+
+  // Glass hero (modals, hero cards)
+  '--f-glass-hero-bg':     'rgba(255,255,255,0.70)',
+  '--f-glass-hero-border': 'rgba(255,255,255,0.92)',
+  '--f-glass-shadow':      'rgba(0,0,0,0.07)',
+  '--f-glass-inner':       'rgba(255,255,255,0.90)',
+  '--f-glass-hero-inner':  'rgba(255,255,255,0.92)',
+
+  // Inputs
+  '--f-input-bg':         'rgba(255,255,255,0.75)',
+  '--f-input-focus-ring': 'rgba(26,144,104,0.12)',
+
+  // Ghost button
+  '--f-btn-ghost-bg':    'rgba(0,0,0,0.04)',
+  '--f-btn-ghost-hover': 'rgba(0,0,0,0.07)',
 
   // Scrollbar
   '--f-scrollbar-thumb':       'rgba(0,0,0,0.12)',
@@ -69,10 +92,11 @@ const SHARED_DARK = {
   '--f-surface-bottom':   'rgba(8,14,10,0.55)',
 
   // Borders — light-on-dark (low alpha)
-  '--f-border':        'rgba(255,255,255,0.08)',
-  '--f-border-subtle': 'rgba(255,255,255,0.06)',
-  '--f-border-faint':  'rgba(255,255,255,0.04)',
-  '--f-border-top':    'rgba(255,255,255,0.07)',
+  '--f-border':            'rgba(255,255,255,0.08)',
+  '--f-border-subtle':     'rgba(255,255,255,0.06)',
+  '--f-border-faint':      'rgba(255,255,255,0.04)',
+  '--f-border-top':        'rgba(255,255,255,0.07)',
+  '--f-border-green-pill': 'rgba(63,217,160,0.20)',
 
   // Blue status accents
   '--f-blue':        'rgba(80,140,220,0.90)',
@@ -97,11 +121,33 @@ const SHARED_DARK = {
   '--f-danger-border': 'rgba(240,120,96,0.20)',
   '--f-danger-text':   'rgba(250,140,110,0.90)',
 
-  // Glass hero
-  '--f-glass-hero-bg':           'rgba(255,255,255,0.05)',
-  '--f-glass-hero-border':       'rgba(255,255,255,0.10)',
-  '--f-glass-hero-inner-shadow': 'rgba(255,255,255,0.10)',
-  '--f-glass-hero-outer-shadow': 'rgba(0,0,0,0.25)',
+  // Hover tints
+  '--f-hover':          'rgba(255,255,255,0.06)',
+  '--f-hover-elevated': 'rgba(255,255,255,0.09)',
+
+  // Tooltip / popover
+  '--f-tooltip-bg':     'rgba(12,22,18,0.97)',
+  '--f-tooltip-border': 'rgba(255,255,255,0.10)',
+  '--f-tooltip-text':   'rgba(255,255,255,0.88)',
+  '--f-tooltip-shadow': 'rgba(0,0,0,0.40)',
+
+  // Nav badge dot border (matches surface-rail)
+  '--f-badge-border': 'rgba(8,15,11,0.8)',
+
+  // Glass hero (modals, hero cards)
+  '--f-glass-hero-bg':     'rgba(255,255,255,0.05)',
+  '--f-glass-hero-border': 'rgba(255,255,255,0.10)',
+  '--f-glass-shadow':      'rgba(0,0,0,0.25)',
+  '--f-glass-inner':       'rgba(255,255,255,0.06)',
+  '--f-glass-hero-inner':  'rgba(255,255,255,0.10)',
+
+  // Inputs
+  '--f-input-bg':         'rgba(255,255,255,0.06)',
+  '--f-input-focus-ring': 'rgba(63,217,160,0.12)',
+
+  // Ghost button
+  '--f-btn-ghost-bg':    'rgba(255,255,255,0.06)',
+  '--f-btn-ghost-hover': 'rgba(255,255,255,0.10)',
 
   // Scrollbar
   '--f-scrollbar-thumb':       'rgba(255,255,255,0.12)',

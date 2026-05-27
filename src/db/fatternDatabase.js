@@ -331,7 +331,14 @@ class FatternDatabase {
   }
 
   getInvoice(invoiceId) {
-    const invoice = this.db.prepare('SELECT * FROM invoices WHERE id = ?').get(invoiceId);
+    const invoice = this.db.prepare(`
+      SELECT invoices.*,
+             customers.name  AS customer_name,
+             customers.email AS customer_email
+      FROM invoices
+      LEFT JOIN customers ON customers.id = invoices.customer_id
+      WHERE invoices.id = ?
+    `).get(invoiceId);
     if (!invoice) return null;
 
     const items = this.db

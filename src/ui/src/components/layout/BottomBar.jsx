@@ -43,8 +43,8 @@ export function BottomBar({ company, onCreateInvoice, onRegisterPayment, onAddEx
       <div
         style={{
           display: 'flex', alignItems: 'center', gap: 7,
-          background: 'rgba(255,255,255,0.06)',
-          border: '1px solid rgba(255,255,255,0.09)',
+          background: 'var(--f-surface)',
+          border: '1px solid var(--f-border)',
           borderRadius: 20,
           padding: '4px 12px 4px 6px',
           marginRight: 10,
@@ -88,7 +88,7 @@ export function BottomBar({ company, onCreateInvoice, onRegisterPayment, onAddEx
             cursor: action ? 'pointer' : 'default',
             transition: 'background 0.1s',
           }}
-          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+          onMouseEnter={e => (e.currentTarget.style.background = 'var(--f-hover)')}
           onMouseLeave={e => (e.currentTarget.style.background = 'none')}
         >
           <span style={{ fontSize: 11.5, color: 'var(--f-text-subtle)' }}>{label}</span>
@@ -96,8 +96,8 @@ export function BottomBar({ company, onCreateInvoice, onRegisterPayment, onAddEx
             style={{
               fontSize: 10,
               color: 'var(--f-text-muted)',
-              background: 'rgba(255,255,255,0.07)',
-              border: '1px solid rgba(255,255,255,0.09)',
+              background: 'var(--f-hover-elevated)',
+              border: '1px solid var(--f-border)',
               borderRadius: 4,
               padding: '1px 5px',
               fontFamily: 'var(--f-font-mono)',

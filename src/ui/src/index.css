@@ -54,12 +54,10 @@
 
     color-scheme: dark;
 
-    /* ─── 2026 Ambient Design Tokens (fixed — not theme-switchable) ─── */
+    /* ─── 2026 Ambient Design Tokens ─── */
+    /* All --f-* vars are updated at runtime by applyTheme() for theme switching */
 
     /* Background layers */
-    --f-bg-base:    #0d1a14;
-    --f-bg-mid:     #111820;
-    --f-bg-dark:    #0e1118;
     --f-bg-gradient: linear-gradient(160deg, #0d1a14 0%, #111820 50%, #0e1118 100%);
     --f-bg-radial:
       radial-gradient(ellipse 80% 60% at 15% 20%,  rgba(45,180,130,0.28) 0%, transparent 60%),
@@ -75,31 +73,29 @@
     --f-surface-bottom:   rgba(8,14,10,0.55);
 
     /* Borders */
-    --f-border:        rgba(255,255,255,0.08);
-    --f-border-subtle: rgba(255,255,255,0.06);
-    --f-border-faint:  rgba(255,255,255,0.04);
-    --f-border-top:    rgba(255,255,255,0.07);
-    --f-border-green:  rgba(45,180,130,0.35);
-    --f-border-green-pill: rgba(63,217,160,0.2);
+    --f-border:            rgba(255,255,255,0.08);
+    --f-border-subtle:     rgba(255,255,255,0.06);
+    --f-border-faint:      rgba(255,255,255,0.04);
+    --f-border-top:        rgba(255,255,255,0.07);
+    --f-border-green:      rgba(45,180,130,0.35);
+    --f-border-green-pill: rgba(63,217,160,0.20);
 
-    /* Green accent — set dynamically by applyTheme() from colors.accent */
-    --f-green:         #3fd9a0;
-    --f-green-dim:     rgba(63,217,160,0.35);
-    --f-green-bright:  rgba(63,217,160,0.9);
-    --f-green-glow:    rgba(63,217,160,0.5);
-    --f-green-bg:      rgba(45,180,130,0.18);
-    --f-green-bg-pill: rgba(63,217,160,0.14);
-    --f-green-text:    rgba(80,220,160,0.95);
+    /* Green accent */
+    --f-green:          #3fd9a0;
+    --f-green-dim:      rgba(63,217,160,0.35);
+    --f-green-bright:   rgba(63,217,160,0.9);
+    --f-green-glow:     rgba(63,217,160,0.5);
+    --f-green-bg:       rgba(45,180,130,0.18);
+    --f-green-bg-pill:  rgba(63,217,160,0.14);
+    --f-green-text:     rgba(80,220,160,0.95);
     --f-green-text-dim: rgba(63,217,160,0.7);
-    --f-green-shadow:  rgba(45,180,130,0.3);
-    --f-border-green:  rgba(45,180,130,0.35);
-    --f-border-green-pill: rgba(63,217,160,0.2);
+    --f-green-shadow:   rgba(45,180,130,0.3);
 
     /* Blue / purple accents */
-    --f-blue:          rgba(80,140,220,0.9);
-    --f-blue-bg:       rgba(80,140,220,0.14);
-    --f-blue-border:   rgba(80,140,220,0.2);
-    --f-blue-text:     rgba(100,160,240,0.9);
+    --f-blue:        rgba(80,140,220,0.9);
+    --f-blue-bg:     rgba(80,140,220,0.14);
+    --f-blue-border: rgba(80,140,220,0.2);
+    --f-blue-text:   rgba(100,160,240,0.9);
 
     /* Text */
     --f-text:        rgba(255,255,255,0.9);
@@ -110,13 +106,47 @@
     --f-text-label:  rgba(255,255,255,0.35);
 
     /* Status */
-    --f-warn:           #f0b840;
-    --f-warn-bg:        rgba(240,184,64,0.14);
-    --f-warn-border:    rgba(240,184,64,0.2);
-    --f-danger:         #f07860;
-    --f-danger-bg:      rgba(240,120,96,0.14);
-    --f-danger-border:  rgba(240,120,96,0.2);
-    --f-danger-text:    rgba(250,140,110,0.9);
+    --f-warn:        #f0b840;
+    --f-warn-bg:     rgba(240,184,64,0.14);
+    --f-warn-border: rgba(240,184,64,0.2);
+    --f-danger:      #f07860;
+    --f-danger-bg:   rgba(240,120,96,0.14);
+    --f-danger-border: rgba(240,120,96,0.2);
+    --f-danger-text: rgba(250,140,110,0.9);
+
+    /* ── Component-level tokens ── */
+
+    /* Hover tints */
+    --f-hover:          rgba(255,255,255,0.06);
+    --f-hover-elevated: rgba(255,255,255,0.09);
+
+    /* Tooltip / popover */
+    --f-tooltip-bg:     rgba(12,22,18,0.97);
+    --f-tooltip-border: rgba(255,255,255,0.10);
+    --f-tooltip-text:   rgba(255,255,255,0.88);
+    --f-tooltip-shadow: rgba(0,0,0,0.40);
+
+    /* Nav badge dot border (matches surface-rail) */
+    --f-badge-border: rgba(8,15,11,0.8);
+
+    /* Glass hero (modals, hero cards) */
+    --f-glass-hero-bg:     rgba(255,255,255,0.05);
+    --f-glass-hero-border: rgba(255,255,255,0.10);
+    --f-glass-shadow:      rgba(0,0,0,0.25);
+    --f-glass-inner:       rgba(255,255,255,0.06);
+    --f-glass-hero-inner:  rgba(255,255,255,0.10);
+
+    /* Inputs */
+    --f-input-bg:         rgba(255,255,255,0.06);
+    --f-input-focus-ring: rgba(63,217,160,0.12);
+
+    /* Ghost button */
+    --f-btn-ghost-bg:    rgba(255,255,255,0.06);
+    --f-btn-ghost-hover: rgba(255,255,255,0.10);
+
+    /* Scrollbar */
+    --f-scrollbar-thumb:       rgba(255,255,255,0.12);
+    --f-scrollbar-thumb-hover: rgba(255,255,255,0.22);
 
     /* Typography */
     --f-font-sans: 'Inter', system-ui, sans-serif;
@@ -130,45 +160,31 @@
     --f-radius-lg: 14px;
     --f-radius-xl: 16px;
 
-    /* Topbar / Rail dimensions */
+    /* Layout dimensions */
     --f-topbar-h: 40px;
     --f-rail-w:   52px;
     --f-bottom-h: 38px;
-
-    /* Glass hero (modals, hero cards) */
-    --f-glass-hero-bg:           rgba(255,255,255,0.05);
-    --f-glass-hero-border:       rgba(255,255,255,0.1);
-    --f-glass-hero-inner-shadow: rgba(255,255,255,0.1);
-    --f-glass-hero-outer-shadow: rgba(0,0,0,0.25);
-
-    /* Scrollbar */
-    --f-scrollbar-thumb:       rgba(255,255,255,0.12);
-    --f-scrollbar-thumb-hover: rgba(255,255,255,0.22);
   }
 
-  /* ─── Ambient dark background applied globally ─── */
+  /* ─── Ambient background applied globally ─── */
   html, body {
     margin: 0; padding: 0;
-    background:
-      var(--f-bg-radial),
-      var(--f-bg-gradient);
+    background: var(--f-bg-radial), var(--f-bg-gradient);
     background-attachment: fixed;
     color: var(--f-text-body);
     font-family: var(--f-font-sans);
   }
 
-  body {
-    overflow: hidden;
-  }
+  body { overflow: hidden; }
 }
 
 /* ─── Scrollbar ─── */
 ::-webkit-scrollbar          { width: 3px; }
 ::-webkit-scrollbar-track    { background: transparent; }
-::-webkit-scrollbar-thumb    { background: var(--f-scrollbar-thumb, rgba(255,255,255,0.12)); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: var(--f-scrollbar-thumb-hover, rgba(255,255,255,0.22)); }
+::-webkit-scrollbar-thumb    { background: var(--f-scrollbar-thumb); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--f-scrollbar-thumb-hover); }
 
-/* ─── Legacy Tailwind component utilities (kept for inner pages) ─── */
+/* ─── Component utilities ─── */
 @layer components {
   .card {
     @apply rounded-xl border;
@@ -185,21 +201,19 @@
     background: var(--f-surface);
     backdrop-filter: blur(20px) saturate(1.4);
     border: 1px solid var(--f-border);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.06);
+    box-shadow: 0 4px 16px var(--f-glass-shadow), inset 0 1px 0 var(--f-glass-inner);
   }
 
   .f-glass-hero {
-    background: var(--f-glass-hero-bg, rgba(255,255,255,0.05));
+    background: var(--f-glass-hero-bg);
     backdrop-filter: blur(24px) saturate(1.5);
-    border: 1px solid var(--f-glass-hero-border, rgba(255,255,255,0.1));
-    box-shadow:
-      0 8px 32px var(--f-glass-hero-outer-shadow, rgba(0,0,0,0.25)),
-      inset 0 1px 0 var(--f-glass-hero-inner-shadow, rgba(255,255,255,0.1));
+    border: 1px solid var(--f-glass-hero-border);
+    box-shadow: 0 8px 32px var(--f-glass-shadow), inset 0 1px 0 var(--f-glass-hero-inner);
   }
 
   /* ── Form inputs ── */
   .f-input {
-    background: rgba(255,255,255,0.06);
+    background: var(--f-input-bg);
     border: 1px solid var(--f-border);
     color: var(--f-text-body);
     border-radius: var(--f-radius-md);
@@ -208,7 +222,7 @@
   .f-input:focus {
     outline: none;
     border-color: var(--f-border-green);
-    box-shadow: 0 0 0 3px rgba(63,217,160,0.12);
+    box-shadow: 0 0 0 3px var(--f-input-focus-ring);
   }
   .f-input::placeholder { color: var(--f-text-subtle); }
 
@@ -228,13 +242,13 @@
   .f-btn-primary:disabled { opacity: 0.5; transform: none; }
 
   .f-btn-ghost {
-    background: rgba(255,255,255,0.06);
+    background: var(--f-btn-ghost-bg);
     border: 1px solid var(--f-border);
     color: var(--f-text-soft);
     transition: background 0.13s, color 0.13s;
   }
   .f-btn-ghost:hover {
-    background: rgba(255,255,255,0.1);
+    background: var(--f-btn-ghost-hover);
     color: var(--f-text-body);
   }
 
@@ -257,8 +271,8 @@
   }
 
   /* Status pill variants */
-  .f-pill-paid    { background: var(--f-green-bg-pill); color: var(--f-green-text);   border: 1px solid var(--f-border-green-pill); }
-  .f-pill-sent    { background: var(--f-blue-bg);        color: var(--f-blue-text);    border: 1px solid var(--f-blue-border); }
-  .f-pill-draft   { background: var(--f-surface);        color: var(--f-text-label);   border: 1px solid var(--f-border-subtle); }
-  .f-pill-overdue { background: var(--f-danger-bg);      color: var(--f-danger-text);  border: 1px solid var(--f-danger-border); }
+  .f-pill-paid    { background: var(--f-green-bg-pill); color: var(--f-green-text);  border: 1px solid var(--f-border-green-pill); }
+  .f-pill-sent    { background: var(--f-blue-bg);       color: var(--f-blue-text);   border: 1px solid var(--f-blue-border); }
+  .f-pill-draft   { background: var(--f-surface);       color: var(--f-text-label);  border: 1px solid var(--f-border-subtle); }
+  .f-pill-overdue { background: var(--f-danger-bg);     color: var(--f-danger-text); border: 1px solid var(--f-danger-border); }
 }

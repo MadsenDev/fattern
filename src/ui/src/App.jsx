@@ -1071,6 +1071,7 @@ function App() {
       <InvoiceViewModal
         isOpen={isInvoiceViewModalOpen}
         invoice={viewingInvoice}
+        company={company}
         formatCurrency={formatCurrency}
         budgetYearId={selectedBudgetYearId}
         onClose={() => {

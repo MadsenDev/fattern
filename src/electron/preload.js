@@ -103,4 +103,11 @@ contextBridge.exposeInMainWorld('fattern', {
   app: {
     wipeAllData: () => invoke('app:wipe-all-data'),
   },
+  email: {
+    getConfig:       ()       => invoke('email:get-config'),
+    saveConfig:      (config) => invoke('email:save-config', config),
+    testConnection:  (config) => invoke('email:test-connection', config),
+    sendInvoice:     (opts)   => invoke('email:send-invoice', opts),
+    openMailto:      (opts)   => invoke('email:open-mailto', opts),
+  },
 });

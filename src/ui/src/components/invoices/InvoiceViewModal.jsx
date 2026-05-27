@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { Modal } from '../Modal';
 import { StatusBadge } from '../StatusBadge';
 import { formatDate } from '../../utils/formatDate';
-import { IconEdit, IconDownload, IconLink, IconX, IconPlus } from '@tabler/icons-react';
+import { IconEdit, IconDownload, IconX, IconPlus, IconSend } from '@tabler/icons-react';
+import { SendEmailModal } from './SendEmailModal';
 
 function getDbApi() {
   if (typeof window === 'undefined') return null;
@@ -196,15 +197,17 @@ function LinkedExpensesTab({ invoiceId, budgetYearId, formatCurrency: fmt }) {
 
 // ─── Main Modal ─────────────────────────────────────────────────────────────
 
-export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGeneratePDF, formatCurrency: fmt, budgetYearId }) {
+export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGeneratePDF, formatCurrency: fmt, budgetYearId, company }) {
   const { t } = useTranslation();
   const [generatingPdf, setGeneratingPdf] = useState(false);
   const [activeTab, setActiveTab] = useState('details');
+  const [sendEmailOpen, setSendEmailOpen] = useState(false);
 
   useEffect(() => {
     if (!isOpen) {
       setGeneratingPdf(false);
       setActiveTab('details');
+      setSendEmailOpen(false);
     }
   }, [isOpen]);
 
@@ -242,6 +245,7 @@ export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGenerateP
   ];
 
   return (
+    <>
     <Modal
       isOpen={isOpen}
       onClose={onClose}
@@ -269,6 +273,14 @@ export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGenerateP
             >
               <IconDownload className="h-4 w-4" />
               {generatingPdf ? t('common.loading') : t('invoice.generate_pdf')}
+            </button>
+            <button
+              type="button"
+              onClick={() => setSendEmailOpen(true)}
+              className="f-btn-ghost rounded-2xl px-4 py-2 text-sm font-medium flex items-center gap-2"
+            >
+              <IconSend className="h-4 w-4" />
+              Send
             </button>
             {onEdit && (
               <button
@@ -460,5 +472,13 @@ export function InvoiceViewModal({ isOpen, invoice, onClose, onEdit, onGenerateP
         />
       )}
     </Modal>
+
+    <SendEmailModal
+      isOpen={sendEmailOpen}
+      invoice={invoice}
+      company={company}
+      onClose={() => setSendEmailOpen(false)}
+    />
+    </>
   );
 }

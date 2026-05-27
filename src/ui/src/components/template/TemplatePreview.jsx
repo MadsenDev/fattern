@@ -33,12 +33,13 @@ const mockData = {
   },
   company: {
     name: 'Mitt Selskap AS',
-    org_number: '987 654 321',
+    org_number: '987 654 321 MVA',
     address: 'Firmaveien 456',
     post_number: '0002',
     post_location: 'Oslo',
     contact_email: 'kontakt@mittselskap.no',
     contact_number: '+47 987 65 432',
+    account_number: '1234 56 78901',
   },
 };
 
@@ -183,9 +184,10 @@ export function TemplatePreview({ template, zoom = 100, pan = { x: 0, y: 0 }, on
         </button>
       )}
       <div className="relative h-full w-full overflow-auto">
-        <div 
-          className="absolute bg-white shadow-2xl"
-          style={{ 
+        <div
+          className="absolute shadow-2xl"
+          style={{
+            background: '#ffffff',
             left: '50%',
             top: '50%',
             width: `${A4_WIDTH}px`,

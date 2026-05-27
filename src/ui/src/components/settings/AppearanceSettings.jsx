@@ -119,7 +119,7 @@ export function AppearanceSettings() {
                   </div>
 
                   {/* Card Footer */}
-                  <div className="p-4" style={{ background: 'rgba(10,16,12,0.7)', borderTop: '1px solid var(--f-border-subtle)' }}>
+                  <div className="p-4" style={{ background: 'var(--f-surface-elevated)', borderTop: '1px solid var(--f-border-subtle)' }}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         <div

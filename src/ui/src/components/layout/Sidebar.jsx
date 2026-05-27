@@ -37,7 +37,7 @@ function Divider() {
     <div
       style={{
         width: 20, height: 1,
-        background: 'rgba(255,255,255,0.07)',
+        background: 'var(--f-border)',
         margin: '4px 0',
       }}
     />
@@ -74,8 +74,8 @@ function RailItem({ label, isActive, onClick, badge }) {
         }}
         onMouseEnter={e => {
           if (!isActive) {
-            e.currentTarget.style.background = 'rgba(255,255,255,0.07)';
-            e.currentTarget.style.color = 'rgba(255,255,255,0.65)';
+            e.currentTarget.style.background = 'var(--f-hover-elevated)';
+            e.currentTarget.style.color = 'var(--f-text-soft)';
           }
         }}
         onMouseLeave={e => {
@@ -92,7 +92,7 @@ function RailItem({ label, isActive, onClick, badge }) {
               position: 'absolute', top: 5, right: 5,
               width: 6, height: 6, borderRadius: '50%',
               background: 'var(--f-green)',
-              border: '1.5px solid rgba(8,15,11,0.8)',
+              border: '1.5px solid var(--f-badge-border)',
               boxShadow: '0 0 6px rgba(63,217,160,0.6)',
             }}
           />
@@ -107,10 +107,10 @@ function RailItem({ label, isActive, onClick, badge }) {
           left: 'calc(100% + 10px)',
           top: '50%',
           transform: 'translateY(-50%)',
-          background: 'rgba(20,30,24,0.95)',
+          background: 'var(--f-tooltip-bg)',
           backdropFilter: 'blur(16px)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          color: 'rgba(255,255,255,0.85)',
+          border: '1px solid var(--f-tooltip-border)',
+          color: 'var(--f-tooltip-text)',
           fontSize: 11.5,
           fontWeight: 500,
           fontFamily: 'var(--f-font-sans)',
@@ -118,7 +118,7 @@ function RailItem({ label, isActive, onClick, badge }) {
           padding: '5px 10px',
           borderRadius: 7,
           zIndex: 999,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
+          boxShadow: '0 4px 12px var(--f-tooltip-shadow)',
         }}
       >
         <span
@@ -129,7 +129,7 @@ function RailItem({ label, isActive, onClick, badge }) {
             top: '50%',
             transform: 'translateY(-50%)',
             border: '4px solid transparent',
-            borderRightColor: 'rgba(255,255,255,0.1)',
+            borderRightColor: 'var(--f-tooltip-border)',
           }}
         />
         {label}

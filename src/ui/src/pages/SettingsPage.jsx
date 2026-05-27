@@ -11,6 +11,7 @@ import { InvoiceSettings } from '../components/settings/InvoiceSettings';
 import { CompanySettings } from '../components/settings/CompanySettings';
 import { TemplatesSettings } from '../components/settings/TemplatesSettings';
 import { AppearanceSettings } from '../components/settings/AppearanceSettings';
+import { EmailSettings } from '../components/settings/EmailSettings';
 import { ImportSettings } from '../components/settings/ImportSettings';
 import { AboutSettings } from '../components/settings/AboutSettings';
 import { DevSettings } from '../components/settings/DevSettings';
@@ -165,6 +166,8 @@ export function SettingsPage({ company, onCompanyUpdate, onOpenTemplateEditor, o
         );
       case 'appearance':
         return <AppearanceSettings />;
+      case 'email':
+        return <EmailSettings />;
       case 'import':
         return <ImportSettings onRefreshData={onRefreshData} />;
       case 'about':
