@@ -208,9 +208,11 @@ function App() {
       .then((locale) => {
         if (!locale) return;
         const normalized = locale.split?.('-')[0] || locale;
-        // Map Norwegian variants to 'nb'; everything else falls back to 'en'
-        const lang = ['nb', 'nn', 'no'].includes(normalized) ? 'nb' : 'en';
-        i18n.changeLanguage(lang);
+        // Fattern is a Norwegian app — only switch language for Norwegian locales;
+        // non-Norwegian system locales (e.g. en-US on Linux) keep the 'nb' default.
+        if (['nb', 'nn', 'no'].includes(normalized)) {
+          i18n.changeLanguage('nb');
+        }
       })
       .catch((err) => {
         console.error('Unable to detect locale', err);
@@ -639,11 +641,13 @@ function App() {
   };
 
   const openEditInvoiceModal = async (invoice) => {
-    if (!invoice || !invoice.dbId) return;
+    // getInvoice() returns raw DB rows with .id; list items carry .dbId — accept both
+    const invoiceId = invoice?.dbId ?? invoice?.id;
+    if (!invoiceId) return;
     try {
       const api = typeof window !== 'undefined' ? window.fattern?.db : null;
       if (!api?.getInvoice) return;
-      const fullInvoice = await api.getInvoice(invoice.dbId);
+      const fullInvoice = await api.getInvoice(invoiceId);
       setEditingInvoice(fullInvoice);
       setInvoiceModalMode('edit');
       setIsInvoiceModalOpen(true);
