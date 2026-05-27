@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '../Modal';
 import { ExpenseCategoryModal } from './ExpenseCategoryModal';
 
 export function ExpenseCategoryManagementModal({ isOpen, onClose, categories = [], onCreateCategory, onEditCategory, onDeleteCategory }) {
+  const { t } = useTranslation();
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [categoryModalMode, setCategoryModalMode] = useState('create');
@@ -52,8 +54,8 @@ export function ExpenseCategoryManagementModal({ isOpen, onClose, categories = [
       <Modal
         isOpen={isOpen}
         onClose={onClose}
-        title="Behandle utgiftskategorier"
-        description="Opprett, rediger eller slett utgiftskategorier. Du kan lage underkategorier ved å velge en overordnet kategori."
+        title={t('expense_category.management_title')}
+        description={t('expense_category.management_desc')}
         size="lg"
         footer={
           <div className="flex w-full items-center justify-between">
@@ -65,21 +67,21 @@ export function ExpenseCategoryManagementModal({ isOpen, onClose, categories = [
               onMouseLeave={e => e.currentTarget.style.color = 'var(--f-text-subtle)'}
               onClick={onClose}
             >
-              Lukk
+              {t('common.close')}
             </button>
             <button
               type="button"
               onClick={openCreateCategory}
               className="f-btn-primary rounded-2xl px-5 py-2 text-sm font-semibold"
             >
-              Ny kategori
+              {t('expense_category.new_category')}
             </button>
           </div>
         }
       >
         <div className="space-y-4">
           {categoryTree.length === 0 ? (
-            <p className="text-sm" style={{ color: 'var(--f-text-subtle)' }}>Ingen kategorier opprettet ennå.</p>
+            <p className="text-sm" style={{ color: 'var(--f-text-subtle)' }}>{t('expense_category.empty')}</p>
           ) : (
             <div className="space-y-2">
               {categoryTree.map((category) => (
@@ -103,7 +105,7 @@ export function ExpenseCategoryManagementModal({ isOpen, onClose, categories = [
                       </p>
                       {category.children.length > 0 && (
                         <p className="mt-1 text-xs" style={{ color: 'var(--f-text-subtle)' }}>
-                          {category.children.length} underkategori{category.children.length !== 1 ? 'er' : ''}
+                          {t('expense_category.subcategories', { count: category.children.length })}
                         </p>
                       )}
                     </div>
@@ -116,7 +118,7 @@ export function ExpenseCategoryManagementModal({ isOpen, onClose, categories = [
                         onMouseEnter={e => e.currentTarget.style.opacity = '0.8'}
                         onMouseLeave={e => e.currentTarget.style.opacity = '1'}
                       >
-                        Rediger
+                        {t('common.edit')}
                       </button>
                       <button
                         type="button"
@@ -126,7 +128,7 @@ export function ExpenseCategoryManagementModal({ isOpen, onClose, categories = [
                         onMouseEnter={e => e.currentTarget.style.opacity = '0.8'}
                         onMouseLeave={e => e.currentTarget.style.opacity = '1'}
                       >
-                        Slett
+                        {t('common.delete')}
                       </button>
                     </div>
                   </div>
@@ -158,7 +160,7 @@ export function ExpenseCategoryManagementModal({ isOpen, onClose, categories = [
                               onMouseEnter={e => e.currentTarget.style.opacity = '0.8'}
                               onMouseLeave={e => e.currentTarget.style.opacity = '1'}
                             >
-                              Rediger
+                              {t('common.edit')}
                             </button>
                             <button
                               type="button"
@@ -168,7 +170,7 @@ export function ExpenseCategoryManagementModal({ isOpen, onClose, categories = [
                               onMouseEnter={e => e.currentTarget.style.opacity = '0.8'}
                               onMouseLeave={e => e.currentTarget.style.opacity = '1'}
                             >
-                              Slett
+                              {t('common.delete')}
                             </button>
                           </div>
                         </div>

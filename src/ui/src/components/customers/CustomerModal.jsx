@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '../Modal';
 import { ImageUpload } from '../ImageUpload';
 
 export function CustomerModal({ isOpen, mode = 'create', initialCustomer, onSubmit, onClose }) {
+  const { t } = useTranslation();
   const [name, setName] = useState(initialCustomer?.name || '');
   const [contactName, setContactName] = useState(initialCustomer?.contact_name || '');
   const [email, setEmail] = useState(initialCustomer?.email || '');
@@ -41,7 +43,7 @@ export function CustomerModal({ isOpen, mode = 'create', initialCustomer, onSubm
     setError('');
 
     if (!name.trim()) {
-      setError('Kundenavn må fylles ut.');
+      setError(t('customer_modal.name_required'));
       return;
     }
 
@@ -64,23 +66,18 @@ export function CustomerModal({ isOpen, mode = 'create', initialCustomer, onSubm
       onClose?.();
     } catch (err) {
       console.error('Kunne ikke lagre kunde', err);
-      setError('Noe gikk galt under lagring. Prøv igjen.');
+      setError(t('common.save_error'));
     } finally {
       setSaving(false);
     }
   };
 
-  const title = isEdit ? 'Rediger kunde' : 'Ny kunde';
-  const modalDescription = isEdit
-    ? 'Oppdater kundeinformasjon.'
-    : 'Legg til en ny kunde i systemet.';
-
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={title}
-      description={modalDescription}
+      title={isEdit ? t('customer_modal.edit_title') : t('customer_modal.create_title')}
+      description={isEdit ? t('customer_modal.edit_desc') : t('customer_modal.create_desc')}
       footer={
         <>
           <button
@@ -92,7 +89,7 @@ export function CustomerModal({ isOpen, mode = 'create', initialCustomer, onSubm
             onClick={onClose}
             disabled={saving}
           >
-            Avbryt
+            {t('common.cancel')}
           </button>
           <button
             type="submit"
@@ -100,35 +97,35 @@ export function CustomerModal({ isOpen, mode = 'create', initialCustomer, onSubm
             className="f-btn-primary rounded-2xl px-5 py-2 text-sm font-semibold disabled:opacity-60"
             disabled={saving}
           >
-            {saving ? 'Lagrer …' : isEdit ? 'Lagre endringer' : 'Opprett kunde'}
+            {saving ? t('common.saving') : isEdit ? t('common.save_changes') : t('customer_modal.create_button')}
           </button>
         </>
       }
     >
       <form id="customer-form" className="space-y-4" onSubmit={handleSubmit}>
         <div>
-          <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Kundenavn *</label>
+          <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('customer_modal.name_label')}</label>
           <input
             className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Eksempel: Acme AS"
+            placeholder={t('customer_modal.name_placeholder')}
             required
           />
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Kontaktperson</label>
+            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('customer_modal.contact_label')}</label>
             <input
               className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
               value={contactName}
               onChange={(e) => setContactName(e.target.value)}
-              placeholder="Navn på kontaktperson"
+              placeholder={t('customer_modal.contact_placeholder')}
             />
           </div>
           <div>
-            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Organisasjonsnummer</label>
+            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('customer_modal.org_number_label')}</label>
             <input
               className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
               value={orgNumber}
@@ -140,7 +137,7 @@ export function CustomerModal({ isOpen, mode = 'create', initialCustomer, onSubm
 
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>E-post</label>
+            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('customer_modal.email_label')}</label>
             <input
               type="email"
               className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
@@ -150,7 +147,7 @@ export function CustomerModal({ isOpen, mode = 'create', initialCustomer, onSubm
             />
           </div>
           <div>
-            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Telefon</label>
+            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('customer_modal.phone_label')}</label>
             <input
               type="tel"
               className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
@@ -162,18 +159,18 @@ export function CustomerModal({ isOpen, mode = 'create', initialCustomer, onSubm
         </div>
 
         <div>
-          <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Adresse</label>
+          <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('customer_modal.address_label')}</label>
           <input
             className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            placeholder="Gateadresse"
+            placeholder={t('customer_modal.address_placeholder')}
           />
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Postnummer</label>
+            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('customer_modal.post_number_label')}</label>
             <input
               className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
               value={postNumber}
@@ -182,7 +179,7 @@ export function CustomerModal({ isOpen, mode = 'create', initialCustomer, onSubm
             />
           </div>
           <div>
-            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Poststed</label>
+            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('customer_modal.post_location_label')}</label>
             <input
               className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
               value={postLocation}
@@ -193,7 +190,7 @@ export function CustomerModal({ isOpen, mode = 'create', initialCustomer, onSubm
         </div>
 
         <div>
-          <ImageUpload value={imagePath} onChange={setImagePath} label="Kundebilde" />
+          <ImageUpload value={imagePath} onChange={setImagePath} label={t('customer_modal.image_label')} />
         </div>
 
         <div className="flex gap-4">
@@ -204,7 +201,7 @@ export function CustomerModal({ isOpen, mode = 'create', initialCustomer, onSubm
               checked={vatExempt}
               onChange={(e) => setVatExempt(e.target.checked)}
             />
-            MVA-fritatt
+            {t('customer_modal.vat_exempt_label')}
           </label>
           <label className="flex items-center gap-2 text-sm" style={{ color: 'var(--f-text-body)' }}>
             <input
@@ -213,7 +210,7 @@ export function CustomerModal({ isOpen, mode = 'create', initialCustomer, onSubm
               checked={active}
               onChange={(e) => setActive(e.target.checked)}
             />
-            Kunden er aktiv
+            {t('customer_modal.active_label')}
           </label>
         </div>
 
@@ -222,4 +219,3 @@ export function CustomerModal({ isOpen, mode = 'create', initialCustomer, onSubm
     </Modal>
   );
 }
-

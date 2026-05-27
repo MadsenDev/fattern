@@ -1,27 +1,30 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Select } from '../Select';
 import { ImageUpload } from '../ImageUpload';
 import { IconStack, IconTypography, IconPhoto, IconTable, IconSettings } from '@tabler/icons-react';
 
-const FIELD_BINDINGS = [
-  { value: 'invoice.invoice_number', label: 'Fakturanummer' },
-  { value: 'invoice.invoice_date', label: 'Fakturadato' },
-  { value: 'invoice.due_date', label: 'Forfallsdato' },
-  { value: 'invoice.status', label: 'Status' },
-  { value: 'invoice.total', label: 'Total' },
-  { value: 'invoice.subtotal', label: 'Delsum' },
-  { value: 'invoice.vat_total', label: 'MVA' },
-  { value: 'customer.name', label: 'Kundenavn' },
-  { value: 'customer.org_number', label: 'Kunde org.nr' },
-  { value: 'customer.address', label: 'Kundeadresse' },
-  { value: 'company.name', label: 'Selskapsnavn' },
-  { value: 'company.org_number', label: 'Selskap org.nr' },
-  { value: 'company.address', label: 'Selskap adresse' },
-];
-
 export function TemplateProperties({ element, onUpdate, template }) {
+  const { t } = useTranslation();
   const [localUpdates, setLocalUpdates] = useState({});
   const [activeTab, setActiveTab] = useState('position');
+
+  // Field bindings defined inside component to use t()
+  const FIELD_BINDINGS = [
+    { value: 'invoice.invoice_number', label: t('template_props.binding_invoice_number') },
+    { value: 'invoice.invoice_date', label: t('template_props.binding_invoice_date') },
+    { value: 'invoice.due_date', label: t('template_props.binding_due_date') },
+    { value: 'invoice.status', label: t('template_props.binding_status') },
+    { value: 'invoice.total', label: t('template_props.binding_total') },
+    { value: 'invoice.subtotal', label: t('template_props.binding_subtotal') },
+    { value: 'invoice.vat_total', label: t('template_props.binding_vat') },
+    { value: 'customer.name', label: t('template_props.binding_customer_name') },
+    { value: 'customer.org_number', label: t('template_props.binding_customer_org') },
+    { value: 'customer.address', label: t('template_props.binding_customer_address') },
+    { value: 'company.name', label: t('template_props.binding_company_name') },
+    { value: 'company.org_number', label: t('template_props.binding_company_org') },
+    { value: 'company.address', label: t('template_props.binding_company_address') },
+  ];
 
   useEffect(() => {
     setLocalUpdates({});
@@ -32,10 +35,10 @@ export function TemplateProperties({ element, onUpdate, template }) {
     return (
       <div className="w-80 flex flex-col h-full" style={{ borderLeft: '1px solid var(--f-border-subtle)', background: 'rgba(8,16,12,0.6)' }}>
         <div className="p-4" style={{ borderBottom: '1px solid var(--f-border-subtle)' }}>
-          <h2 className="text-sm font-semibold" style={{ color: 'var(--f-text-body)' }}>Egenskaper</h2>
+          <h2 className="text-sm font-semibold" style={{ color: 'var(--f-text-body)' }}>{t('template_props.title')}</h2>
         </div>
         <div className="p-4">
-          <p className="text-sm" style={{ color: 'var(--f-text-subtle)' }}>Velg et element for å redigere</p>
+          <p className="text-sm" style={{ color: 'var(--f-text-subtle)' }}>{t('template_props.no_selection')}</p>
         </div>
       </div>
     );
@@ -51,30 +54,37 @@ export function TemplateProperties({ element, onUpdate, template }) {
 
   // Determine available tabs based on element type
   const tabs = [
-    { id: 'position', label: 'Posisjon', icon: IconStack },
+    { id: 'position', label: t('template_props.tab_position'), icon: IconStack },
     ...(element.type === 'text' || element.type === 'field'
-      ? [{ id: 'content', label: 'Innhold', icon: IconTypography }]
+      ? [{ id: 'content', label: t('template_props.tab_content'), icon: IconTypography }]
       : []),
     ...(element.type === 'text' || element.type === 'field'
-      ? [{ id: 'typography', label: 'Typografi', icon: IconTypography }]
+      ? [{ id: 'typography', label: t('template_props.tab_typography'), icon: IconTypography }]
       : []),
     ...(element.type === 'image'
-      ? [{ id: 'image', label: 'Bilde', icon: IconPhoto }]
+      ? [{ id: 'image', label: t('template_props.tab_image'), icon: IconPhoto }]
       : []),
     ...(element.type === 'table'
-      ? [{ id: 'table', label: 'Tabell', icon: IconTable }]
+      ? [{ id: 'table', label: t('template_props.tab_table'), icon: IconTable }]
       : []),
     ...(element.type === 'shape'
-      ? [{ id: 'shape', label: 'Form', icon: IconSettings }]
+      ? [{ id: 'shape', label: t('template_props.tab_shape'), icon: IconSettings }]
       : []),
-    { id: 'style', label: 'Stil', icon: IconSettings },
+    { id: 'style', label: t('template_props.tab_style'), icon: IconSettings },
   ];
+  const elementTypeLabel = {
+    text: t('template_editor.element_text'),
+    field: t('template_editor.element_field'),
+    image: t('template_editor.element_image'),
+    table: t('template_editor.element_table'),
+    shape: t('template_editor.element_shape'),
+  }[element.type] || element.type;
 
   return (
     <div className="w-80 flex flex-col h-full" style={{ borderLeft: '1px solid var(--f-border-subtle)', background: 'rgba(8,16,12,0.6)' }}>
       <div className="p-4" style={{ borderBottom: '1px solid var(--f-border-subtle)' }}>
-        <h2 className="text-sm font-semibold" style={{ color: 'var(--f-text-body)' }}>Egenskaper</h2>
-        <p className="mt-1 text-xs capitalize" style={{ color: 'var(--f-text-subtle)' }}>{element.type}</p>
+        <h2 className="text-sm font-semibold" style={{ color: 'var(--f-text-body)' }}>{t('template_props.title')}</h2>
+        <p className="mt-1 text-xs" style={{ color: 'var(--f-text-subtle)' }}>{elementTypeLabel}</p>
       </div>
 
       {/* Tabs */}
@@ -107,7 +117,7 @@ export function TemplateProperties({ element, onUpdate, template }) {
         {activeTab === 'position' && (
           <div>
             <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--f-text-subtle)' }}>
-              Posisjon
+              {t('template_props.tab_position')}
             </h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -129,7 +139,7 @@ export function TemplateProperties({ element, onUpdate, template }) {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>Bredde</label>
+                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.width')}</label>
                 <input
                   type="number"
                   value={element.width}
@@ -138,7 +148,7 @@ export function TemplateProperties({ element, onUpdate, template }) {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>Høyde</label>
+                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.height')}</label>
                 <input
                   type="number"
                   value={element.height}
@@ -147,7 +157,7 @@ export function TemplateProperties({ element, onUpdate, template }) {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>Z-index (lag)</label>
+                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.z_index')}</label>
                 <input
                   type="number"
                   value={element.zIndex ?? 1}
@@ -155,7 +165,7 @@ export function TemplateProperties({ element, onUpdate, template }) {
                   className="f-input w-full rounded-lg px-3 py-2 text-sm"
                 />
                 <p className="mt-1 text-xs" style={{ color: 'var(--f-text-subtle)' }}>
-                  Lavere tall vises bak andre elementer. Formelementer har vanligvis 0.
+                  {t('template_props.z_index_hint')}
                 </p>
               </div>
             </div>
@@ -167,7 +177,7 @@ export function TemplateProperties({ element, onUpdate, template }) {
           <div>
             {element.type === 'text' && (
               <div>
-                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>Innhold</label>
+                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.content')}</label>
                 <textarea
                   value={element.content || ''}
                   onChange={(e) => applyUpdate({ content: e.target.value })}
@@ -179,7 +189,7 @@ export function TemplateProperties({ element, onUpdate, template }) {
 
             {element.type === 'field' && (
               <div>
-                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>Feltbinding</label>
+                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.field_binding')}</label>
                 <Select
                   value={element.binding || ''}
                   onChange={(value) => applyUpdate({ binding: value })}
@@ -194,11 +204,11 @@ export function TemplateProperties({ element, onUpdate, template }) {
         {activeTab === 'typography' && (element.type === 'text' || element.type === 'field') && (
           <div>
             <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--f-text-subtle)' }}>
-              Typografi
+              {t('template_props.tab_typography')}
             </h3>
             <div className="space-y-3">
               <div>
-                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>Font</label>
+                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.font')}</label>
                 <select
                   value={element.fontFamily || 'Inter'}
                   onChange={(e) => applyUpdate({ fontFamily: e.target.value })}
@@ -211,7 +221,7 @@ export function TemplateProperties({ element, onUpdate, template }) {
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>Størrelse</label>
+                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.font_size')}</label>
                 <input
                   type="number"
                   value={element.fontSize || 14}
@@ -220,21 +230,21 @@ export function TemplateProperties({ element, onUpdate, template }) {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>Vekt</label>
+                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.font_weight')}</label>
                 <select
                   value={element.fontWeight || 400}
                   onChange={(e) => applyUpdate({ fontWeight: parseInt(e.target.value) || 400 })}
                   className="f-input w-full rounded-lg px-3 py-2 text-sm"
                 >
-                  <option value={300}>Lett (300)</option>
-                  <option value={400}>Normal (400)</option>
-                  <option value={500}>Medium (500)</option>
-                  <option value={600}>Semibold (600)</option>
-                  <option value={700}>Fet (700)</option>
+                  <option value={300}>{t('template_props.weight_light')} (300)</option>
+                  <option value={400}>{t('template_props.weight_normal')} (400)</option>
+                  <option value={500}>{t('template_props.weight_medium')} (500)</option>
+                  <option value={600}>{t('template_props.weight_semibold')} (600)</option>
+                  <option value={700}>{t('template_props.weight_bold')} (700)</option>
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>Farge</label>
+                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.color')}</label>
                 <input
                   type="color"
                   value={element.color || '#0d3e51'}
@@ -243,19 +253,19 @@ export function TemplateProperties({ element, onUpdate, template }) {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>Justering</label>
+                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.align')}</label>
                 <select
                   value={element.align || 'left'}
                   onChange={(e) => applyUpdate({ align: e.target.value })}
                   className="f-input w-full rounded-lg px-3 py-2 text-sm"
                 >
-                  <option value="left">Venstre</option>
-                  <option value="center">Senter</option>
-                  <option value="right">Høyre</option>
+                  <option value="left">{t('template_props.align_left')}</option>
+                  <option value="center">{t('template_props.align_center')}</option>
+                  <option value="right">{t('template_props.align_right')}</option>
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>Linjehøyde</label>
+                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.line_height')}</label>
                 <input
                   type="number"
                   step="0.1"
@@ -265,7 +275,7 @@ export function TemplateProperties({ element, onUpdate, template }) {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>Bokstavavstand</label>
+                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.letter_spacing')}</label>
                 <input
                   type="number"
                   step="0.1"
@@ -275,7 +285,7 @@ export function TemplateProperties({ element, onUpdate, template }) {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>Tekststil</label>
+                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.text_style')}</label>
                 <div className="flex gap-2">
                   <label className="flex items-center gap-1.5">
                     <input
@@ -284,7 +294,7 @@ export function TemplateProperties({ element, onUpdate, template }) {
                       onChange={(e) => applyUpdate({ fontStyle: e.target.checked ? 'italic' : 'normal' })}
                       className="rounded"
                     />
-                    <span className="text-xs" style={{ color: 'var(--f-text-soft)' }}>Kursiv</span>
+                    <span className="text-xs" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.italic')}</span>
                   </label>
                   <label className="flex items-center gap-1.5">
                     <input
@@ -293,21 +303,21 @@ export function TemplateProperties({ element, onUpdate, template }) {
                       onChange={(e) => applyUpdate({ textDecoration: e.target.checked ? 'underline' : 'none' })}
                       className="rounded"
                     />
-                    <span className="text-xs" style={{ color: 'var(--f-text-soft)' }}>Understreket</span>
+                    <span className="text-xs" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.underline')}</span>
                   </label>
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>Teksttransform</label>
+                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.text_transform')}</label>
                 <select
                   value={element.textTransform || 'none'}
                   onChange={(e) => applyUpdate({ textTransform: e.target.value })}
                   className="f-input w-full rounded-lg px-3 py-2 text-sm"
                 >
-                  <option value="none">Ingen</option>
-                  <option value="uppercase">STORE BOKSTAVER</option>
-                  <option value="lowercase">små bokstaver</option>
-                  <option value="capitalize">Stor Forbokstav</option>
+                  <option value="none">{t('template_props.transform_none')}</option>
+                  <option value="uppercase">{t('template_props.transform_uppercase')}</option>
+                  <option value="lowercase">{t('template_props.transform_lowercase')}</option>
+                  <option value="capitalize">{t('template_props.transform_capitalize')}</option>
                 </select>
               </div>
             </div>
@@ -328,17 +338,17 @@ export function TemplateProperties({ element, onUpdate, template }) {
                 }}
                 templateId={template?.meta?.id || template?.id}
                 elementId={element.id}
-                label="Bilde"
+                label={t('template_props.tab_image')}
                 maxSizeMB={10}
               />
             </div>
             <div className="pt-4" style={{ borderTop: '1px solid var(--f-border-faint)' }}>
-              <label className="mb-2 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>Alternativ: URL eller sti</label>
+              <label className="mb-2 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.image_url_label')}</label>
               <input
                 type="text"
                 value={element.src || ''}
                 onChange={(e) => applyUpdate({ src: e.target.value })}
-                placeholder="https://example.com/image.jpg eller /path/to/image.png"
+                placeholder={t('template_props.image_url_placeholder')}
                 className="f-input w-full rounded-lg px-3 py-2 text-sm"
               />
             </div>
@@ -350,7 +360,7 @@ export function TemplateProperties({ element, onUpdate, template }) {
                   onChange={(e) => applyUpdate({ preserveAspectRatio: e.target.checked })}
                   className="rounded"
                 />
-                <span className="text-xs" style={{ color: 'var(--f-text-soft)' }}>Bevar sideforhold</span>
+                <span className="text-xs" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.preserve_aspect')}</span>
               </label>
             </div>
           </div>
@@ -360,15 +370,15 @@ export function TemplateProperties({ element, onUpdate, template }) {
         {activeTab === 'table' && element.type === 'table' && (
           <div className="space-y-4">
             <div>
-              <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>Binding</label>
+              <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.binding')}</label>
               <Select
                 value={element.binding || 'invoice.items'}
                 onChange={(value) => applyUpdate({ binding: value })}
-                options={[{ value: 'invoice.items', label: 'Fakturalinjer' }]}
+                options={[{ value: 'invoice.items', label: t('template_props.binding_invoice_items') }]}
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>Radhøyde</label>
+              <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.row_height')}</label>
               <input
                 type="number"
                 value={element.rowHeight || 18}
@@ -377,7 +387,7 @@ export function TemplateProperties({ element, onUpdate, template }) {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>Maks rader</label>
+              <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.max_rows')}</label>
               <input
                 type="number"
                 value={element.maxRows || 15}
@@ -385,14 +395,14 @@ export function TemplateProperties({ element, onUpdate, template }) {
                 className="f-input w-full rounded-lg px-3 py-2 text-sm"
               />
             </div>
-            
+
             <div className="pt-4" style={{ borderTop: '1px solid var(--f-border-faint)' }}>
               <h4 className="mb-3 text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--f-text-subtle)' }}>
-                Tabellhode
+                {t('template_props.table_header')}
               </h4>
               <div className="space-y-3">
                 <div>
-                  <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>Bakgrunnsfarge</label>
+                  <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.background_color')}</label>
                   <div className="flex gap-2">
                     <input
                       type="color"
@@ -410,7 +420,7 @@ export function TemplateProperties({ element, onUpdate, template }) {
                   </div>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>Tekstfarge</label>
+                  <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.text_color')}</label>
                   <div className="flex gap-2">
                     <input
                       type="color"
@@ -432,11 +442,11 @@ export function TemplateProperties({ element, onUpdate, template }) {
 
             <div className="pt-4" style={{ borderTop: '1px solid var(--f-border-faint)' }}>
               <h4 className="mb-3 text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--f-text-subtle)' }}>
-                Tabellinnhold
+                {t('template_props.table_body')}
               </h4>
               <div className="space-y-3">
                 <div>
-                  <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>Tekstfarge</label>
+                  <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.text_color')}</label>
                   <div className="flex gap-2">
                     <input
                       type="color"
@@ -462,31 +472,31 @@ export function TemplateProperties({ element, onUpdate, template }) {
         {activeTab === 'shape' && element.type === 'shape' && (
           <div className="space-y-4">
             <div>
-              <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>Formtype</label>
+              <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.shape_type')}</label>
               <select
                 value={element.shapeType || 'rectangle'}
                 onChange={(e) => applyUpdate({ shapeType: e.target.value })}
                 className="f-input w-full rounded-lg px-3 py-2 text-sm"
               >
-                <option value="rectangle">Rektangel</option>
-                <option value="circle">Sirkel</option>
-                <option value="line">Linje</option>
+                <option value="rectangle">{t('template_props.shape_rectangle')}</option>
+                <option value="circle">{t('template_props.shape_circle')}</option>
+                <option value="line">{t('template_props.shape_line')}</option>
               </select>
             </div>
             {element.shapeType === 'line' && (
               <div>
                 <p className="text-xs" style={{ color: 'var(--f-text-subtle)' }}>
-                  Linjen vil være horisontal hvis bredden er større enn høyden, ellers vertikal.
+                  {t('template_props.shape_line_hint')}
                 </p>
                 <p className="mt-2 text-xs" style={{ color: 'var(--f-text-subtle)' }}>
-                  Bruk "Stil"-fanen for å justere farger, rammer og andre stilegenskaper.
+                  {t('template_props.shape_style_hint')}
                 </p>
               </div>
             )}
             {element.shapeType !== 'line' && (
               <div>
                 <p className="text-xs" style={{ color: 'var(--f-text-subtle)' }}>
-                  Bruk "Stil"-fanen for å justere bakgrunnsfarge, rammer, avrunding og andre stilegenskaper.
+                  {t('template_props.shape_rect_hint')}
                 </p>
               </div>
             )}
@@ -497,11 +507,11 @@ export function TemplateProperties({ element, onUpdate, template }) {
         {activeTab === 'style' && (
           <div>
             <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--f-text-subtle)' }}>
-              Stil
+              {t('template_props.tab_style')}
             </h3>
             <div className="space-y-3">
               <div>
-                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>Bakgrunnsfarge</label>
+                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.background_color')}</label>
                 <div className="flex gap-2">
                   <input
                     type="color"
@@ -519,7 +529,7 @@ export function TemplateProperties({ element, onUpdate, template }) {
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>Gjennomsiktighet</label>
+                <label className="mb-1 block text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.opacity')}</label>
                 <input
                   type="number"
                   min="0"
@@ -531,11 +541,11 @@ export function TemplateProperties({ element, onUpdate, template }) {
                 />
               </div>
               <div>
-                <h4 className="mb-2 text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>Ramme</h4>
+                <h4 className="mb-2 text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.border')}</h4>
                 <div className="space-y-2">
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="mb-1 block text-xs" style={{ color: 'var(--f-text-subtle)' }}>Bredde</label>
+                      <label className="mb-1 block text-xs" style={{ color: 'var(--f-text-subtle)' }}>{t('template_props.width')}</label>
                       <input
                         type="number"
                         value={element.borderWidth || 0}
@@ -544,7 +554,7 @@ export function TemplateProperties({ element, onUpdate, template }) {
                       />
                     </div>
                     <div>
-                      <label className="mb-1 block text-xs" style={{ color: 'var(--f-text-subtle)' }}>Farge</label>
+                      <label className="mb-1 block text-xs" style={{ color: 'var(--f-text-subtle)' }}>{t('template_props.color')}</label>
                       <input
                         type="color"
                         value={element.borderColor || '#000000'}
@@ -554,20 +564,20 @@ export function TemplateProperties({ element, onUpdate, template }) {
                     </div>
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs" style={{ color: 'var(--f-text-subtle)' }}>Stil</label>
+                    <label className="mb-1 block text-xs" style={{ color: 'var(--f-text-subtle)' }}>{t('template_props.border_style')}</label>
                     <select
                       value={element.borderStyle || 'solid'}
                       onChange={(e) => applyUpdate({ borderStyle: e.target.value })}
                       className="f-input w-full rounded-lg px-2 py-1.5 text-sm"
                     >
-                      <option value="solid">Solid</option>
-                      <option value="dashed">Stiplet</option>
-                      <option value="dotted">Prikket</option>
-                      <option value="none">Ingen</option>
+                      <option value="solid">{t('template_props.border_solid')}</option>
+                      <option value="dashed">{t('template_props.border_dashed')}</option>
+                      <option value="dotted">{t('template_props.border_dotted')}</option>
+                      <option value="none">{t('template_props.none')}</option>
                     </select>
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs" style={{ color: 'var(--f-text-subtle)' }}>Avrunding</label>
+                    <label className="mb-1 block text-xs" style={{ color: 'var(--f-text-subtle)' }}>{t('template_props.border_radius')}</label>
                     <input
                       type="number"
                       value={element.borderRadius || 0}
@@ -578,10 +588,10 @@ export function TemplateProperties({ element, onUpdate, template }) {
                 </div>
               </div>
               <div>
-                <h4 className="mb-2 text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>Padding</h4>
+                <h4 className="mb-2 text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.padding')}</h4>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="mb-1 block text-xs" style={{ color: 'var(--f-text-subtle)' }}>Topp</label>
+                    <label className="mb-1 block text-xs" style={{ color: 'var(--f-text-subtle)' }}>{t('template_props.padding_top')}</label>
                     <input
                       type="number"
                       value={element.paddingTop || 0}
@@ -590,7 +600,7 @@ export function TemplateProperties({ element, onUpdate, template }) {
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs" style={{ color: 'var(--f-text-subtle)' }}>Høyre</label>
+                    <label className="mb-1 block text-xs" style={{ color: 'var(--f-text-subtle)' }}>{t('template_props.padding_right')}</label>
                     <input
                       type="number"
                       value={element.paddingRight || 0}
@@ -599,7 +609,7 @@ export function TemplateProperties({ element, onUpdate, template }) {
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs" style={{ color: 'var(--f-text-subtle)' }}>Bunn</label>
+                    <label className="mb-1 block text-xs" style={{ color: 'var(--f-text-subtle)' }}>{t('template_props.padding_bottom')}</label>
                     <input
                       type="number"
                       value={element.paddingBottom || 0}
@@ -608,7 +618,7 @@ export function TemplateProperties({ element, onUpdate, template }) {
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs" style={{ color: 'var(--f-text-subtle)' }}>Venstre</label>
+                    <label className="mb-1 block text-xs" style={{ color: 'var(--f-text-subtle)' }}>{t('template_props.padding_left')}</label>
                     <input
                       type="number"
                       value={element.paddingLeft || 0}
@@ -619,7 +629,7 @@ export function TemplateProperties({ element, onUpdate, template }) {
                 </div>
               </div>
               <div>
-                <h4 className="mb-2 text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>Skygge</h4>
+                <h4 className="mb-2 text-xs font-medium" style={{ color: 'var(--f-text-soft)' }}>{t('template_props.shadow')}</h4>
                 <div className="space-y-2">
                   <div className="grid grid-cols-3 gap-2">
                     <div>
@@ -641,7 +651,7 @@ export function TemplateProperties({ element, onUpdate, template }) {
                       />
                     </div>
                     <div>
-                      <label className="mb-1 block text-xs" style={{ color: 'var(--f-text-subtle)' }}>Uskarphet</label>
+                      <label className="mb-1 block text-xs" style={{ color: 'var(--f-text-subtle)' }}>{t('template_props.shadow_blur')}</label>
                       <input
                         type="number"
                         value={element.boxShadowBlur || 0}
@@ -651,7 +661,7 @@ export function TemplateProperties({ element, onUpdate, template }) {
                     </div>
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs" style={{ color: 'var(--f-text-subtle)' }}>Farge</label>
+                    <label className="mb-1 block text-xs" style={{ color: 'var(--f-text-subtle)' }}>{t('template_props.color')}</label>
                     <input
                       type="color"
                       value={element.boxShadowColor || '#000000'}

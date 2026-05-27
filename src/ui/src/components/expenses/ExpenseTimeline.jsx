@@ -1,19 +1,18 @@
 // src/ui/src/components/expenses/ExpenseTimeline.jsx
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ExpenseTimelineRow } from './ExpenseTimelineRow';
 
-const MONTH_NAMES_NO = [
-  'Januar', 'Februar', 'Mars', 'April', 'Mai', 'Juni',
-  'Juli', 'August', 'September', 'Oktober', 'November', 'Desember',
-];
-
-function monthLabel(yyyyMm) {
-  if (yyyyMm === 'ukjent') return 'Ukjent dato';
+function monthLabel(yyyyMm, lng, unknownLabel) {
+  if (yyyyMm === 'ukjent') return unknownLabel;
   const [year, month] = yyyyMm.split('-');
-  return `${MONTH_NAMES_NO[parseInt(month, 10) - 1]} ${year}`;
+  const date = new Date(parseInt(year, 10), parseInt(month, 10) - 1, 1);
+  return new Intl.DateTimeFormat(lng, { month: 'long', year: 'numeric' }).format(date);
 }
 
 export function ExpenseTimeline({ expenses = [], formatCurrency, onSelectExpense, selectedExpenseId }) {
+  const { t, i18n } = useTranslation();
+
   const groups = useMemo(() => {
     const map = new Map();
     for (const expense of expenses) {
@@ -28,7 +27,7 @@ export function ExpenseTimeline({ expenses = [], formatCurrency, onSelectExpense
   if (groups.length === 0) {
     return (
       <div style={{ padding: '40px 0', textAlign: 'center', color: 'var(--f-text-subtle)', fontSize: 14 }}>
-        Ingen utgifter å vise
+        {t('expense.no_expenses')}
       </div>
     );
   }
@@ -58,7 +57,7 @@ export function ExpenseTimeline({ expenses = [], formatCurrency, onSelectExpense
                   whiteSpace: 'nowrap',
                 }}
               >
-                {monthLabel(monthKey)}
+                {monthLabel(monthKey, i18n.language, t('expense.unknown_date'))}
               </span>
               <div style={{ flex: 1, height: 1, background: 'var(--f-border)' }} />
               <span style={{ fontSize: 12, color: 'var(--f-text-subtle)', whiteSpace: 'nowrap' }}>

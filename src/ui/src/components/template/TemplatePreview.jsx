@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { IconX } from '@tabler/icons-react';
 import { renderTemplateToHTML } from '../../utils/templateRenderer';
 
@@ -44,6 +45,7 @@ const mockData = {
 };
 
 export function TemplatePreview({ template, zoom = 100, pan = { x: 0, y: 0 }, onPanChange, onClose }) {
+  const { t } = useTranslation();
   const iframeRef = useRef(null);
   const containerRef = useRef(null);
   const [html, setHtml] = useState('');
@@ -94,7 +96,7 @@ export function TemplatePreview({ template, zoom = 100, pan = { x: 0, y: 0 }, on
   if (!template) {
     return (
       <div className="flex h-full items-center justify-center" style={{ background: 'rgba(255,255,255,0.03)' }}>
-        <p style={{ color: 'var(--f-text-subtle)' }}>Ingen mal å forhåndsvise</p>
+        <p style={{ color: 'var(--f-text-subtle)' }}>{t('template_editor.no_preview')}</p>
       </div>
     );
   }
@@ -178,7 +180,7 @@ export function TemplatePreview({ template, zoom = 100, pan = { x: 0, y: 0 }, on
           style={{ background: 'rgba(12,22,18,0.9)', border: '1px solid var(--f-border)', color: 'var(--f-text-soft)' }}
           onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
           onMouseLeave={e => e.currentTarget.style.background = 'rgba(12,22,18,0.9)'}
-          title="Lukk forhåndsvisning"
+          title={t('template_editor.close_preview')}
         >
           <IconX className="h-5 w-5" />
         </button>
@@ -199,7 +201,7 @@ export function TemplatePreview({ template, zoom = 100, pan = { x: 0, y: 0 }, on
           <iframe
             ref={iframeRef}
             className="border-0 pointer-events-none"
-            title="Forhåndsvisning av mal"
+            title={t('template_editor.preview_title')}
             style={{
               width: `${A4_WIDTH}px`,
               height: `${A4_HEIGHT}px`,

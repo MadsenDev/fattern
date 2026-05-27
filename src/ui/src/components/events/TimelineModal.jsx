@@ -1,14 +1,16 @@
+import { useTranslation } from 'react-i18next';
 import { Modal } from '../Modal';
 
 export function TimelineModal({ isOpen, onClose, activityFeed, formatCurrency: fmt }) {
+  const { t } = useTranslation();
   const formatValue = (value) => (typeof fmt === 'function' ? fmt(value) : value);
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Tidslinje"
-      description="Oversikt over alle økonomihendelser i systemet"
+      title={t('timeline.title')}
+      description={t('timeline.description')}
     >
       <div className="max-h-[70vh] space-y-4 overflow-y-auto">
         {activityFeed && activityFeed.length > 0 ? (
@@ -58,8 +60,8 @@ export function TimelineModal({ isOpen, onClose, activityFeed, formatCurrency: f
           </div>
         ) : (
           <div className="rounded-2xl p-12 text-center" style={{ border: '1px solid var(--f-border-subtle)', background: 'rgba(255,255,255,0.02)' }}>
-            <p className="text-sm" style={{ color: 'var(--f-text-subtle)' }}>Ingen hendelser å vise</p>
-            <p className="mt-1 text-xs" style={{ color: 'var(--f-text-subtle)' }}>Aktiviteter vil vises her når de oppstår</p>
+            <p className="text-sm" style={{ color: 'var(--f-text-subtle)' }}>{t('timeline.empty')}</p>
+            <p className="mt-1 text-xs" style={{ color: 'var(--f-text-subtle)' }}>{t('timeline.empty_hint')}</p>
           </div>
         )}
       </div>

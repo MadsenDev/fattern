@@ -1,7 +1,9 @@
 import { motion } from 'framer-motion';
-import { formatCurrency } from '../utils/formatCurrency';
+import { useTranslation } from 'react-i18next';
 
 export function ProductCard({ product, formatCurrency: fmt, onEdit, onDelete, index = 0 }) {
+  const { t } = useTranslation();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -37,13 +39,13 @@ export function ProductCard({ product, formatCurrency: fmt, onEdit, onDelete, in
             {product.sku && <p className="mt-1 text-xs" style={{ color: 'var(--f-text-subtle)' }}>SKU: {product.sku}</p>}
           </div>
           <span className="ml-2 inline-flex rounded-full px-2 py-1 text-xs font-semibold" style={product.active ? { background: 'var(--f-green-bg)', color: 'var(--f-green-text)', border: '1px solid var(--f-border-green)' } : { background: 'rgba(255,255,255,0.06)', color: 'var(--f-text-subtle)' }}>
-            {product.active ? 'Aktiv' : 'Inaktiv'}
+            {product.active ? t('common.active') : t('common.inactive')}
           </span>
         </div>
         <div className="mt-3 flex items-center justify-between">
           <div>
             <p className="text-lg font-semibold" style={{ color: 'var(--f-text-body)' }}>{fmt(product.unit_price || 0)}</p>
-            {product.unit && <p className="text-xs" style={{ color: 'var(--f-text-subtle)' }}>per {product.unit}</p>}
+            {product.unit && <p className="text-xs" style={{ color: 'var(--f-text-subtle)' }}>{t('product_card.per_unit', { unit: product.unit })}</p>}
           </div>
         </div>
         {product.description && (
@@ -58,7 +60,7 @@ export function ProductCard({ product, formatCurrency: fmt, onEdit, onDelete, in
             onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
             onMouseLeave={e => e.currentTarget.style.opacity = '1'}
           >
-            Rediger
+            {t('common.edit')}
           </button>
           <button
             type="button"
@@ -68,11 +70,10 @@ export function ProductCard({ product, formatCurrency: fmt, onEdit, onDelete, in
             onMouseEnter={e => { e.currentTarget.style.background = 'var(--f-danger-bg)'; e.currentTarget.style.color = 'var(--f-danger-text)'; e.currentTarget.style.borderColor = 'var(--f-danger-border)'; }}
             onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--f-text-soft)'; e.currentTarget.style.borderColor = 'var(--f-border-subtle)'; }}
           >
-            Slett
+            {t('common.delete')}
           </button>
         </div>
       </div>
     </motion.div>
   );
 }
-

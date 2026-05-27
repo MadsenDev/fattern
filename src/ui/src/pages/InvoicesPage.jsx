@@ -142,8 +142,8 @@ export function InvoicesPage({ invoices, formatCurrency: fmt, onCreateInvoice, o
             <button
               onClick={() => onViewInvoice?.(invoice)}
               className="rounded-lg p-1.5 text-ink-subtle hover:[background:var(--f-green-bg)] hover:[color:var(--f-green-text)]"
-              aria-label={t('invoice.view')}
-              title={t('invoice.view')}
+              aria-label={t('invoice.view_action')}
+              title={t('invoice.view_action')}
             >
               <IconEye size={15} stroke={1.8} />
             </button>
