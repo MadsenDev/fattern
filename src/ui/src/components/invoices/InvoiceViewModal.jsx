@@ -78,6 +78,35 @@ function InvoiceEventLog({ invoiceId }) {
                     {ts.toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 )}
+                {/* Diff table for 'updated' events */}
+                {event.type === 'updated' && event.metadata?.changes?.length > 0 && (
+                  <div
+                    className="mt-2 rounded-lg overflow-hidden text-xs"
+                    style={{ border: '1px solid var(--f-border-faint)' }}
+                  >
+                    {event.metadata.changes.map((change, ci) => (
+                      <div
+                        key={ci}
+                        className="flex items-baseline gap-2 px-3 py-1.5"
+                        style={{
+                          borderTop: ci > 0 ? '1px solid var(--f-border-faint)' : 'none',
+                          background: ci % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.015)',
+                        }}
+                      >
+                        <span className="flex-shrink-0 font-medium" style={{ color: 'var(--f-text-subtle)', minWidth: 80 }}>
+                          {change.field}
+                        </span>
+                        <span className="truncate px-1.5 py-0.5 rounded" style={{ color: 'var(--f-danger-text)', background: 'var(--f-danger-bg)', maxWidth: 140 }}>
+                          {change.from}
+                        </span>
+                        <span style={{ color: 'var(--f-text-muted)' }}>→</span>
+                        <span className="truncate px-1.5 py-0.5 rounded" style={{ color: 'var(--f-green-text)', background: 'var(--f-green-bg)', maxWidth: 140 }}>
+                          {change.to}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           );

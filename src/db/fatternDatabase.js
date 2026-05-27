@@ -366,6 +366,11 @@ class FatternDatabase {
       throw new Error('Invoice not found');
     }
 
+    // Capture existing items for diff
+    const existingItems = this.db
+      .prepare('SELECT * FROM invoice_items WHERE invoice_id = ? ORDER BY id')
+      .all(invoiceId);
+
     const items = invoice.items || [];
     const subtotal = items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
     const vatTotal = items.reduce((sum, item) => sum + item.quantity * item.unitPrice * (item.vatRate ?? 0), 0);
@@ -441,7 +446,50 @@ class FatternDatabase {
     });
 
     transaction();
-    this.logInvoiceEvent(invoiceId, 'updated', 'Faktura redigert');
+
+    // Build field diff for the log
+    const fmtAmt = (v) => v != null ? `kr ${Number(v).toLocaleString('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '—';
+    const changes = [];
+
+    if (existing.customer_id !== (invoice.customerId ?? null)) {
+      const oldName = existing.customer_id
+        ? this.db.prepare('SELECT name FROM customers WHERE id = ?').get(existing.customer_id)?.name ?? '—'
+        : '—';
+      const newName = invoice.customerId
+        ? this.db.prepare('SELECT name FROM customers WHERE id = ?').get(invoice.customerId)?.name ?? '—'
+        : '—';
+      changes.push({ field: 'Kunde', from: oldName, to: newName });
+    }
+    const newInvoiceDate = toDateOnlyString(invoice.invoiceDate || new Date());
+    if (existing.invoice_date !== newInvoiceDate)
+      changes.push({ field: 'Fakturadato', from: existing.invoice_date ?? '—', to: newInvoiceDate });
+
+    const newDueDate = toDateOnlyString(invoice.dueDate || new Date());
+    if (existing.due_date !== newDueDate)
+      changes.push({ field: 'Forfallsdato', from: existing.due_date ?? '—', to: newDueDate });
+
+    if (Math.abs((existing.total ?? 0) - total) > 0.001)
+      changes.push({ field: 'Beløp', from: fmtAmt(existing.total), to: fmtAmt(total) });
+
+    if ((existing.notes ?? '') !== (invoice.notes ?? ''))
+      changes.push({ field: 'Notater', from: existing.notes ?? '—', to: invoice.notes ?? '—' });
+
+    if ((existing.your_reference ?? '') !== (invoice.yourReference ?? ''))
+      changes.push({ field: 'Deres ref.', from: existing.your_reference ?? '—', to: invoice.yourReference ?? '—' });
+
+    if ((existing.our_reference ?? '') !== (invoice.ourReference ?? ''))
+      changes.push({ field: 'Vår ref.', from: existing.our_reference ?? '—', to: invoice.ourReference ?? '—' });
+
+    if (existingItems.length !== items.length)
+      changes.push({ field: 'Linjer', from: String(existingItems.length), to: String(items.length) });
+
+    const desc = changes.length === 0
+      ? 'Faktura redigert'
+      : changes.length === 1
+        ? `Faktura redigert · ${changes[0].field}: ${changes[0].from} → ${changes[0].to}`
+        : `Faktura redigert · ${changes.length} felt endret`;
+
+    this.logInvoiceEvent(invoiceId, 'updated', desc, changes.length > 0 ? { changes } : null);
     return this.getInvoice(invoiceId);
   }
 
