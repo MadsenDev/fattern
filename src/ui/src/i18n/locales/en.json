@@ -647,7 +647,28 @@
     "close": "Close",
     "shortcut_new_invoice": "New invoice",
     "shortcut_register_payment": "Register payment",
-    "shortcut_add_expense": "Add expense"
+    "shortcut_add_expense": "Add expense",
+    "shortcut_new_customer": "New customer",
+    "shortcut_new_product": "New product",
+    "shortcut_new_budget_year": "New budget year",
+    "bottom_bar": {
+      "quick_actions": "Quick actions",
+      "company_settings": "Open settings",
+      "status_title": "Status",
+      "storage": "Storage",
+      "local_storage": "Local",
+      "version": "Version",
+      "budget_year": "Budget year",
+      "current_page": "Page",
+      "no_payable_invoices": "No sent or overdue invoices",
+      "switch_budget_year": "Switch budget year",
+      "active_budget_year": "Active budget year",
+      "switch_to_budget_year": "Switch to this budget year",
+      "create_budget_year": "Create budget year",
+      "no_budget_year": "No budget year",
+      "no_budget_years": "No budget years have been created",
+      "unnamed_budget_year": "Unnamed"
+    }
   },
   "invoice_log": {
     "tab": "Log",

@@ -647,7 +647,28 @@
     "close": "Lukk",
     "shortcut_new_invoice": "Ny faktura",
     "shortcut_register_payment": "Registrer betaling",
-    "shortcut_add_expense": "Legg til utgift"
+    "shortcut_add_expense": "Legg til utgift",
+    "shortcut_new_customer": "Ny kunde",
+    "shortcut_new_product": "Nytt produkt",
+    "shortcut_new_budget_year": "Nytt budsjettår",
+    "bottom_bar": {
+      "quick_actions": "Hurtighandlinger",
+      "company_settings": "Åpne innstillinger",
+      "status_title": "Status",
+      "storage": "Lagring",
+      "local_storage": "Lokal",
+      "version": "Versjon",
+      "budget_year": "Budsjettår",
+      "current_page": "Side",
+      "no_payable_invoices": "Ingen sendte eller forfalte fakturaer",
+      "switch_budget_year": "Bytt budsjettår",
+      "active_budget_year": "Aktivt budsjettår",
+      "switch_to_budget_year": "Bytt til dette budsjettåret",
+      "create_budget_year": "Opprett budsjettår",
+      "no_budget_year": "Ingen budsjettår",
+      "no_budget_years": "Ingen budsjettår er opprettet",
+      "unnamed_budget_year": "Uten navn"
+    }
   },
   "invoice_log": {
     "tab": "Logg",
