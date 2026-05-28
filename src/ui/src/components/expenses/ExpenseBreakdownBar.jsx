@@ -1,5 +1,8 @@
 // src/ui/src/components/expenses/ExpenseBreakdownBar.jsx
+import { useTranslation } from 'react-i18next';
+
 export function ExpenseBreakdownBar({ breakdown = [], activeCategory, onSelectCategory }) {
+  const { t } = useTranslation();
   const grandTotal = breakdown.reduce((sum, c) => sum + c.total, 0) || 1;
   const DEFAULT_COLOR = '#555555';
 
@@ -21,7 +24,7 @@ export function ExpenseBreakdownBar({ breakdown = [], activeCategory, onSelectCa
             key={cat.id ?? 'uncategorised'}
             type="button"
             title={cat.name}
-            aria-label={`Filter by ${cat.name}`}
+            aria-label={t('expense.filter_by', { name: cat.name })}
             style={{
               flex: cat.total / grandTotal,
               background: cat.color || DEFAULT_COLOR,
@@ -46,7 +49,7 @@ export function ExpenseBreakdownBar({ breakdown = [], activeCategory, onSelectCa
             <button
               key={cat.id ?? 'uncategorised'}
               type="button"
-              aria-label={`Filter by ${cat.name}: ${pct}%`}
+              aria-label={t('expense.filter_by_pct', { name: cat.name, pct })}
               onClick={() => onSelectCategory?.(activeCategory === cat.id ? null : cat.id)}
               style={{
                 display: 'flex',

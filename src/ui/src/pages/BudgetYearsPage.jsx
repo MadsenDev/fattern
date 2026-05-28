@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import {
   IconCalendar, IconEdit, IconTrash, IconCheck, IconPlus,
-  IconTrendingUp, IconTrendingDown, IconCurrencyDollar,
-  IconCreditCard, IconAlertCircle, IconCoin, IconReceipt,
+  IconTrendingUp, IconTrendingDown,
+  IconAlertCircle, IconCoin, IconReceipt,
 } from '@tabler/icons-react';
 import { formatDate } from '../utils/formatDate';
 import { formatCurrency } from '../utils/formatCurrency';
@@ -21,12 +22,12 @@ export function BudgetYearsPage({
   onDeleteYear,
   formatCurrency: formatCurrencyProp,
 }) {
+  const { t } = useTranslation();
   const [yearSummaries, setYearSummaries] = useState({});
   const [loadingSummaries, setLoadingSummaries] = useState({});
 
   const formatCurrencyFn = formatCurrencyProp || formatCurrency;
 
-  // Load summaries for all budget years
   useEffect(() => {
     const loadSummaries = async () => {
       const api = getDbApi();
@@ -49,14 +50,7 @@ export function BudgetYearsPage({
           };
         } catch (error) {
           console.error(`Failed to load summary for year ${year.id}`, error);
-          summaries[year.id] = {
-            income: 0,
-            expenses: 0,
-            net: 0,
-            paid: 0,
-            unpaid: 0,
-            overdue: 0,
-          };
+          summaries[year.id] = { income: 0, expenses: 0, net: 0, paid: 0, unpaid: 0, overdue: 0 };
         } finally {
           loading[year.id] = false;
         }
@@ -75,7 +69,6 @@ export function BudgetYearsPage({
     onSelectYear?.(yearId);
   };
 
-  // Calculate days remaining/elapsed for each year
   const getYearProgress = (year) => {
     const start = year.start ?? year.start_date;
     const end = year.end ?? year.end_date;
@@ -107,7 +100,7 @@ export function BudgetYearsPage({
       const aStart = a.start ?? a.start_date;
       const bStart = b.start ?? b.start_date;
       if (!aStart || !bStart) return 0;
-      return new Date(bStart) - new Date(aStart); // Most recent first
+      return new Date(bStart) - new Date(aStart);
     });
   }, [budgetYears]);
 
@@ -118,10 +111,10 @@ export function BudgetYearsPage({
         <div className="relative z-10 p-6 lg:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.3em]" style={{ color: 'var(--f-text-subtle)' }}>Budsjettår</p>
-              <h1 className="mt-3 text-3xl font-semibold" style={{ color: 'var(--f-text)' }}>Administrer budsjettår</h1>
+              <p className="text-xs uppercase tracking-[0.3em]" style={{ color: 'var(--f-text-subtle)' }}>{t('budget_years_page.subtitle')}</p>
+              <h1 className="mt-3 text-3xl font-semibold" style={{ color: 'var(--f-text)' }}>{t('budget_years_page.title')}</h1>
               <p className="mt-2 text-sm" style={{ color: 'var(--f-text-soft)' }}>
-                Oversikt over alle budsjettår med detaljert statistikk og finansielle nøkkeltall
+                {t('budget_years_page.desc')}
               </p>
             </div>
             <button
@@ -130,7 +123,7 @@ export function BudgetYearsPage({
               className="f-btn-primary flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold transition"
             >
               <IconPlus size={15} stroke={1.8} />
-              Nytt budsjettår
+              {t('budget_years_page.new_button')}
             </button>
           </div>
         </div>
@@ -139,16 +132,16 @@ export function BudgetYearsPage({
       {budgetYears.length === 0 ? (
         <div className="f-glass rounded-3xl p-12 text-center">
           <IconCalendar size={48} stroke={1.4} style={{ color: 'var(--f-text-subtle)', margin: '0 auto 16px' }} />
-          <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--f-text)' }}>Ingen budsjettår</h3>
+          <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--f-text)' }}>{t('budget_years_page.empty_title')}</h3>
           <p className="text-sm mb-6" style={{ color: 'var(--f-text-soft)' }}>
-            Opprett ditt første budsjettår for å begynne å organisere fakturaer og utgifter
+            {t('budget_years_page.empty_desc')}
           </p>
           <button
             type="button"
             onClick={onCreateYear}
             className="f-btn-primary rounded-2xl px-5 py-2 text-sm font-semibold transition"
           >
-            Opprett budsjettår
+            {t('budget_years_page.create_button')}
           </button>
         </div>
       ) : (
@@ -157,14 +150,7 @@ export function BudgetYearsPage({
             const isActive = selectedYearId === year.id;
             const start = year.start ?? year.start_date;
             const end = year.end ?? year.end_date;
-            const summary = yearSummaries[year.id] || {
-              income: 0,
-              expenses: 0,
-              net: 0,
-              paid: 0,
-              unpaid: 0,
-              overdue: 0,
-            };
+            const summary = yearSummaries[year.id] || { income: 0, expenses: 0, net: 0, paid: 0, unpaid: 0, overdue: 0 };
             const isLoading = loadingSummaries[year.id];
             const progress = getYearProgress(year);
 
@@ -187,17 +173,17 @@ export function BudgetYearsPage({
                         {isActive && (
                           <div className="flex items-center gap-1.5 rounded-full px-3 py-1" style={{ background: 'var(--f-green-bg)', border: '1px solid var(--f-border-green)' }}>
                             <IconCheck size={14} stroke={2} style={{ color: 'var(--f-green-text)' }} />
-                            <span className="text-xs font-semibold" style={{ color: 'var(--f-green-text)' }}>Aktivt år</span>
+                            <span className="text-xs font-semibold" style={{ color: 'var(--f-green-text)' }}>{t('budget_years_page.active_badge')}</span>
                           </div>
                         )}
                         {progress?.isFuture && (
                           <span className="rounded-full px-3 py-1 text-xs font-semibold" style={{ background: 'rgba(255,255,255,0.07)', color: 'var(--f-text-soft)', border: '1px solid var(--f-border)' }}>
-                            Fremtidig
+                            {t('budget_years_page.future_badge')}
                           </span>
                         )}
                         {progress?.isPast && (
                           <span className="rounded-full px-3 py-1 text-xs font-semibold" style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--f-text-subtle)', border: '1px solid var(--f-border-subtle)' }}>
-                            Avsluttet
+                            {t('budget_years_page.past_badge')}
                           </span>
                         )}
                       </div>
@@ -213,15 +199,15 @@ export function BudgetYearsPage({
                             {progress.isActive && (
                               <div className="flex items-center gap-1.5">
                                 <span className="text-xs">
-                                  {Math.round(progress.progress)}% gjennomført · {progress.daysRemaining} dager igjen
+                                  {t('budget_years_page.progress', { pct: Math.round(progress.progress), days: progress.daysRemaining })}
                                 </span>
                               </div>
                             )}
                             {progress.isFuture && (
-                              <span className="text-xs">Starter om {progress.daysRemaining} dager</span>
+                              <span className="text-xs">{t('budget_years_page.starts_in', { days: progress.daysRemaining })}</span>
                             )}
                             {progress.isPast && (
-                              <span className="text-xs">Avsluttet for {Math.abs(progress.daysRemaining)} dager siden</span>
+                              <span className="text-xs">{t('budget_years_page.ended_ago', { days: Math.abs(progress.daysRemaining) })}</span>
                             )}
                           </>
                         )}
@@ -235,22 +221,14 @@ export function BudgetYearsPage({
                             animate={{ width: `${progress.progress}%` }}
                             transition={{ duration: 0.8, ease: 'easeOut' }}
                           >
-                            {/* Continuous shimmer animation - moves left to right repeatedly */}
                             <motion.div
                               className="absolute top-0 bottom-0"
                               style={{
                                 background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%)',
                                 width: '50%',
                               }}
-                              animate={{
-                                x: ['-50%', '150%'],
-                              }}
-                              transition={{
-                                duration: 2.5,
-                                repeat: Infinity,
-                                ease: 'linear',
-                                repeatDelay: 0,
-                              }}
+                              animate={{ x: ['-50%', '150%'] }}
+                              transition={{ duration: 2.5, repeat: Infinity, ease: 'linear', repeatDelay: 0 }}
                             />
                           </motion.div>
                         </div>
@@ -263,7 +241,7 @@ export function BudgetYearsPage({
                           onClick={() => handleSetActive(year.id)}
                           className="f-btn-primary rounded-xl px-4 py-2 text-sm font-medium transition"
                         >
-                          Sett som aktivt
+                          {t('budget_years_page.set_active')}
                         </button>
                       )}
                       <button
@@ -272,7 +250,7 @@ export function BudgetYearsPage({
                         className="f-btn-ghost rounded-xl px-4 py-2 text-sm font-medium transition flex items-center gap-1.5"
                       >
                         <IconEdit size={15} stroke={1.8} />
-                        Rediger
+                        {t('common.edit')}
                       </button>
                       {!isActive && (
                         <button
@@ -281,7 +259,7 @@ export function BudgetYearsPage({
                           className="f-btn-danger rounded-xl px-4 py-2 text-sm font-medium transition flex items-center gap-1.5"
                         >
                           <IconTrash size={15} stroke={1.8} />
-                          Slett
+                          {t('common.delete')}
                         </button>
                       )}
                     </div>
@@ -291,7 +269,7 @@ export function BudgetYearsPage({
                 {/* Statistics Grid */}
                 <div className="p-6">
                   {isLoading ? (
-                    <div className="py-8 text-center text-sm" style={{ color: 'var(--f-text-subtle)' }}>Laster statistikk...</div>
+                    <div className="py-8 text-center text-sm" style={{ color: 'var(--f-text-subtle)' }}>{t('budget_years_page.loading_stats')}</div>
                   ) : (
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                       {/* Income */}
@@ -301,7 +279,7 @@ export function BudgetYearsPage({
                             <IconCoin size={18} stroke={1.6} style={{ color: 'var(--f-green-text)' }} />
                           </div>
                           <div className="flex-1">
-                            <p className="text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--f-text-subtle)' }}>Inntekter</p>
+                            <p className="text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--f-text-subtle)' }}>{t('budget_years_page.income')}</p>
                             <p className="text-xl font-semibold mt-0.5" style={{ color: 'var(--f-text)' }}>
                               {formatCurrencyFn(summary.income)}
                             </p>
@@ -309,18 +287,18 @@ export function BudgetYearsPage({
                         </div>
                         <div className="mt-3 pt-3 space-y-1.5 text-xs" style={{ borderTop: '1px solid var(--f-border-faint)' }}>
                           <div className="flex items-center justify-between">
-                            <span style={{ color: 'var(--f-text-soft)' }}>Betalt</span>
+                            <span style={{ color: 'var(--f-text-soft)' }}>{t('budget_years_page.paid')}</span>
                             <span className="font-medium" style={{ color: 'var(--f-green-text)' }}>{formatCurrencyFn(summary.paid)}</span>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span style={{ color: 'var(--f-text-soft)' }}>Ikke betalt</span>
+                            <span style={{ color: 'var(--f-text-soft)' }}>{t('budget_years_page.unpaid')}</span>
                             <span className="font-medium" style={{ color: 'var(--f-text-body)' }}>{formatCurrencyFn(summary.unpaid)}</span>
                           </div>
                           {summary.overdue > 0 && (
                             <div className="flex items-center justify-between">
                               <span className="flex items-center gap-1" style={{ color: 'var(--f-text-soft)' }}>
                                 <IconAlertCircle size={12} stroke={2} />
-                                Forfalt
+                                {t('budget_years_page.overdue')}
                               </span>
                               <span className="font-medium" style={{ color: 'var(--f-danger-text)' }}>{formatCurrencyFn(summary.overdue)}</span>
                             </div>
@@ -335,7 +313,7 @@ export function BudgetYearsPage({
                             <IconReceipt size={18} stroke={1.6} style={{ color: 'var(--f-danger-text)' }} />
                           </div>
                           <div className="flex-1">
-                            <p className="text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--f-text-subtle)' }}>Utgifter</p>
+                            <p className="text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--f-text-subtle)' }}>{t('budget_years_page.expenses')}</p>
                             <p className="text-xl font-semibold mt-0.5" style={{ color: 'var(--f-text)' }}>
                               {formatCurrencyFn(summary.expenses)}
                             </p>
@@ -344,7 +322,7 @@ export function BudgetYearsPage({
                         {summary.income > 0 && (
                           <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--f-border-faint)' }}>
                             <div className="flex items-center justify-between text-xs">
-                              <span style={{ color: 'var(--f-text-soft)' }}>Andel av inntekter</span>
+                              <span style={{ color: 'var(--f-text-soft)' }}>{t('budget_years_page.expense_ratio')}</span>
                               <span className="font-medium" style={{ color: 'var(--f-text-body)' }}>
                                 {Math.round((summary.expenses / summary.income) * 100)}%
                               </span>
@@ -363,11 +341,11 @@ export function BudgetYearsPage({
                             {summary.net >= 0 ? (
                               <IconTrendingUp size={18} stroke={1.6} style={{ color: 'var(--f-green-text)' }} />
                             ) : (
-                              <IconTrendingDown size={18} stroke={1.6} style={{color:"var(--f-danger)"}} />
+                              <IconTrendingDown size={18} stroke={1.6} style={{ color: 'var(--f-danger)' }} />
                             )}
                           </div>
                           <div className="flex-1">
-                            <p className="text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--f-text-subtle)' }}>Netto</p>
+                            <p className="text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--f-text-subtle)' }}>{t('budget_years_page.net')}</p>
                             <p className="text-xl font-semibold mt-0.5" style={{ color: summary.net >= 0 ? 'var(--f-green-text)' : 'var(--f-danger-text)' }}>
                               {formatCurrencyFn(summary.net)}
                             </p>
@@ -376,7 +354,7 @@ export function BudgetYearsPage({
                         {summary.income > 0 && (
                           <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--f-border-faint)' }}>
                             <div className="flex items-center justify-between text-xs">
-                              <span style={{ color: 'var(--f-text-soft)' }}>Margin</span>
+                              <span style={{ color: 'var(--f-text-soft)' }}>{t('budget_years_page.margin')}</span>
                               <span className="font-medium" style={{ color: summary.net >= 0 ? 'var(--f-green-text)' : 'var(--f-danger-text)' }}>
                                 {summary.net >= 0 ? '+' : ''}{Math.round((summary.net / summary.income) * 100)}%
                               </span>
@@ -395,4 +373,3 @@ export function BudgetYearsPage({
     </div>
   );
 }
-

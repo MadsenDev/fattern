@@ -175,11 +175,12 @@ export function TemplateCanvas({
         }}
       />
 
-      {/* Canvas (A4 artboard) */}
+      {/* Canvas (A4 artboard) — explicit #ffffff, never inherits theme's --color-white */}
       <div
         ref={canvasRef}
-        className="absolute bg-white shadow-2xl"
+        className="absolute shadow-2xl"
         style={{
+          background: '#ffffff',
           left: '50%',
           top: '50%',
           width: `${canvasWidth}px`,

@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { fileToDataURL, isImageFile, validateImageSize } from '../../utils/imageUpload';
 
-export function ExpenseAttachmentUpload({ value, onChange, label = 'Kvittering/bilde', maxSizeMB = 10, expenseId }) {
+export function ExpenseAttachmentUpload({ value, onChange, maxSizeMB = 10, expenseId }) {
+  const { t } = useTranslation();
   const [fileName, setFileName] = useState('');
   const [preview, setPreview] = useState(null);
   const [error, setError] = useState('');
@@ -40,7 +42,7 @@ export function ExpenseAttachmentUpload({ value, onChange, label = 'Kvittering/b
 
     try {
       if (!isImageFile(file)) {
-        throw new Error('Filen må være et bilde (JPG, PNG, etc.)');
+        throw new Error(t('expense.attachment_file_type_error'));
       }
 
       validateImageSize(file, maxSizeMB);
@@ -58,7 +60,7 @@ export function ExpenseAttachmentUpload({ value, onChange, label = 'Kvittering/b
         onChange?.(dataURL);
       }
     } catch (err) {
-      setError(err.message || 'Kunne ikke laste opp bilde');
+      setError(err.message || t('expense.attachment_upload_error'));
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -77,7 +79,7 @@ export function ExpenseAttachmentUpload({ value, onChange, label = 'Kvittering/b
 
   return (
     <div>
-      <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{label}</label>
+      <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('expense.attachment_label')}</label>
       <div className="mt-2 space-y-2">
         {value ? (
           <div className="space-y-2">
@@ -85,7 +87,7 @@ export function ExpenseAttachmentUpload({ value, onChange, label = 'Kvittering/b
               <div className="relative inline-block">
                 <img
                   src={preview}
-                  alt="Forhåndsvisning"
+                  alt={t('expense.attachment_preview')}
                   className="h-48 w-full rounded-2xl object-contain"
                   style={{ border: '1px solid var(--f-border-subtle)', background: 'rgba(255,255,255,0.03)' }}
                 />
@@ -96,7 +98,7 @@ export function ExpenseAttachmentUpload({ value, onChange, label = 'Kvittering/b
                   style={{ background: 'var(--f-danger-text)' }}
                   onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
                   onMouseLeave={e => e.currentTarget.style.opacity = '1'}
-                  title="Fjern bilde"
+                  title={t('expense.attachment_remove')}
                 >
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -110,9 +112,9 @@ export function ExpenseAttachmentUpload({ value, onChange, label = 'Kvittering/b
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                   <span className="text-sm" style={{ color: 'var(--f-text-body)' }}>
-                    {fileName || (value.startsWith('data:') ? 'Bilde valgt' : value)}
+                    {fileName || (value.startsWith('data:') ? t('expense.attachment_selected') : value)}
                   </span>
-                  {isSaving && <span className="text-xs" style={{ color: 'var(--f-text-subtle)' }}>(lagrer...)</span>}
+                  {isSaving && <span className="text-xs" style={{ color: 'var(--f-text-subtle)' }}>({t('expense.attachment_saving')})</span>}
                 </div>
                 <button
                   type="button"
@@ -121,7 +123,7 @@ export function ExpenseAttachmentUpload({ value, onChange, label = 'Kvittering/b
                   style={{ color: 'var(--f-text-subtle)' }}
                   onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'var(--f-text-body)'; }}
                   onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--f-text-subtle)'; }}
-                  title="Fjern bilde"
+                  title={t('expense.attachment_remove')}
                 >
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -142,7 +144,7 @@ export function ExpenseAttachmentUpload({ value, onChange, label = 'Kvittering/b
             <svg className="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            <span className="text-sm">Velg kvittering/bilde</span>
+            <span className="text-sm">{t('expense.attachment_choose')}</span>
           </button>
         )}
         <input
@@ -154,7 +156,7 @@ export function ExpenseAttachmentUpload({ value, onChange, label = 'Kvittering/b
         />
         {error && <p className="text-sm font-medium" style={{ color: 'var(--f-danger-text)' }}>{error}</p>}
         {!value && (
-          <p className="text-xs" style={{ color: 'var(--f-text-subtle)' }}>JPG, PNG eller GIF. Maks {maxSizeMB}MB</p>
+          <p className="text-xs" style={{ color: 'var(--f-text-subtle)' }}>{t('expense.attachment_hint', { max: maxSizeMB })}</p>
         )}
       </div>
     </div>

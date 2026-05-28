@@ -1,7 +1,9 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 // Component to load images from file paths or data URLs
 function ImageLoader({ src, elementId, templateId }) {
+  const { t } = useTranslation();
   const [imageSrc, setImageSrc] = useState(null);
   const [error, setError] = useState(false);
 
@@ -31,7 +33,7 @@ function ImageLoader({ src, elementId, templateId }) {
   }, [src, templateId]);
 
   if (error || !imageSrc) {
-    return <span className="text-xs" style={{ color: '#9ca3af' }}>Bilde</span>;
+    return <span className="text-xs" style={{ color: '#9ca3af' }}>{t('template_editor.element_image')}</span>;
   }
 
   return (
@@ -55,6 +57,7 @@ export function TemplateElement({
   onDelete,
   templateId,
 }) {
+  const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -201,7 +204,7 @@ export function TemplateElement({
             {element.src ? (
               <ImageLoader src={element.src} elementId={element.id} templateId={templateId} />
             ) : (
-              <span className="text-xs" style={{ color: '#9ca3af' }}>Bilde</span>
+              <span className="text-xs" style={{ color: '#9ca3af' }}>{t('template_editor.element_image')}</span>
             )}
           </div>
         );
@@ -226,10 +229,10 @@ export function TemplateElement({
             }}
           >
             <div className="p-1 text-xs font-semibold" style={{ borderBottom: '1px solid rgba(0,0,0,0.12)', background: 'rgba(0,0,0,0.04)', color: '#374151' }}>
-              Tabell: {element.binding || 'invoice.items'}
+              {t('template_editor.element_table')}: {element.binding || 'invoice.items'}
             </div>
             <div className="p-2 text-xs" style={{ color: '#9ca3af' }}>
-              {element.columns?.length || 0} kolonner
+              {t('template_editor.columns_count', { count: element.columns?.length || 0 })}
             </div>
           </div>
         );
@@ -301,7 +304,7 @@ export function TemplateElement({
           );
         }
       default:
-        return <div className="text-xs" style={{ color: '#9ca3af' }}>Ukjent element</div>;
+        return <div className="text-xs" style={{ color: '#9ca3af' }}>{t('template_editor.unknown_element')}</div>;
     }
   };
 
@@ -338,4 +341,3 @@ export function TemplateElement({
     </div>
   );
 }
-

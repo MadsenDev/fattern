@@ -1,11 +1,12 @@
+import { useTranslation } from 'react-i18next';
 import { useSettings } from '../../hooks/useSettings';
 import { useToast } from '../../hooks/useToast';
 
 export function InvoiceSettings() {
+  const { t } = useTranslation();
   const { getSetting, updateSetting, isLoading } = useSettings();
   const { toast } = useToast();
 
-  // Get current settings with defaults
   const defaultPaymentTerms = parseInt(getSetting('invoice.defaultPaymentTerms', '14'), 10);
   const autoCalculateDueDate = getSetting('invoice.autoCalculateDueDate', 'true') === 'true';
   const defaultStatus = getSetting('invoice.defaultStatus', 'draft');
@@ -13,29 +14,29 @@ export function InvoiceSettings() {
 
   const handlePaymentTermsChange = (days) => {
     updateSetting('invoice.defaultPaymentTerms', days.toString());
-    toast.success('Standard betalingsfrist oppdatert', `${days} dager`);
+    toast.success(t('settings.invoice.payment_terms_updated'), `${days} ${t('settings.invoice.days_unit')}`);
   };
 
   const handleAutoCalculateDueDate = (enabled) => {
     updateSetting('invoice.autoCalculateDueDate', enabled.toString());
-    toast.success('Automatisk forfallsdato', enabled ? 'Aktivert' : 'Deaktivert');
+    toast.success(t('settings.invoice.auto_due_label'), enabled ? t('settings.invoice.enabled') : t('settings.invoice.disabled'));
   };
 
   const handleDefaultStatusChange = (status) => {
     updateSetting('invoice.defaultStatus', status);
-    toast.success('Standard status oppdatert', status === 'draft' ? 'Utkast' : status === 'sent' ? 'Sendt' : 'Betalt');
+    toast.success(t('settings.invoice.default_status_updated'), t(`status.${status}`));
   };
 
   const handleAutoIncrementChange = (enabled) => {
     updateSetting('invoice.autoIncrementNumbers', enabled.toString());
-    toast.success('Automatisk nummerering', enabled ? 'Aktivert' : 'Deaktivert');
+    toast.success(t('settings.invoice.auto_increment_label'), enabled ? t('settings.invoice.enabled') : t('settings.invoice.disabled'));
   };
 
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--f-text-body)' }}>Faktura innstillinger</h3>
-        <p className="text-xs mb-4" style={{ color: 'var(--f-text-subtle)' }}>Standardverdier for nye fakturaer</p>
+        <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--f-text-body)' }}>{t('settings.invoice.title')}</h3>
+        <p className="text-xs mb-4" style={{ color: 'var(--f-text-subtle)' }}>{t('settings.invoice.desc')}</p>
       </div>
 
       <div className="space-y-4">
@@ -43,8 +44,8 @@ export function InvoiceSettings() {
         <div className="py-3" style={{ borderBottom: '1px solid var(--f-border-faint)' }}>
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Standard betalingsfrist</label>
-              <p className="text-xs mt-0.5" style={{ color: 'var(--f-text-subtle)' }}>Antall dager fra faktureringsdato til forfallsdato</p>
+              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('settings.invoice.payment_terms_label')}</label>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--f-text-subtle)' }}>{t('settings.invoice.payment_terms_desc')}</p>
             </div>
             <div className="flex rounded-lg p-0.5" style={{ border: '1px solid var(--f-border)', background: 'rgba(255,255,255,0.04)' }}>
               {[14, 21, 30, 45, 60].map((days) => (
@@ -60,7 +61,7 @@ export function InvoiceSettings() {
                   onMouseEnter={e => { if (defaultPaymentTerms !== days) { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'var(--f-text-body)'; } }}
                   onMouseLeave={e => { if (defaultPaymentTerms !== days) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--f-text-soft)'; } }}
                 >
-                  {days} dager
+                  {days} {t('settings.invoice.days_unit')}
                 </button>
               ))}
             </div>
@@ -78,9 +79,9 @@ export function InvoiceSettings() {
                 }
               }}
               className="f-input w-24 rounded-lg px-2 py-1 text-sm"
-              placeholder="Egendefinert"
+              placeholder={t('settings.invoice.custom_placeholder')}
             />
-            <span className="ml-2 text-xs" style={{ color: 'var(--f-text-subtle)' }}>dager</span>
+            <span className="ml-2 text-xs" style={{ color: 'var(--f-text-subtle)' }}>{t('settings.invoice.days_unit')}</span>
           </div>
         </div>
 
@@ -88,10 +89,8 @@ export function InvoiceSettings() {
         <div className="py-3" style={{ borderBottom: '1px solid var(--f-border-faint)' }}>
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Automatisk forfallsdato</label>
-              <p className="text-xs mt-0.5" style={{ color: 'var(--f-text-subtle)' }}>
-                Beregn forfallsdato automatisk basert på faktureringsdato og betalingsfrist
-              </p>
+              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('settings.invoice.auto_due_label')}</label>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--f-text-subtle)' }}>{t('settings.invoice.auto_due_desc')}</p>
             </div>
             <button
               type="button"
@@ -113,32 +112,24 @@ export function InvoiceSettings() {
         <div className="py-3" style={{ borderBottom: '1px solid var(--f-border-faint)' }}>
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Standard status</label>
-              <p className="text-xs mt-0.5" style={{ color: 'var(--f-text-subtle)' }}>Standard status for nye fakturaer</p>
+              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('settings.invoice.default_status_label')}</label>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--f-text-subtle)' }}>{t('settings.invoice.default_status_desc')}</p>
             </div>
             <div className="flex rounded-lg p-0.5" style={{ border: '1px solid var(--f-border)', background: 'rgba(255,255,255,0.04)' }}>
-              <button
-                type="button"
-                onClick={() => handleDefaultStatusChange('draft')}
-                disabled={isLoading}
-                className="rounded-md px-3 py-1.5 text-xs font-medium transition disabled:opacity-60"
-                style={defaultStatus === 'draft' ? { background: 'var(--f-green-bg)', color: 'var(--f-green-text)', border: '1px solid var(--f-border-green)' } : { color: 'var(--f-text-soft)' }}
-                onMouseEnter={e => { if (defaultStatus !== 'draft') { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; } }}
-                onMouseLeave={e => { if (defaultStatus !== 'draft') { e.currentTarget.style.background = 'transparent'; } }}
-              >
-                Utkast
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDefaultStatusChange('sent')}
-                disabled={isLoading}
-                className="rounded-md px-3 py-1.5 text-xs font-medium transition disabled:opacity-60"
-                style={defaultStatus === 'sent' ? { background: 'var(--f-green-bg)', color: 'var(--f-green-text)', border: '1px solid var(--f-border-green)' } : { color: 'var(--f-text-soft)' }}
-                onMouseEnter={e => { if (defaultStatus !== 'sent') { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; } }}
-                onMouseLeave={e => { if (defaultStatus !== 'sent') { e.currentTarget.style.background = 'transparent'; } }}
-              >
-                Sendt
-              </button>
+              {['draft', 'sent'].map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => handleDefaultStatusChange(s)}
+                  disabled={isLoading}
+                  className="rounded-md px-3 py-1.5 text-xs font-medium transition disabled:opacity-60"
+                  style={defaultStatus === s ? { background: 'var(--f-green-bg)', color: 'var(--f-green-text)', border: '1px solid var(--f-border-green)' } : { color: 'var(--f-text-soft)' }}
+                  onMouseEnter={e => { if (defaultStatus !== s) { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; } }}
+                  onMouseLeave={e => { if (defaultStatus !== s) { e.currentTarget.style.background = 'transparent'; } }}
+                >
+                  {t(`status.${s}`)}
+                </button>
+              ))}
             </div>
           </div>
         </div>
@@ -147,10 +138,8 @@ export function InvoiceSettings() {
         <div className="py-3" style={{ borderBottom: '1px solid var(--f-border-faint)' }}>
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Automatisk fakturanummerering</label>
-              <p className="text-xs mt-0.5" style={{ color: 'var(--f-text-subtle)' }}>
-                Generer fakturanummer automatisk (format: YYYY-XXX eller budsjettår-XXX)
-              </p>
+              <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('settings.invoice.auto_increment_label')}</label>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--f-text-subtle)' }}>{t('settings.invoice.auto_increment_desc')}</p>
             </div>
             <button
               type="button"
@@ -171,8 +160,8 @@ export function InvoiceSettings() {
         {/* Info Box */}
         <div className="rounded-lg p-4" style={{ border: '1px solid var(--f-border-subtle)', background: 'rgba(255,255,255,0.03)' }}>
           <p className="text-xs" style={{ color: 'var(--f-text-soft)' }}>
-            <strong style={{ color: 'var(--f-text-body)' }}>Merk:</strong> Disse innstillingene gjelder for nye fakturaer.
-            Eksisterende fakturaer påvirkes ikke. Fakturanummerering følger budsjettår-grenser og nullstilles automatisk ved årsskifte.
+            <strong style={{ color: 'var(--f-text-body)' }}>{t('settings.invoice.note_title')}</strong>{' '}
+            {t('settings.invoice.note')}
           </p>
         </div>
       </div>

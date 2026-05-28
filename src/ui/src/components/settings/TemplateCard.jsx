@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import { IconCheck, IconEdit, IconDownload, IconLock, IconCopy, IconTrash, IconDotsVertical } from '@tabler/icons-react';
 import { renderTemplateToHTML } from '../../utils/templateRenderer';
-import { getTemplateId, getTemplateName, getTemplateMeta, isTemplatePremium, isTemplateLocked, isTemplateDefault, isTemplatePreset } from '../../utils/templateUtils';
+import { getTemplateId, getTemplateName, getTemplateMeta, isTemplatePremium, isTemplateLocked, isTemplatePreset } from '../../utils/templateUtils';
 
 // Mock data for preview
 const mockData = {
@@ -44,6 +45,7 @@ export function TemplateCard({
   onDuplicate,
   onDelete,
 }) {
+  const { t } = useTranslation();
   const [previewHtml, setPreviewHtml] = useState('');
   const [showActions, setShowActions] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
@@ -59,13 +61,11 @@ export function TemplateCard({
   const isLocked = isTemplateLocked(template, isSupporter);
   const isPreset = isTemplatePreset(templateId);
 
-  // Generate preview HTML
   useEffect(() => {
     if (!template) return;
 
     const processTemplate = async () => {
       try {
-        // Process template to convert file paths to data URLs
         const currentTemplateId = template.meta?.id || template.id;
         const processedElements = await Promise.all(
           template.elements.map(async (element) => {
@@ -95,7 +95,6 @@ export function TemplateCard({
     processTemplate();
   }, [template]);
 
-  // Update iframe content when HTML changes
   useEffect(() => {
     if (!iframeRef.current || !previewHtml) return;
     const iframe = iframeRef.current;
@@ -105,7 +104,6 @@ export function TemplateCard({
     doc.close();
   }, [previewHtml]);
 
-  // Calculate menu position and handle click outside
   useEffect(() => {
     const updatePosition = () => {
       if (showActions && buttonRef.current) {
@@ -120,7 +118,7 @@ export function TemplateCard({
     const handleClickOutside = (event) => {
       const clickedButton = buttonRef.current?.contains(event.target);
       const clickedMenu = menuRef.current?.contains(event.target);
-      
+
       if (!clickedButton && !clickedMenu) {
         setShowActions(false);
       }
@@ -158,25 +156,24 @@ export function TemplateCard({
               ref={iframeRef}
               className="absolute border-0 pointer-events-none"
               style={{
-                width: '794px', // A4 width
-                height: '1123px', // A4 height
+                width: '794px',
+                height: '1123px',
                 transform: 'scale(0.18)',
                 transformOrigin: 'center center',
                 left: '50%',
                 top: '50%',
-                marginLeft: '-397px', // Half of 794px
-                marginTop: '-561.5px', // Half of 1123px
+                marginLeft: '-397px',
+                marginTop: '-561.5px',
               }}
-              title={`Forhåndsvisning av ${templateName}`}
+              title={t('settings.templates.preview_aria', { name: templateName })}
             />
           </div>
         ) : (
           <div className="flex items-center justify-center h-full text-xs" style={{ color: 'var(--f-text-subtle)' }}>
-            Laster forhåndsvisning...
+            {t('settings.templates.loading_preview')}
           </div>
         )}
-        
-        {/* Overlay gradient for better text readability */}
+
         <div className="absolute inset-0 bg-gradient-to-t from-ink/20 via-transparent to-transparent pointer-events-none" />
       </div>
 
@@ -187,7 +184,7 @@ export function TemplateCard({
           {isDefault && (
             <span className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold" style={{ background: 'var(--f-green-bg)', color: 'var(--f-green-text)', border: '1px solid var(--f-border-green)' }}>
               <IconCheck className="h-3 w-3" />
-              Standard
+              {t('settings.templates.badge_default')}
             </span>
           )}
           {isPremium && (
@@ -198,7 +195,7 @@ export function TemplateCard({
           )}
           {isPreset && !isPremium && !isDefault && (
             <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium" style={{ background: 'rgba(255,255,255,0.06)', color: 'var(--f-text-subtle)' }}>
-              Forhåndsdefinert
+              {t('settings.templates.badge_preset')}
             </span>
           )}
         </div>
@@ -224,7 +221,7 @@ export function TemplateCard({
               style={{ color: 'var(--f-text-subtle)' }}
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = 'var(--f-text-body)'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--f-text-subtle)'; }}
-              title="Flere handlinger"
+              title={t('settings.templates.more_actions')}
             >
               <IconDotsVertical className="h-4 w-4" />
             </button>
@@ -248,7 +245,7 @@ export function TemplateCard({
             <span className="text-xs" style={{ color: 'var(--f-text-subtle)' }}>v{templateMeta.version}</span>
           )}
           {templateMeta.author && (
-            <span className="text-xs" style={{ color: 'var(--f-text-subtle)' }}>av {templateMeta.author}</span>
+            <span className="text-xs" style={{ color: 'var(--f-text-subtle)' }}>{t('settings.templates.by_author', { author: templateMeta.author })}</span>
           )}
         </div>
 
@@ -256,7 +253,7 @@ export function TemplateCard({
           <div className="mt-2 pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
             <p className="text-xs font-medium flex items-center gap-1" style={{ color: '#fbbf24' }}>
               <IconLock className="h-3 w-3" />
-              Krever Supporter-pakken
+              {t('settings.templates.requires_supporter')}
             </p>
           </div>
         )}
@@ -278,77 +275,62 @@ export function TemplateCard({
         >
           {!isDefault && !isLocked && (
             <button
-              onClick={() => {
-                onSetDefault?.();
-                setShowActions(false);
-              }}
+              onClick={() => { onSetDefault?.(); setShowActions(false); }}
               className="w-full px-3 py-2 text-left text-xs transition flex items-center gap-2"
               style={{ color: 'var(--f-text-body)' }}
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
             >
               <IconCheck className="h-3.5 w-3.5" />
-              Sett som standard
+              {t('settings.templates.set_default')}
             </button>
           )}
           {onEdit && !isLocked && (
             <button
-              onClick={() => {
-                onEdit?.();
-                setShowActions(false);
-              }}
+              onClick={() => { onEdit?.(); setShowActions(false); }}
               className="w-full px-3 py-2 text-left text-xs transition flex items-center gap-2"
               style={{ color: 'var(--f-text-body)' }}
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
             >
               <IconEdit className="h-3.5 w-3.5" />
-              Rediger
+              {t('common.edit')}
             </button>
           )}
           {onExport && !isLocked && (
             <button
-              onClick={() => {
-                onExport?.();
-                setShowActions(false);
-              }}
+              onClick={() => { onExport?.(); setShowActions(false); }}
               className="w-full px-3 py-2 text-left text-xs transition flex items-center gap-2"
               style={{ color: 'var(--f-text-body)' }}
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
             >
               <IconDownload className="h-3.5 w-3.5" />
-              Eksporter
+              {t('settings.templates.export')}
             </button>
           )}
           {onDuplicate && !isLocked && (
             <button
-              onClick={() => {
-                onDuplicate?.();
-                setShowActions(false);
-              }}
+              onClick={() => { onDuplicate?.(); setShowActions(false); }}
               className="w-full px-3 py-2 text-left text-xs transition flex items-center gap-2"
               style={{ color: 'var(--f-text-body)' }}
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
             >
               <IconCopy className="h-3.5 w-3.5" />
-              Dupliser
+              {t('settings.templates.duplicate')}
             </button>
           )}
           {onDelete && templateId !== 'default_invoice' && !isLocked && (
             <button
-              onClick={() => {
-                onDelete?.();
-                setShowActions(false);
-              }}
+              onClick={() => { onDelete?.(); setShowActions(false); }}
               className="w-full px-3 py-2 text-left text-xs transition flex items-center gap-2"
               style={{ color: 'var(--f-danger-text)' }}
               onMouseEnter={e => { e.currentTarget.style.background = 'var(--f-danger-bg)'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
             >
               <IconTrash className="h-3.5 w-3.5" />
-              Slett
+              {t('common.delete')}
             </button>
           )}
         </div>,

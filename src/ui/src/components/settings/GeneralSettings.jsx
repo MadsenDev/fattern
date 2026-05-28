@@ -1,12 +1,13 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { IconTrash, IconAlertTriangle } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { useToast } from '../../hooks/useToast';
-
-const CONFIRM_PHRASE = 'SLETT ALT';
+import { useSettings } from '../../hooks/useSettings';
 
 function WipeConfirmModal({ onConfirm, onCancel }) {
+  const { t } = useTranslation();
+  const CONFIRM_PHRASE = t('settings.general.wipe_modal_phrase');
   const [input, setInput] = useState('');
-  const inputRef = useRef(null);
   const matches = input === CONFIRM_PHRASE;
 
   return (
@@ -40,27 +41,27 @@ function WipeConfirmModal({ onConfirm, onCancel }) {
           </div>
           <div>
             <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--f-text-body)' }}>
-              Slett all data
+              {t('settings.general.wipe_modal_title')}
             </div>
             <div style={{ fontSize: 12, color: 'var(--f-text-subtle)', marginTop: 1 }}>
-              Denne handlingen kan ikke angres
+              {t('settings.general.wipe_modal_irreversible')}
             </div>
           </div>
         </div>
 
         {/* Warning text */}
         <p style={{ fontSize: 13, color: 'var(--f-text-soft)', lineHeight: 1.6, marginBottom: 20 }}>
-          Dette vil permanent slette <strong style={{ color: 'var(--f-text-body)' }}>alle fakturaer, kunder, produkter,
-          utgifter, budsjettår og selskapsdata</strong>. Appen starter som ny. Det finnes ingen angre-funksjon.
+          {t('settings.general.wipe_modal_warning')}
         </p>
 
         {/* Typed confirmation */}
         <div style={{ marginBottom: 20 }}>
           <label style={{ fontSize: 12, color: 'var(--f-text-subtle)', display: 'block', marginBottom: 6 }}>
-            Skriv <strong style={{ color: 'var(--f-text-body)', letterSpacing: '0.04em' }}>{CONFIRM_PHRASE}</strong> for å bekrefte:
+            {t('settings.general.wipe_modal_type_label', { phrase: '' })}
+            <strong style={{ color: 'var(--f-text-body)', letterSpacing: '0.04em' }}>{CONFIRM_PHRASE}</strong>
+            {t('settings.general.wipe_modal_type_label', { phrase: '' }).split('{{phrase}}')[1] || ':'}
           </label>
           <input
-            ref={inputRef}
             autoFocus
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -92,7 +93,7 @@ function WipeConfirmModal({ onConfirm, onCancel }) {
               color: 'var(--f-text-soft)', cursor: 'pointer',
             }}
           >
-            Avbryt
+            {t('settings.general.wipe_modal_cancel')}
           </button>
           <button
             onClick={onConfirm}
@@ -106,7 +107,7 @@ function WipeConfirmModal({ onConfirm, onCancel }) {
               transition: 'all 0.15s',
             }}
           >
-            Slett all data
+            {t('settings.general.wipe_modal_confirm')}
           </button>
         </div>
       </div>
@@ -115,20 +116,37 @@ function WipeConfirmModal({ onConfirm, onCancel }) {
 }
 
 export function GeneralSettings({ onRefreshData }) {
+  const { t, i18n } = useTranslation();
   const { toast } = useToast();
+  const { updateSetting } = useSettings();
   const [showFirstConfirm, setShowFirstConfirm] = useState(false);
   const [showSecondConfirm, setShowSecondConfirm] = useState(false);
   const [wiping, setWiping] = useState(false);
+
+  const currentLang = i18n.language?.startsWith('nb') || i18n.language?.startsWith('no')
+    ? 'nb'
+    : i18n.language?.startsWith('en')
+    ? 'en'
+    : 'nb';
+
+  const handleLanguageChange = async (lang) => {
+    try {
+      await updateSetting('app.language', lang);
+      i18n.changeLanguage(lang);
+    } catch (err) {
+      console.error('Could not save language setting', err);
+    }
+  };
 
   const handleWipe = async () => {
     setShowSecondConfirm(false);
     setWiping(true);
     try {
       await window.fattern.app.wipeAllData();
-      toast.success('All data er slettet', 'Appen er nå tilbakestilt til fabrikktilstand');
+      toast.success(t('settings.general.wipe_success'), t('settings.general.wipe_success_desc'));
       onRefreshData?.();
     } catch (err) {
-      toast.error('Sletting feilet', err.message);
+      toast.error(t('settings.general.wipe_error'), err.message);
     } finally {
       setWiping(false);
     }
@@ -138,14 +156,53 @@ export function GeneralSettings({ onRefreshData }) {
     <>
       <div className="space-y-6">
         <div>
-          <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--f-text-body)' }}>Generelle innstillinger</h3>
-          <p className="text-xs mb-4" style={{ color: 'var(--f-text-subtle)' }}>Generelle app-innstillinger og preferanser</p>
+          <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--f-text-body)' }}>
+            {t('settings.general.title')}
+          </h3>
+          <p className="text-xs mb-4" style={{ color: 'var(--f-text-subtle)' }}>
+            {t('settings.general.description')}
+          </p>
         </div>
 
+        {/* ── Language selector ─────────────────────────────────────────────── */}
         <div className="space-y-4">
           <div className="py-3" style={{ borderBottom: '1px solid var(--f-border-faint)' }}>
-            <label className="text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--f-text-subtle)' }}>Kommer snart</label>
-            <p className="text-sm mt-1.5" style={{ color: 'var(--f-text-soft)' }}>Flere generelle innstillinger vil bli lagt til her</p>
+            <label className="text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--f-text-subtle)' }}>
+              {t('settings.general.language_section')}
+            </label>
+            <p className="text-sm mt-1.5 mb-3" style={{ color: 'var(--f-text-soft)' }}>
+              {t('settings.general.language_label')}
+            </p>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {[
+                { code: 'nb', label: t('settings.general.language_nb') },
+                { code: 'en', label: t('settings.general.language_en') },
+              ].map(({ code, label }) => (
+                <button
+                  key={code}
+                  onClick={() => handleLanguageChange(code)}
+                  style={{
+                    padding: '6px 16px',
+                    borderRadius: 8,
+                    fontSize: 13,
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.13s',
+                    background: currentLang === code
+                      ? 'var(--f-green-bg)'
+                      : 'rgba(255,255,255,0.04)',
+                    border: currentLang === code
+                      ? '1px solid var(--f-border-green)'
+                      : '1px solid var(--f-border-subtle)',
+                    color: currentLang === code
+                      ? 'var(--f-green-text)'
+                      : 'var(--f-text-soft)',
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -154,7 +211,7 @@ export function GeneralSettings({ onRefreshData }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
             <div style={{ flex: 1, height: 1, background: 'rgba(240,80,70,0.2)' }} />
             <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(240,80,70,0.55)', flexShrink: 0 }}>
-              Faresone
+              {t('settings.general.danger_zone')}
             </span>
             <div style={{ flex: 1, height: 1, background: 'rgba(240,80,70,0.2)' }} />
           </div>
@@ -173,10 +230,10 @@ export function GeneralSettings({ onRefreshData }) {
           >
             <div>
               <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--f-text-body)', marginBottom: 3 }}>
-                Slett all data
+                {t('settings.general.wipe_title')}
               </div>
               <div style={{ fontSize: 12, color: 'var(--f-text-subtle)', lineHeight: 1.5 }}>
-                Fjerner alle fakturaer, kunder, utgifter og innstillinger permanent.
+                {t('settings.general.wipe_desc')}
               </div>
             </div>
             <button
@@ -197,7 +254,7 @@ export function GeneralSettings({ onRefreshData }) {
               onMouseLeave={e => { e.currentTarget.style.background = 'rgba(240,80,70,0.08)'; e.currentTarget.style.borderColor = 'rgba(240,80,70,0.3)'; }}
             >
               <IconTrash size={13} />
-              {wiping ? 'Sletter…' : 'Tilbakestill app'}
+              {wiping ? t('settings.general.wipe_deleting') : t('settings.general.wipe_button')}
             </button>
           </div>
         </div>
@@ -225,10 +282,10 @@ export function GeneralSettings({ onRefreshData }) {
             }}
           >
             <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--f-text-body)', marginBottom: 8 }}>
-              Er du sikker?
+              {t('settings.general.first_confirm_title')}
             </div>
             <p style={{ fontSize: 12, color: 'var(--f-text-soft)', lineHeight: 1.6, marginBottom: 18 }}>
-              Du er i ferd med å slette <em>all</em> data i Fattern. Dette inkluderer alle fakturaer, kunder, produkter og utgifter.
+              {t('settings.general.first_confirm_desc')}
             </p>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button
@@ -239,7 +296,7 @@ export function GeneralSettings({ onRefreshData }) {
                   color: 'var(--f-text-soft)', cursor: 'pointer',
                 }}
               >
-                Avbryt
+                {t('settings.general.first_confirm_cancel')}
               </button>
               <button
                 onClick={() => { setShowFirstConfirm(false); setShowSecondConfirm(true); }}
@@ -250,7 +307,7 @@ export function GeneralSettings({ onRefreshData }) {
                   color: '#f07060', cursor: 'pointer',
                 }}
               >
-                Ja, fortsett
+                {t('settings.general.first_confirm_proceed')}
               </button>
             </div>
           </div>

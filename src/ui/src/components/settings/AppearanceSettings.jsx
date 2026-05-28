@@ -1,9 +1,11 @@
 import { IconCheck, IconLock } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../hooks/useTheme';
 import { useSupporterPack } from '../../hooks/useSupporterPack';
 import { useToast } from '../../hooks/useToast';
 
 export function AppearanceSettings() {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const { currentTheme, availableThemes, setTheme } = useTheme();
   const { isSupporter } = useSupporterPack();
@@ -11,13 +13,13 @@ export function AppearanceSettings() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--f-text)' }}>Utseende</h3>
-        <p className="text-xs mb-4" style={{ color: 'var(--f-text-subtle)' }}>Tilpass appens utseende og visning</p>
+        <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--f-text)' }}>{t('settings.appearance.title')}</h3>
+        <p className="text-xs mb-4" style={{ color: 'var(--f-text-subtle)' }}>{t('settings.appearance.description')}</p>
       </div>
 
       <div className="space-y-4">
         <div className="py-3" style={{ borderBottom: '1px solid var(--f-border-faint)' }}>
-          <label className="f-label uppercase tracking-wider mb-4 block">Tema</label>
+          <label className="f-label uppercase tracking-wider mb-4 block">{t('settings.appearance.theme')}</label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {availableThemes.map((theme) => {
               const isSelected = currentTheme?.id === theme.id;
@@ -28,14 +30,14 @@ export function AppearanceSettings() {
                   key={theme.id}
                   onClick={() => {
                     if (isLocked) {
-                      toast.info('Premium tema', 'Dette temaet krever Supporter-pakken');
+                      toast.info(t('settings.appearance.premium_theme'), t('settings.appearance.premium_theme_desc'));
                       return;
                     }
                     try {
                       setTheme(theme.id);
-                      toast.success('Tema endret', `"${theme.name}" er nå aktivt`);
+                      toast.success(t('settings.appearance.theme_changed'), t('settings.appearance.theme_active', { name: theme.name }));
                     } catch (error) {
-                      toast.error('Kunne ikke endre tema', error.message);
+                      toast.error(t('settings.appearance.theme_error'), error.message);
                     }
                   }}
                   disabled={isLocked}
@@ -119,7 +121,7 @@ export function AppearanceSettings() {
                   </div>
 
                   {/* Card Footer */}
-                  <div className="p-4" style={{ background: 'rgba(10,16,12,0.7)', borderTop: '1px solid var(--f-border-subtle)' }}>
+                  <div className="p-4" style={{ background: 'var(--f-surface-elevated)', borderTop: '1px solid var(--f-border-subtle)' }}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         <div
@@ -142,9 +144,9 @@ export function AppearanceSettings() {
                                       e.stopPropagation();
                                       try {
                                         setTheme(theme.id, accent.color);
-                                        toast.success('Tema endret', `"${theme.name}" med ${accent.name.toLowerCase()} aksent`);
+                                        toast.success(t('settings.appearance.theme_changed'), t('settings.appearance.theme_with_accent', { name: theme.name, accent: accent.name.toLowerCase() }));
                                       } catch (error) {
-                                        toast.error('Kunne ikke endre tema', error.message);
+                                        toast.error(t('settings.appearance.theme_error'), error.message);
                                       }
                                     }}
                                     className={`w-5 h-5 rounded-md border-2 transition-all hover:scale-110 ${isCurrentAccent ? 'scale-110' : ''}`}
@@ -157,16 +159,16 @@ export function AppearanceSettings() {
                                 );
                               })
                             ) : (
-                              <div className="flex items-center gap-1 opacity-60" title="Krever Supporter-pakken">
+                              <div className="flex items-center gap-1 opacity-60" title={t('settings.appearance.requires_supporter')}>
                                 <IconLock className="h-3.5 w-3.5" style={{ color: 'var(--f-text-subtle)' }} />
-                                <span className="text-xs" style={{ color: 'var(--f-text-subtle)' }}>Aksentfarger</span>
+                                <span className="text-xs" style={{ color: 'var(--f-text-subtle)' }}>{t('settings.appearance.accent_colors')}</span>
                               </div>
                             )}
                           </div>
                         )}
                         {theme.premium && (
                           <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ color: 'var(--f-green-text)', background: 'var(--f-green-bg)', border: '1px solid var(--f-border-green)' }}>
-                            Premium
+                            {t('settings.appearance.premium')}
                           </span>
                         )}
                       </div>
@@ -178,7 +180,7 @@ export function AppearanceSettings() {
           </div>
           {!isSupporter && (
             <p className="text-xs mt-4" style={{ color: 'var(--f-text-subtle)' }}>
-              Låste temaer krever Supporter-pakken. <a href="#" className="hover:underline" style={{ color: 'var(--f-green-text-dim)' }}>Les mer</a>
+              {t('settings.appearance.premium_locked')} <a href="#" className="hover:underline" style={{ color: 'var(--f-green-text-dim)' }}>{t('settings.appearance.premium_locked_link')}</a>
             </p>
           )}
         </div>

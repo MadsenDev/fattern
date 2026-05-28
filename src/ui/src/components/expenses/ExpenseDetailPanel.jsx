@@ -1,7 +1,9 @@
 // src/ui/src/components/expenses/ExpenseDetailPanel.jsx
 import { useEffect, useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export function ExpenseDetailPanel({ expense, formatCurrency, onEdit, onDelete, onClose }) {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const [attachmentSrc, setAttachmentSrc] = useState(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -101,10 +103,10 @@ export function ExpenseDetailPanel({ expense, formatCurrency, onEdit, onDelete, 
                   marginBottom: 6,
                 }}
               >
-                {expense.category_name || 'Ukategorisert'}
+                {expense.category_name || t('expense.uncategorised')}
               </div>
               <div style={{ fontWeight: 700, fontSize: 18, color: 'var(--f-text)', wordBreak: 'break-word' }}>
-                {expense.vendor || 'Ukjent leverandør'}
+                {expense.vendor || t('expense.unknown_vendor')}
               </div>
               <div style={{ fontSize: 12, color: 'var(--f-text-subtle)', marginTop: 4 }}>
                 {expense.date}
@@ -123,7 +125,7 @@ export function ExpenseDetailPanel({ expense, formatCurrency, onEdit, onDelete, 
                 lineHeight: 1,
                 flexShrink: 0,
               }}
-              aria-label="Lukk"
+              aria-label={t('common.close')}
             >
               ×
             </button>
@@ -139,12 +141,12 @@ export function ExpenseDetailPanel({ expense, formatCurrency, onEdit, onDelete, 
         {/* Receipt */}
         <div style={{ marginBottom: 16 }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--f-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
-            Kvittering
+            {t('expense.receipt_section')}
           </div>
           {attachmentSrc ? (
             <img
               src={attachmentSrc}
-              alt="Kvittering"
+              alt={t('expense.receipt_section')}
               onClick={() => setLightboxOpen(true)}
               style={{
                 width: '100%',
@@ -166,7 +168,7 @@ export function ExpenseDetailPanel({ expense, formatCurrency, onEdit, onDelete, 
                 fontSize: 12,
               }}
             >
-              Ingen kvittering
+              {t('expense.no_receipt')}
             </div>
           )}
         </div>
@@ -175,17 +177,17 @@ export function ExpenseDetailPanel({ expense, formatCurrency, onEdit, onDelete, 
         {baseAmount !== null && (
           <div style={{ marginBottom: 16 }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--f-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
-              Beløp
+              {t('expense.amounts_section')}
             </div>
             <div style={{ fontSize: 13, color: 'var(--f-text-soft)' }}>
               {[
-                { label: 'Grunnbeløp', value: formatCurrency ? formatCurrency(baseAmount) : baseAmount },
-                { label: 'MVA', value: vatAmount !== null ? (formatCurrency ? formatCurrency(vatAmount) : vatAmount) : '—' },
-                { label: 'Totalt', value: formatCurrency ? formatCurrency(expense.amount) : expense.amount },
+                { label: t('expense.base_amount'), value: formatCurrency ? formatCurrency(baseAmount) : baseAmount },
+                { label: t('expense.vat'), value: vatAmount !== null ? (formatCurrency ? formatCurrency(vatAmount) : vatAmount) : '—' },
+                { label: t('expense.total'), value: formatCurrency ? formatCurrency(expense.amount) : expense.amount },
               ].map(({ label, value }) => (
                 <div key={label} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid var(--f-border)' }}>
                   <span>{label}</span>
-                  <span style={{ fontWeight: label === 'Totalt' ? 700 : 400 }}>{value}</span>
+                  <span style={{ fontWeight: label === t('expense.total') ? 700 : 400 }}>{value}</span>
                 </div>
               ))}
             </div>
@@ -196,7 +198,7 @@ export function ExpenseDetailPanel({ expense, formatCurrency, onEdit, onDelete, 
         {expense.notes && (
           <div style={{ marginBottom: 16 }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--f-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
-              Notat
+              {t('expense.notes_section')}
             </div>
             <p style={{ fontSize: 13, color: 'var(--f-text-soft)', margin: 0, lineHeight: 1.5 }}>
               {expense.notes}
@@ -227,7 +229,7 @@ export function ExpenseDetailPanel({ expense, formatCurrency, onEdit, onDelete, 
             className="f-btn-ghost"
             style={{ flex: 1, padding: '8px 0', borderRadius: 12, fontSize: 13, fontWeight: 600 }}
           >
-            Rediger
+            {t('common.edit')}
           </button>
           <button
             type="button"
@@ -244,7 +246,7 @@ export function ExpenseDetailPanel({ expense, formatCurrency, onEdit, onDelete, 
               cursor: 'pointer',
             }}
           >
-            Slett
+            {t('common.delete')}
           </button>
         </div>
       </div>
@@ -265,7 +267,7 @@ export function ExpenseDetailPanel({ expense, formatCurrency, onEdit, onDelete, 
         {attachmentSrc && (
           <img
             src={attachmentSrc}
-            alt="Kvittering full størrelse"
+            alt={t('expense.receipt_fullsize')}
             style={{ display: 'block', maxWidth: '100%', maxHeight: '85vh', borderRadius: 12 }}
           />
         )}

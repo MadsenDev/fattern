@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '../Modal';
 import { Select } from '../Select';
 
 export function ExpenseCategoryModal({ isOpen, mode = 'create', initialCategory, onSubmit, onClose, categories = [] }) {
+  const { t } = useTranslation();
   const [name, setName] = useState(initialCategory?.name || '');
   const [parentId, setParentId] = useState(initialCategory?.parent_id?.toString() || '');
   const [saving, setSaving] = useState(false);
@@ -23,7 +25,7 @@ export function ExpenseCategoryModal({ isOpen, mode = 'create', initialCategory,
     setError('');
 
     if (!name.trim()) {
-      setError('Kategorinavn må fylles ut.');
+      setError(t('expense_category.name_required'));
       return;
     }
 
@@ -37,17 +39,17 @@ export function ExpenseCategoryModal({ isOpen, mode = 'create', initialCategory,
       onClose?.();
     } catch (err) {
       console.error('Kunne ikke lagre kategori', err);
-      const errorMessage = err?.message || 'Noe gikk galt under lagring. Prøv igjen.';
+      const errorMessage = err?.message || t('expense_category.save_error');
       setError(errorMessage);
     } finally {
       setSaving(false);
     }
   };
 
-  const title = isEdit ? 'Rediger kategori' : 'Ny kategori';
+  const title = isEdit ? t('expense_category.edit_title') : t('expense_category.create_title');
   const modalDescription = isEdit
-    ? 'Oppdater kategorinformasjon.'
-    : 'Opprett en ny utgiftskategori. Du kan velge en overordnet kategori for å lage en underkategori.';
+    ? t('expense_category.edit_desc')
+    : t('expense_category.create_desc');
 
   // Build category hierarchy for display
   const buildCategoryOptions = (cats, parentId = null, level = 0, excludeId = null) => {
@@ -85,7 +87,7 @@ export function ExpenseCategoryModal({ isOpen, mode = 'create', initialCategory,
   );
 
   const parentOptions = [
-    { value: '', label: 'Ingen overordnet kategori' },
+    { value: '', label: t('expense_category.no_parent') },
     ...availableParentOptions,
   ];
 
@@ -106,7 +108,7 @@ export function ExpenseCategoryModal({ isOpen, mode = 'create', initialCategory,
             onClick={onClose}
             disabled={saving}
           >
-            Avbryt
+            {t('common.cancel')}
           </button>
           <button
             type="submit"
@@ -114,33 +116,33 @@ export function ExpenseCategoryModal({ isOpen, mode = 'create', initialCategory,
             className="f-btn-primary rounded-2xl px-5 py-2 text-sm font-semibold disabled:opacity-60"
             disabled={saving}
           >
-            {saving ? 'Lagrer …' : isEdit ? 'Lagre endringer' : 'Opprett kategori'}
+            {saving ? t('expense_category.saving') : isEdit ? t('expense_category.save_changes') : t('expense_category.create_button')}
           </button>
         </>
       }
     >
       <form id="expense-category-form" className="space-y-4" onSubmit={handleSubmit}>
         <div>
-          <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Kategorinavn *</label>
+          <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('expense_category.name_label')}</label>
           <input
             className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Eksempel: Reise, Kontor, Mat"
+            placeholder={t('expense_category.name_placeholder')}
             required
           />
         </div>
 
         <div>
-          <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Overordnet kategori</label>
+          <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('expense_category.parent_label')}</label>
           <Select
             value={parentId}
             onChange={setParentId}
             options={parentOptions}
-            placeholder="Velg overordnet kategori (valgfritt)"
+            placeholder={t('expense_category.parent_placeholder')}
           />
           <p className="mt-1 text-xs" style={{ color: 'var(--f-text-subtle)' }}>
-            Velg en overordnet kategori for å lage en underkategori
+            {t('expense_category.parent_hint')}
           </p>
         </div>
 

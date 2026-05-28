@@ -118,6 +118,12 @@ function registerDatabaseHandlers(database) {
   handle('db:unlink-expense-from-invoice', (invoiceId, expenseId) =>
     database.unlinkExpenseFromInvoice(invoiceId, expenseId)
   );
+
+  // Invoice event log
+  handle('db:get-invoice-events', (invoiceId) => database.getInvoiceEvents(invoiceId));
+  handle('db:log-invoice-event', (invoiceId, type, description, metadata) =>
+    database.logInvoiceEvent(invoiceId, type, description, metadata)
+  );
 }
 
 module.exports = {

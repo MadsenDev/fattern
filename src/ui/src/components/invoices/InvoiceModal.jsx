@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { QuantityInput } from '../QuantityInput';
 import { Select } from '../Select';
 import { Checkbox } from '../Checkbox';
@@ -9,6 +10,7 @@ import { useSettings } from '../../hooks/useSettings';
 import { IconPlus, IconTrash, IconCheck, IconCircleCheck, IconSend, IconFile, IconAlertCircle, IconX } from '@tabler/icons-react';
 
 export function InvoiceModal({ isOpen, mode = 'create', initialInvoice, onSubmit, onClose, customers = [], products = [] }) {
+  const { t } = useTranslation();
   const { getSetting } = useSettings();
   const isEdit = mode === 'edit';
 
@@ -307,11 +309,18 @@ export function InvoiceModal({ isOpen, mode = 'create', initialInvoice, onSubmit
           <div className="flex-1 flex flex-col overflow-hidden">
             <div className="p-6" style={{ borderBottom: '1px solid var(--f-border-subtle)' }}>
               <h2 className="text-lg font-semibold" style={{ color: 'var(--f-text)' }}>{isEdit ? 'Rediger faktura' : 'Ny faktura'}</h2>
-              <p className="mt-1 text-sm" style={{ color: 'var(--f-text-soft)' }}>{isEdit ? 'Oppdater fakturainformasjon' : 'Opprett en ny faktura'}</p>
+              <p className="mt-1 text-sm" style={{ color: 'var(--f-text-soft)' }}>{isEdit ? t('invoice.form.description_edit') : t('invoice.form.description_create')}</p>
             </div>
 
             <div className="flex-1 overflow-y-auto p-6">
               <form id="invoice-form" onSubmit={handleSubmit} className="space-y-6">
+                {isEdit && ['sent', 'paid', 'overdue'].includes(initialInvoice?.status) && (
+                  <div className="rounded-xl px-4 py-3 text-sm flex items-start gap-2" style={{ background: 'var(--f-warn-bg)', border: '1px solid var(--f-warn-border)', color: 'var(--f-warn)' }}>
+                    <IconAlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                    <span dangerouslySetInnerHTML={{ __html: t('invoice.form.edit_warning', { status: t(`status.${initialInvoice.status}`) }) }} />
+                  </div>
+                )}
+
                 {error && (
                   <div className="rounded-xl px-4 py-3 text-sm" style={{ background: 'var(--f-danger-bg)', border: '1px solid var(--f-danger-border)', color: 'var(--f-danger-text)' }}>
                     {error}

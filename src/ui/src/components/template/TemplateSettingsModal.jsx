@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { IconX, IconDeviceFloppy, IconTag, IconUser, IconLink, IconInfoCircle, IconFileText } from '@tabler/icons-react';
 import { Modal } from '../Modal';
 
 export function TemplateSettingsModal({ isOpen, onClose, template, onSave }) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -30,7 +32,7 @@ export function TemplateSettingsModal({ isOpen, onClose, template, onSave }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     if (!template || !template.meta) return;
 
     // Update template metadata
@@ -80,7 +82,7 @@ export function TemplateSettingsModal({ isOpen, onClose, template, onSave }) {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Mal innstillinger"
+      title={t('template_settings.title')}
       size="lg"
     >
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -88,12 +90,12 @@ export function TemplateSettingsModal({ isOpen, onClose, template, onSave }) {
         <div className="space-y-4">
           <h3 className="text-sm font-semibold flex items-center gap-2" style={{ color: 'var(--f-text-body)' }}>
             <IconFileText className="h-4 w-4" />
-            Grunnleggende informasjon
+            {t('template_settings.basic_info')}
           </h3>
 
           <div>
             <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--f-text-subtle)' }}>
-              Navn *
+              {t('template_settings.name_label')}
             </label>
             <input
               type="text"
@@ -106,20 +108,20 @@ export function TemplateSettingsModal({ isOpen, onClose, template, onSave }) {
 
           <div>
             <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--f-text-subtle)' }}>
-              Beskrivelse
+              {t('template_settings.description_label')}
             </label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={3}
               className="f-input w-full rounded-lg px-3 py-2 text-sm resize-none"
-              placeholder="Beskrivelse av malen..."
+              placeholder={t('template_settings.description_placeholder')}
             />
           </div>
 
           <div>
             <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--f-text-subtle)' }}>
-              Versjon *
+              {t('template_settings.version_label')}
             </label>
             <input
               type="text"
@@ -129,9 +131,9 @@ export function TemplateSettingsModal({ isOpen, onClose, template, onSave }) {
               placeholder="1.0.0"
               required
               pattern="^\d+\.\d+\.\d+(-.+)?$"
-              title="Versjon må følge SemVer format (f.eks. 1.0.0)"
+              title={t('template_settings.version_pattern_hint')}
             />
-            <p className="text-xs mt-1" style={{ color: 'var(--f-text-subtle)' }}>SemVer format (f.eks. 1.0.0)</p>
+            <p className="text-xs mt-1" style={{ color: 'var(--f-text-subtle)' }}>{t('template_settings.version_hint')}</p>
           </div>
         </div>
 
@@ -139,27 +141,27 @@ export function TemplateSettingsModal({ isOpen, onClose, template, onSave }) {
         <div className="space-y-4 pt-4" style={{ borderTop: '1px solid var(--f-border-faint)' }}>
           <h3 className="text-sm font-semibold flex items-center gap-2" style={{ color: 'var(--f-text-body)' }}>
             <IconUser className="h-4 w-4" />
-            Forfatter informasjon
+            {t('template_settings.author_section')}
           </h3>
 
           <div>
             <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--f-text-subtle)' }}>
-              Forfatter
+              {t('template_settings.author_label')}
             </label>
             <input
               type="text"
               value={formData.author}
               onChange={(e) => setFormData({ ...formData, author: e.target.value })}
               className="f-input w-full rounded-lg px-3 py-2 text-sm"
-              placeholder="Navn på forfatter eller selskap"
+              placeholder={t('template_settings.author_placeholder')}
             />
-            <p className="text-xs mt-1" style={{ color: 'var(--f-text-subtle)' }}>Brukes når malen eksporteres</p>
+            <p className="text-xs mt-1" style={{ color: 'var(--f-text-subtle)' }}>{t('template_settings.author_hint')}</p>
           </div>
 
           <div>
             <label className="flex items-center gap-1 text-xs font-medium mb-1.5" style={{ color: 'var(--f-text-subtle)' }}>
               <IconLink className="h-3 w-3" />
-              Forfatter URL
+              {t('template_settings.author_url_label')}
             </label>
             <input
               type="url"
@@ -175,7 +177,7 @@ export function TemplateSettingsModal({ isOpen, onClose, template, onSave }) {
         <div className="space-y-4 pt-4" style={{ borderTop: '1px solid var(--f-border-faint)' }}>
           <h3 className="text-sm font-semibold flex items-center gap-2" style={{ color: 'var(--f-text-body)' }}>
             <IconTag className="h-4 w-4" />
-            Tagger
+            {t('template_settings.tags_section')}
           </h3>
 
           <div>
@@ -186,14 +188,14 @@ export function TemplateSettingsModal({ isOpen, onClose, template, onSave }) {
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={handleTagInputKeyDown}
                 className="f-input flex-1 rounded-lg px-3 py-2 text-sm"
-                placeholder="Legg til tag (trykk Enter)"
+                placeholder={t('template_settings.tag_placeholder')}
               />
               <button
                 type="button"
                 onClick={handleAddTag}
                 className="f-btn-ghost rounded-lg px-4 py-2 text-sm font-medium transition"
               >
-                Legg til
+                {t('template_settings.add_tag')}
               </button>
             </div>
             {formData.tags.length > 0 && (
@@ -225,21 +227,21 @@ export function TemplateSettingsModal({ isOpen, onClose, template, onSave }) {
         <div className="pt-4" style={{ borderTop: '1px solid var(--f-border-faint)' }}>
           <h3 className="text-sm font-semibold flex items-center gap-2 mb-4" style={{ color: 'var(--f-text-body)' }}>
             <IconInfoCircle className="h-4 w-4" />
-            Lisens
+            {t('template_settings.license_section')}
           </h3>
 
           <div>
             <label className="block text-xs font-medium mb-1.5" style={{ color: 'var(--f-text-subtle)' }}>
-              Lisens type
+              {t('template_settings.license_label')}
             </label>
             <input
               type="text"
               value={formData.license}
               onChange={(e) => setFormData({ ...formData, license: e.target.value })}
               className="f-input w-full rounded-lg px-3 py-2 text-sm"
-              placeholder="f.eks. commercial-use, MIT, CC-BY"
+              placeholder={t('template_settings.license_placeholder')}
             />
-            <p className="text-xs mt-1" style={{ color: 'var(--f-text-subtle)' }}>Valgfritt. Angir lisens for malen.</p>
+            <p className="text-xs mt-1" style={{ color: 'var(--f-text-subtle)' }}>{t('template_settings.license_hint')}</p>
           </div>
         </div>
 
@@ -250,18 +252,17 @@ export function TemplateSettingsModal({ isOpen, onClose, template, onSave }) {
             onClick={onClose}
             className="f-btn-ghost rounded-lg px-4 py-2 text-sm font-medium transition"
           >
-            Avbryt
+            {t('common.cancel')}
           </button>
           <button
             type="submit"
             className="f-btn-primary rounded-lg px-4 py-2 text-sm font-medium transition flex items-center gap-2"
           >
             <IconDeviceFloppy className="h-4 w-4" />
-            Lagre innstillinger
+            {t('template_settings.save_button')}
           </button>
         </div>
       </form>
     </Modal>
   );
 }
-

@@ -1,11 +1,16 @@
+import { useTranslation } from 'react-i18next';
 import { SETTING_CATEGORIES } from '../../utils/settingsConstants';
 
 export function SettingsSidebar({ activeCategory, onCategoryChange, showDevMenu }) {
+  const { t } = useTranslation();
+
   return (
     <aside className="w-64 flex-shrink-0">
       <div className="f-glass rounded-2xl p-3">
         <div className="mb-2 px-2 py-1.5">
-          <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--f-text-subtle)' }}>Kategorier</p>
+          <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--f-text-subtle)' }}>
+            {t('settings.sidebar_categories')}
+          </p>
         </div>
         <nav className="space-y-1">
           {SETTING_CATEGORIES.filter((category) => {
@@ -14,6 +19,8 @@ export function SettingsSidebar({ activeCategory, onCategoryChange, showDevMenu 
           }).map((category) => {
             const Icon = category.icon;
             const isActive = activeCategory === category.id;
+            const label = t(`settings.categories.${category.id}`, { defaultValue: category.label });
+            const description = t(`settings.category_descriptions.${category.id}`, { defaultValue: category.description });
             return (
               <button
                 key={category.id}
@@ -38,9 +45,9 @@ export function SettingsSidebar({ activeCategory, onCategoryChange, showDevMenu 
                   <Icon className="h-4 w-4" />
                 </span>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium">{category.label}</div>
+                  <div className="text-sm font-medium">{label}</div>
                   <div className="text-xs mt-0.5" style={{ color: isActive ? 'var(--f-green-text-dim)' : 'var(--f-text-subtle)' }}>
-                    {category.description}
+                    {description}
                   </div>
                 </div>
                 {isActive && (

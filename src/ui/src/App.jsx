@@ -53,7 +53,7 @@ function hasCompletedOnboarding() {
 function App() {
   // Initialize theme early
   useTheme();
-  const { getSetting } = useSettings();
+  const { getSetting, settings } = useSettings();
   
   const [isLoading, setIsLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
@@ -166,6 +166,10 @@ function App() {
 
   const availableBudgetYears = budgetYears;
   const selectedYear = selectedBudgetYearId ?? availableBudgetYears[0]?.id ?? null;
+  const activeBudgetYear = availableBudgetYears.find((year) => year.id === selectedYear);
+  const payableInvoice = (allInvoices || []).find((invoice) =>
+    invoice?.dbId && ['sent', 'overdue'].includes(invoice.status)
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -199,6 +203,16 @@ function App() {
     }
   }, [company]);
 
+  // Apply saved language preference from DB settings
+  useEffect(() => {
+    if (!settings) return;
+    const savedLang = settings['app.language'];
+    if (savedLang && ['nb', 'en'].includes(savedLang)) {
+      i18n.changeLanguage(savedLang);
+    }
+  }, [settings]);
+
+  // Fallback: use system locale only if no saved preference
   useEffect(() => {
     const api = typeof window !== 'undefined' ? window.fattern?.system : null;
     if (!api?.getLocale) return;
@@ -207,10 +221,16 @@ function App() {
       .getLocale()
       .then((locale) => {
         if (!locale) return;
+        // Only apply system locale if user hasn't saved a preference
+        const savedLang = getSetting('app.language', null);
+        if (savedLang) return; // saved preference takes priority
+
         const normalized = locale.split?.('-')[0] || locale;
-        // Map Norwegian variants to 'nb'; everything else falls back to 'en'
-        const lang = ['nb', 'nn', 'no'].includes(normalized) ? 'nb' : 'en';
-        i18n.changeLanguage(lang);
+        // Fattern is a Norwegian app — only switch language for Norwegian locales;
+        // non-Norwegian system locales (e.g. en-US on Linux) keep the 'nb' default.
+        if (['nb', 'nn', 'no'].includes(normalized)) {
+          i18n.changeLanguage('nb');
+        }
       })
       .catch((err) => {
         console.error('Unable to detect locale', err);
@@ -639,11 +659,13 @@ function App() {
   };
 
   const openEditInvoiceModal = async (invoice) => {
-    if (!invoice || !invoice.dbId) return;
+    // getInvoice() returns raw DB rows with .id; list items carry .dbId — accept both
+    const invoiceId = invoice?.dbId ?? invoice?.id;
+    if (!invoiceId) return;
     try {
       const api = typeof window !== 'undefined' ? window.fattern?.db : null;
       if (!api?.getInvoice) return;
-      const fullInvoice = await api.getInvoice(invoice.dbId);
+      const fullInvoice = await api.getInvoice(invoiceId);
       setEditingInvoice(fullInvoice);
       setInvoiceModalMode('edit');
       setIsInvoiceModalOpen(true);
@@ -983,9 +1005,58 @@ function App() {
       )}
       <BottomBar
         company={company}
-        onCreateInvoice={openCreateInvoiceModal}
-        onRegisterPayment={() => showInvoiceStatusModal(null)}
-        onAddExpense={openCreateExpenseModal}
+        budgetYears={availableBudgetYears}
+        selectedBudgetYearId={selectedYear}
+        onBudgetYearChange={handleSelectYear}
+        onCompanyClick={() => setCurrentPage('Innstillinger')}
+        onCreateBudgetYear={openCreateBudgetYearModal}
+        status={{
+          currentPage,
+          budgetYear: activeBudgetYear?.label || activeBudgetYear?.name,
+        }}
+        actions={[
+          {
+            id: 'new-invoice',
+            labelKey: 'layout.shortcut_new_invoice',
+            shortcut: '⌘ N',
+            icon: 'invoice',
+            onSelect: openCreateInvoiceModal,
+          },
+          {
+            id: 'register-payment',
+            labelKey: 'layout.shortcut_register_payment',
+            shortcut: '⌘ P',
+            icon: 'payment',
+            disabled: !payableInvoice,
+            disabledReasonKey: 'layout.bottom_bar.no_payable_invoices',
+            onSelect: () => showInvoiceStatusModal(payableInvoice, 'paid'),
+          },
+          {
+            id: 'add-expense',
+            labelKey: 'layout.shortcut_add_expense',
+            shortcut: '⌘ E',
+            icon: 'expense',
+            onSelect: openCreateExpenseModal,
+          },
+          {
+            id: 'new-customer',
+            labelKey: 'layout.shortcut_new_customer',
+            icon: 'customer',
+            onSelect: openCreateCustomerModal,
+          },
+          {
+            id: 'new-product',
+            labelKey: 'layout.shortcut_new_product',
+            icon: 'product',
+            onSelect: openCreateProductModal,
+          },
+          {
+            id: 'new-budget-year',
+            labelKey: 'layout.shortcut_new_budget_year',
+            icon: 'budgetYear',
+            onSelect: openCreateBudgetYearModal,
+          },
+        ]}
       />
       {showOnboarding ? (
         <OnboardingFlow initialCompany={company} onComplete={handleOnboardingComplete} />
@@ -1070,6 +1141,7 @@ function App() {
       <InvoiceViewModal
         isOpen={isInvoiceViewModalOpen}
         invoice={viewingInvoice}
+        company={company}
         formatCurrency={formatCurrency}
         budgetYearId={selectedBudgetYearId}
         onClose={() => {
@@ -1082,6 +1154,7 @@ function App() {
           openEditInvoiceModal(invoice);
         }}
         onGeneratePDF={handleViewInvoiceGeneratePDF}
+        onStatusChange={() => setInvoicesRefreshKey((prev) => prev + 1)}
       />
       <ConfirmModal
         isOpen={deleteConfirm.isOpen}

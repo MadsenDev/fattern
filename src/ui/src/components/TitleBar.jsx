@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { IconTerminal2 } from '@tabler/icons-react';
 
 export function TitleBar({ title = 'Fattern' }) {
+  const { t } = useTranslation();
   const [isMaximized, setIsMaximized] = useState(false);
 
   useEffect(() => {
@@ -58,7 +60,7 @@ export function TitleBar({ title = 'Fattern' }) {
         {/* Dev tools — subtle icon button */}
         <button
           onClick={handleDevTools}
-          title="Utviklerverktøy (F12)"
+          title={t('layout.dev_tools')}
           style={{
             background: 'none', border: 'none', cursor: 'pointer',
             color: 'var(--f-text-muted)',
@@ -75,14 +77,14 @@ export function TitleBar({ title = 'Fattern' }) {
 
         {/* macOS-style traffic lights */}
         {[
-          { color: '#f0c060', label: 'Minimiser', action: handleMinimize },
-          { color: '#70c87a', label: isMaximized ? 'Gjenopprett' : 'Maksimer', action: handleMaximize },
-          { color: '#f07060', label: 'Lukk', action: handleClose },
-        ].map(({ color, label, action }) => (
+          { color: '#f0c060', labelKey: 'layout.minimize', action: handleMinimize },
+          { color: '#70c87a', labelKey: isMaximized ? 'layout.restore' : 'layout.maximize', action: handleMaximize },
+          { color: '#f07060', labelKey: 'layout.close', action: handleClose },
+        ].map(({ color, labelKey, action }) => (
           <button
-            key={label}
+            key={labelKey}
             onClick={action}
-            aria-label={label}
+            aria-label={t(labelKey)}
             style={{
               width: 12, height: 12, borderRadius: '50%',
               background: color,

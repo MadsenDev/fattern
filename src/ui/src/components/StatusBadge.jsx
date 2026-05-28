@@ -1,22 +1,26 @@
+import { useTranslation } from 'react-i18next';
 import {
   IconCircleCheck,
   IconSend,
   IconFile,
   IconAlertCircle,
+  IconX,
 } from '@tabler/icons-react';
-import { statusBadge, statusLabel } from '../data/mockData.jsx';
+import { statusBadge } from '../data/mockData.jsx';
 
 const statusIcons = {
-  paid:    IconCircleCheck,
-  sent:    IconSend,
-  draft:   IconFile,
-  overdue: IconAlertCircle,
+  paid:      IconCircleCheck,
+  sent:      IconSend,
+  draft:     IconFile,
+  overdue:   IconAlertCircle,
+  cancelled: IconX,
 };
 
 export function StatusBadge({ status, className = '' }) {
+  const { t } = useTranslation();
   const Icon = statusIcons[status] || IconFile;
   const badgeClass = statusBadge[status] || 'f-pill-draft';
-  const label = statusLabel[status] || status || 'Ukjent';
+  const label = t(`status.${status}`, { defaultValue: status || t('errors.not_available') });
 
   return (
     <span

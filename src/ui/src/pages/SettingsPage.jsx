@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSettings } from '../hooks/useSettings';
 import { useToast } from '../hooks/useToast';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { TemplateImportModal } from '../components/templates/TemplateImportModal';
-import { SETTING_CATEGORIES, CATEGORY_DESCRIPTIONS } from '../utils/settingsConstants';
+import { SETTING_CATEGORIES } from '../utils/settingsConstants';
 import { SettingsSidebar } from '../components/settings/SettingsSidebar';
 import { GeneralSettings } from '../components/settings/GeneralSettings';
 import { DefaultsSettings } from '../components/settings/DefaultsSettings';
@@ -11,21 +12,20 @@ import { InvoiceSettings } from '../components/settings/InvoiceSettings';
 import { CompanySettings } from '../components/settings/CompanySettings';
 import { TemplatesSettings } from '../components/settings/TemplatesSettings';
 import { AppearanceSettings } from '../components/settings/AppearanceSettings';
+import { EmailSettings } from '../components/settings/EmailSettings';
 import { ImportSettings } from '../components/settings/ImportSettings';
 import { AboutSettings } from '../components/settings/AboutSettings';
 import { DevSettings } from '../components/settings/DevSettings';
-import { getTemplateId, getTemplateName } from '../utils/templateUtils';
 
 export function SettingsPage({ company, onCompanyUpdate, onOpenTemplateEditor, onRefreshData }) {
-  const { getSetting, updateSetting } = useSettings();
+  const { t } = useTranslation();
+  const { updateSetting } = useSettings();
   const { toast } = useToast();
   const [activeCategory, setActiveCategory] = useState('general');
   const [showDevMenu, setShowDevMenu] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, templateId: null, templateName: null });
   const [importModal, setImportModal] = useState({ isOpen: false, packagePath: null, templateMeta: null, validationIssues: [], warnings: [] });
-  const defaultTemplateId = getSetting('invoice.defaultTemplate', 'default_invoice');
 
-  // Keyboard shortcut to toggle dev menu (Ctrl+Shift+D)
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.ctrlKey && event.shiftKey && event.key === 'D') {
@@ -44,24 +44,23 @@ export function SettingsPage({ company, onCompanyUpdate, onOpenTemplateEditor, o
   const handleSetDefaultTemplate = async (templateId) => {
     try {
       updateSetting('invoice.defaultTemplate', templateId);
-      toast.success('Standard mal oppdatert', `"${templateId}" er nå standard`);
+      toast.success(t('settings_page.default_template_updated'), t('settings_page.default_template_updated_desc', { id: templateId }));
     } catch (error) {
       console.error('Failed to set default template', error);
-      toast.error('Kunne ikke sette standard mal', error.message);
+      toast.error(t('settings_page.set_default_error'), error.message);
     }
   };
 
   const handleDeleteTemplate = (templateId) => {
     if (templateId === 'default_invoice') {
-      toast.error('Kan ikke slette standard mal', 'Du kan ikke slette standard malen');
+      toast.error(t('settings_page.delete_not_allowed'), t('settings_page.delete_not_allowed_desc'));
       return;
     }
 
-    // We need to get the template name - this will be handled by TemplatesSettings
     setDeleteConfirm({
       isOpen: true,
       templateId,
-      templateName: templateId, // Will be updated if we have access to templates list
+      templateName: templateId,
     });
   };
 
@@ -74,10 +73,10 @@ export function SettingsPage({ company, onCompanyUpdate, onOpenTemplateEditor, o
       if (!api) return;
 
       await api.delete(templateId);
-      toast.success('Mal slettet', 'Malen har blitt slettet');
+      toast.success(t('settings_page.template_deleted'), t('settings_page.template_deleted_desc'));
     } catch (error) {
       console.error('Failed to delete template', error);
-      toast.error('Kunne ikke slette mal', error.message);
+      toast.error(t('settings_page.delete_template_error'), error.message);
     } finally {
       setDeleteConfirm({ isOpen: false, templateId: null, templateName: null });
     }
@@ -88,15 +87,15 @@ export function SettingsPage({ company, onCompanyUpdate, onOpenTemplateEditor, o
       const dialogApi = window.fattern?.dialog;
       const api = window.fattern?.template;
       if (!dialogApi || !api) {
-        toast.error('Import ikke tilgjengelig', 'Dialog API ikke tilgjengelig');
+        toast.error(t('settings_page.import_not_available'), t('settings_page.import_not_available_desc'));
         return;
       }
 
       const result = await dialogApi.showOpenDialog({
-        title: 'Importer mal',
+        title: t('settings_page.import_title'),
         filters: [
-          { name: 'Fattern-mal', extensions: ['fattern-template'] },
-          { name: 'Alle filer', extensions: ['*'] },
+          { name: t('settings_page.import_filter_name'), extensions: ['fattern-template'] },
+          { name: t('settings_page.import_all_files'), extensions: ['*'] },
         ],
         properties: ['openFile'],
       });
@@ -104,11 +103,8 @@ export function SettingsPage({ company, onCompanyUpdate, onOpenTemplateEditor, o
       if (result.canceled || !result.filePaths || result.filePaths.length === 0) return;
 
       const packagePath = result.filePaths[0];
-
-      // Validate package first (without importing)
       const validationResult = await api.validatePackage(packagePath);
 
-      // Show import modal with template info
       setImportModal({
         isOpen: true,
         packagePath,
@@ -118,7 +114,7 @@ export function SettingsPage({ company, onCompanyUpdate, onOpenTemplateEditor, o
       });
     } catch (error) {
       console.error('Failed to import template', error);
-      toast.error('Kunne ikke importere mal', error.message);
+      toast.error(t('settings_page.import_error'), error.message);
     }
   };
 
@@ -128,19 +124,24 @@ export function SettingsPage({ company, onCompanyUpdate, onOpenTemplateEditor, o
       if (!api) return;
 
       const result = await api.importPackage(importModal.packagePath);
-      
-      toast.success('Mal importert', `"${result.meta.name}" er importert${result.finalId !== result.meta.id ? ` som "${result.finalId}"` : ''}`);
-      
+      const importedAs = result.finalId !== result.meta.id;
+      toast.success(
+        t('settings_page.template_imported'),
+        importedAs
+          ? t('settings_page.template_imported_as_desc', { name: result.meta.name, id: result.finalId })
+          : t('settings_page.template_imported_desc', { name: result.meta.name })
+      );
+
       if (result.warnings && result.warnings.length > 0) {
         result.warnings.forEach(warning => {
-          toast.warning('Import advarsel', warning);
+          toast.warning(t('settings_page.import_warning'), warning);
         });
       }
 
       setImportModal({ isOpen: false, packagePath: null, templateMeta: null, validationIssues: [], warnings: [] });
     } catch (error) {
       console.error('Failed to import template', error);
-      toast.error('Kunne ikke importere mal', error.message);
+      toast.error(t('settings_page.import_error'), error.message);
     }
   };
 
@@ -165,6 +166,8 @@ export function SettingsPage({ company, onCompanyUpdate, onOpenTemplateEditor, o
         );
       case 'appearance':
         return <AppearanceSettings />;
+      case 'email':
+        return <EmailSettings />;
       case 'import':
         return <ImportSettings onRefreshData={onRefreshData} />;
       case 'about':
@@ -176,8 +179,13 @@ export function SettingsPage({ company, onCompanyUpdate, onOpenTemplateEditor, o
     }
   };
 
-  const activeCategoryLabel = SETTING_CATEGORIES.find((c) => c.id === activeCategory)?.label || 'Innstillinger';
-  const activeCategoryDescription = CATEGORY_DESCRIPTIONS[activeCategory] || '';
+  const activeCategoryObj = SETTING_CATEGORIES.find((c) => c.id === activeCategory);
+  const activeCategoryLabel = activeCategoryObj
+    ? t(`settings.categories.${activeCategory}`, { defaultValue: activeCategoryObj.label })
+    : t('settings.title');
+  const activeCategoryDescription = activeCategoryObj
+    ? t(`settings.category_descriptions.${activeCategory}`, { defaultValue: activeCategoryObj.description || '' })
+    : '';
 
   return (
     <div className="flex" style={{ height: 'calc(100vh - 126px)' }}>
@@ -215,10 +223,10 @@ export function SettingsPage({ company, onCompanyUpdate, onOpenTemplateEditor, o
         isOpen={deleteConfirm.isOpen}
         onClose={() => setDeleteConfirm({ isOpen: false, templateId: null, templateName: null })}
         onConfirm={confirmDeleteTemplate}
-        title="Slett mal"
-        description={`Er du sikker på at du vil slette malen "${deleteConfirm.templateName}"? Denne handlingen kan ikke angres.`}
-        confirmLabel="Slett"
-        cancelLabel="Avbryt"
+        title={t('settings_page.delete_template_title')}
+        description={t('settings_page.delete_template_desc', { name: deleteConfirm.templateName })}
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
         variant="danger"
       />
     </div>

@@ -6,6 +6,7 @@ const { registerDatabaseHandlers } = require('./dbHandlers');
 const { registerTemplateHandlers } = require('./templateHandlers');
 const { generateInvoicePDF } = require('./pdfGenerator');
 const { generateTemplatePDF } = require('./templatePdfGenerator');
+const { registerEmailHandlers } = require('./emailHandler');
 
 const isDev = Boolean(process.env.VITE_DEV_SERVER_URL);
 let database;
@@ -74,6 +75,9 @@ app.whenReady().then(() => {
   
   // Register template handlers
   registerTemplateHandlers(ipcMain);
+
+  // Register email handlers
+  registerEmailHandlers(ipcMain, database);
   
   // File dialogs for template import/export
   ipcMain.handle('dialog:show-open-dialog', async (event, options) => {
@@ -161,6 +165,7 @@ app.whenReady().then(() => {
           const template = templateStorage.loadTemplate(templateId);
           if (template) {
             const filepath = await generateTemplatePDF(template, invoice, company, customer);
+            database.logInvoiceEvent(invoiceId, 'pdf_generated', 'PDF generert');
             return { success: true, filepath };
           }
           // Template not found, fall back to default generator
@@ -173,6 +178,7 @@ app.whenReady().then(() => {
 
       // Use the default PDF generator (either no templateId provided, or template not found/failed)
       const filepath = await generateInvoicePDF(invoice, company, customer);
+      database.logInvoiceEvent(invoiceId, 'pdf_generated', 'PDF generert');
       return { success: true, filepath };
     } catch (error) {
       console.error('PDF generation error:', error);

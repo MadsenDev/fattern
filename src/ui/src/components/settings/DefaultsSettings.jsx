@@ -1,6 +1,8 @@
+import { useTranslation } from 'react-i18next';
 import { useSettings } from '../../hooks/useSettings';
 
 export function DefaultsSettings() {
+  const { t } = useTranslation();
   const { getSetting, updateSetting, isLoading } = useSettings();
   const productsDefaultView = getSetting('products.defaultView', 'table');
   const customersDefaultView = getSetting('customers.defaultView', 'table');
@@ -15,15 +17,15 @@ export function DefaultsSettings() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--f-text-body)' }}>Standard visninger</h3>
-        <p className="text-xs mb-4" style={{ color: 'var(--f-text-subtle)' }}>Velg standard visningsmodus for ulike sider</p>
+        <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--f-text-body)' }}>{t('settings.defaults.title')}</h3>
+        <p className="text-xs mb-4" style={{ color: 'var(--f-text-subtle)' }}>{t('settings.defaults.desc')}</p>
       </div>
 
       <div className="space-y-4">
         <div className="flex items-center justify-between py-3" style={{ borderBottom: '1px solid var(--f-border-faint)' }}>
           <div className="flex-1">
-            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Produkter</label>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--f-text-subtle)' }}>Standard visning når du åpner produktsiden</p>
+            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('settings.defaults.products_label')}</label>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--f-text-subtle)' }}>{t('settings.defaults.products_desc')}</p>
           </div>
           <div className="flex rounded-lg p-0.5" style={{ border: '1px solid var(--f-border)', background: 'rgba(255,255,255,0.04)' }}>
             <button
@@ -35,7 +37,7 @@ export function DefaultsSettings() {
               onMouseEnter={e => { if (productsDefaultView !== 'table') { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'var(--f-text-body)'; } }}
               onMouseLeave={e => { if (productsDefaultView !== 'table') { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--f-text-soft)'; } }}
             >
-              Liste
+              {t('common.list')}
             </button>
             <button
               type="button"
@@ -46,15 +48,15 @@ export function DefaultsSettings() {
               onMouseEnter={e => { if (productsDefaultView !== 'card') { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'var(--f-text-body)'; } }}
               onMouseLeave={e => { if (productsDefaultView !== 'card') { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--f-text-soft)'; } }}
             >
-              Kort
+              {t('common.card')}
             </button>
           </div>
         </div>
 
         <div className="flex items-center justify-between py-3" style={{ borderBottom: '1px solid var(--f-border-faint)' }}>
           <div className="flex-1">
-            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Kunder</label>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--f-text-subtle)' }}>Standard visning når du åpner kundesiden</p>
+            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('settings.defaults.customers_label')}</label>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--f-text-subtle)' }}>{t('settings.defaults.customers_desc')}</p>
           </div>
           <div className="flex rounded-lg p-0.5" style={{ border: '1px solid var(--f-border)', background: 'rgba(255,255,255,0.04)' }}>
             <button
@@ -66,7 +68,7 @@ export function DefaultsSettings() {
               onMouseEnter={e => { if (customersDefaultView !== 'table') { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'var(--f-text-body)'; } }}
               onMouseLeave={e => { if (customersDefaultView !== 'table') { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--f-text-soft)'; } }}
             >
-              Liste
+              {t('common.list')}
             </button>
             <button
               type="button"
@@ -77,7 +79,7 @@ export function DefaultsSettings() {
               onMouseEnter={e => { if (customersDefaultView !== 'card') { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'var(--f-text-body)'; } }}
               onMouseLeave={e => { if (customersDefaultView !== 'card') { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--f-text-soft)'; } }}
             >
-              Kort
+              {t('common.card')}
             </button>
           </div>
         </div>

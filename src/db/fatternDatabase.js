@@ -327,11 +327,19 @@ class FatternDatabase {
     });
 
     const invoiceId = transaction();
+    this.logInvoiceEvent(invoiceId, 'created', 'Faktura opprettet');
     return this.db.prepare('SELECT * FROM invoices WHERE id = ?').get(invoiceId);
   }
 
   getInvoice(invoiceId) {
-    const invoice = this.db.prepare('SELECT * FROM invoices WHERE id = ?').get(invoiceId);
+    const invoice = this.db.prepare(`
+      SELECT invoices.*,
+             customers.name  AS customer_name,
+             customers.email AS customer_email
+      FROM invoices
+      LEFT JOIN customers ON customers.id = invoices.customer_id
+      WHERE invoices.id = ?
+    `).get(invoiceId);
     if (!invoice) return null;
 
     const items = this.db
@@ -357,6 +365,11 @@ class FatternDatabase {
     if (!existing) {
       throw new Error('Invoice not found');
     }
+
+    // Capture existing items for diff
+    const existingItems = this.db
+      .prepare('SELECT * FROM invoice_items WHERE invoice_id = ? ORDER BY id')
+      .all(invoiceId);
 
     const items = invoice.items || [];
     const subtotal = items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
@@ -433,6 +446,59 @@ class FatternDatabase {
     });
 
     transaction();
+
+    // Build field diff for the log
+    const fmtAmt = (v) => v != null ? `kr ${Number(v).toLocaleString('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '—';
+    const changes = [];
+
+    if (existing.customer_id !== (invoice.customerId ?? null)) {
+      const oldName = existing.customer_id
+        ? this.db.prepare('SELECT name FROM customers WHERE id = ?').get(existing.customer_id)?.name ?? '—'
+        : '—';
+      const newName = invoice.customerId
+        ? this.db.prepare('SELECT name FROM customers WHERE id = ?').get(invoice.customerId)?.name ?? '—'
+        : '—';
+      changes.push({ field: 'Kunde', from: oldName, to: newName });
+    }
+    const newInvoiceDate = toDateOnlyString(invoice.invoiceDate || new Date());
+    if (existing.invoice_date !== newInvoiceDate)
+      changes.push({ field: 'Fakturadato', from: existing.invoice_date ?? '—', to: newInvoiceDate });
+
+    const newDueDate = toDateOnlyString(invoice.dueDate || new Date());
+    if (existing.due_date !== newDueDate)
+      changes.push({ field: 'Forfallsdato', from: existing.due_date ?? '—', to: newDueDate });
+
+    if (Math.abs((existing.total ?? 0) - total) > 0.001)
+      changes.push({ field: 'Beløp', from: fmtAmt(existing.total), to: fmtAmt(total) });
+
+    if ((existing.notes ?? '') !== (invoice.notes ?? ''))
+      changes.push({ field: 'Notater', from: existing.notes ?? '—', to: invoice.notes ?? '—' });
+
+    if ((existing.your_reference ?? '') !== (invoice.yourReference ?? ''))
+      changes.push({ field: 'Deres ref.', from: existing.your_reference ?? '—', to: invoice.yourReference ?? '—' });
+
+    if ((existing.our_reference ?? '') !== (invoice.ourReference ?? ''))
+      changes.push({ field: 'Vår ref.', from: existing.our_reference ?? '—', to: invoice.ourReference ?? '—' });
+
+    if (existingItems.length !== items.length)
+      changes.push({ field: 'Linjer', from: String(existingItems.length), to: String(items.length) });
+
+    const postSend = ['sent', 'paid', 'overdue'].includes(existing.status);
+    const eventType = postSend ? 'updated_after_send' : 'updated';
+    const prefix = postSend ? 'Faktura redigert etter utsending' : 'Faktura redigert';
+
+    const desc = changes.length === 0
+      ? prefix
+      : changes.length === 1
+        ? `${prefix} · ${changes[0].field}: ${changes[0].from} → ${changes[0].to}`
+        : `${prefix} · ${changes.length} felt endret`;
+
+    this.logInvoiceEvent(
+      invoiceId,
+      eventType,
+      desc,
+      { ...(changes.length > 0 ? { changes } : {}), ...(postSend ? { statusAtEdit: existing.status } : {}) } || null,
+    );
     return this.getInvoice(invoiceId);
   }
 
@@ -441,6 +507,8 @@ class FatternDatabase {
     if (!existing) {
       throw new Error('Invoice not found');
     }
+
+    const prevStatus = existing.status;
 
     this.db
       .prepare(
@@ -456,6 +524,17 @@ class FatternDatabase {
         payment_date: paymentDate ? toDateOnlyString(paymentDate) : null,
       });
 
+    const statusLabels = {
+      draft: 'Utkast', sent: 'Sendt', paid: 'Betalt',
+      overdue: 'Forfalt', cancelled: 'Kansellert',
+    };
+    const from = statusLabels[prevStatus] || prevStatus;
+    const to   = statusLabels[status]     || status;
+    const desc = paymentDate
+      ? `Status endret: ${from} → ${to} (betalt ${toDateOnlyString(paymentDate)})`
+      : `Status endret: ${from} → ${to}`;
+    this.logInvoiceEvent(invoiceId, 'status_changed', desc, { from: prevStatus, to: status });
+
     return this.getInvoice(invoiceId);
   }
 
@@ -468,6 +547,34 @@ class FatternDatabase {
     // Items will be deleted via CASCADE
     this.db.prepare('DELETE FROM invoices WHERE id = ?').run(invoiceId);
     return true;
+  }
+
+  // ─── Invoice event log ───────────────────────────────────────────────────────
+
+  logInvoiceEvent(invoiceId, type, description, metadata = null) {
+    try {
+      this.db.prepare(
+        `INSERT INTO invoice_events (invoice_id, type, description, metadata)
+         VALUES (?, ?, ?, ?)`
+      ).run(invoiceId, type, description, metadata ? JSON.stringify(metadata) : null);
+    } catch (err) {
+      // Never let logging break the main operation
+      console.warn('[invoice_events] Failed to log event:', err.message);
+    }
+  }
+
+  getInvoiceEvents(invoiceId) {
+    try {
+      const rows = this.db.prepare(
+        `SELECT * FROM invoice_events WHERE invoice_id = ? ORDER BY created_at ASC`
+      ).all(invoiceId);
+      return rows.map((r) => ({
+        ...r,
+        metadata: r.metadata ? JSON.parse(r.metadata) : null,
+      }));
+    } catch {
+      return [];
+    }
   }
 
   addExpense(expense) {

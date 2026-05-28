@@ -1,30 +1,11 @@
 import { useState, useRef } from 'react';
-import { IconUpload, IconX, IconFile, IconCheck } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
+import { IconUpload, IconX } from '@tabler/icons-react';
 import { parseCSV, validateCSV } from '../../utils/csvParser';
 import { useSupporterPack } from '../../hooks/useSupporterPack';
 
-const FIELD_MAPPINGS = {
-  customer: [
-    { value: 'name', label: 'Navn' },
-    { value: 'contact_name', label: 'Kontaktperson' },
-    { value: 'email', label: 'E-post' },
-    { value: 'phone', label: 'Telefon' },
-    { value: 'address', label: 'Adresse' },
-    { value: 'post_number', label: 'Postnummer' },
-    { value: 'post_location', label: 'Poststed' },
-    { value: 'org_number', label: 'Org.nr.' },
-  ],
-  product: [
-    { value: 'name', label: 'Navn' },
-    { value: 'sku', label: 'SKU' },
-    { value: 'description', label: 'Beskrivelse' },
-    { value: 'unit_price', label: 'Pris' },
-    { value: 'vat_rate', label: 'MVA-sats' },
-    { value: 'unit', label: 'Enhet' },
-  ],
-};
-
 export function CSVImportModal({ isOpen, onClose, onImport, type = 'customer' }) {
+  const { t } = useTranslation();
   const [step, setStep] = useState('upload'); // upload, mapping, preview, importing
   const [csvData, setCsvData] = useState(null);
   const [mapping, setMapping] = useState({});
@@ -32,6 +13,27 @@ export function CSVImportModal({ isOpen, onClose, onImport, type = 'customer' })
   const [previewData, setPreviewData] = useState([]);
   const fileInputRef = useRef(null);
   const { hasFeature } = useSupporterPack();
+
+  const FIELD_MAPPINGS = {
+    customer: [
+      { value: 'name', label: t('csv_import.field_customer_name') },
+      { value: 'contact_name', label: t('csv_import.field_customer_contact') },
+      { value: 'email', label: t('csv_import.field_customer_email') },
+      { value: 'phone', label: t('csv_import.field_customer_phone') },
+      { value: 'address', label: t('csv_import.field_customer_address') },
+      { value: 'post_number', label: t('csv_import.field_customer_post_number') },
+      { value: 'post_location', label: t('csv_import.field_customer_post_location') },
+      { value: 'org_number', label: t('csv_import.field_customer_org_number') },
+    ],
+    product: [
+      { value: 'name', label: t('csv_import.field_product_name') },
+      { value: 'sku', label: t('csv_import.field_product_sku') },
+      { value: 'description', label: t('csv_import.field_product_description') },
+      { value: 'unit_price', label: t('csv_import.field_product_unit_price') },
+      { value: 'vat_rate', label: t('csv_import.field_product_vat_rate') },
+      { value: 'unit', label: t('csv_import.field_product_unit') },
+    ],
+  };
 
   const handleFileSelect = async (event) => {
     const file = event.target.files?.[0];
@@ -53,7 +55,7 @@ export function CSVImportModal({ isOpen, onClose, onImport, type = 'customer' })
         setErrors([]);
         setStep('mapping');
       } catch (error) {
-        setErrors([`Kunne ikke lese fil: ${error.message}`]);
+        setErrors([t('csv_import.read_error', { error: error.message })]);
       }
     };
     reader.readAsText(file, 'UTF-8');
@@ -95,7 +97,7 @@ export function CSVImportModal({ isOpen, onClose, onImport, type = 'customer' })
         const mapped = {};
         Object.entries(mapping).forEach(([csvColumn, field]) => {
           let value = row[csvColumn];
-          
+
           // Type conversions
           if (field === 'unit_price' || field === 'vat_rate' || field === 'amount') {
             value = parseFloat(value?.replace(',', '.')) || 0;
@@ -115,7 +117,7 @@ export function CSVImportModal({ isOpen, onClose, onImport, type = 'customer' })
       await onImport(importData);
       onClose();
     } catch (error) {
-      setErrors([`Import feilet: ${error.message}`]);
+      setErrors([t('csv_import.import_error', { error: error.message })]);
       setStep('preview');
     }
   };
@@ -130,14 +132,16 @@ export function CSVImportModal({ isOpen, onClose, onImport, type = 'customer' })
       <div className="f-glass-hero w-full max-w-4xl rounded-2xl shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between p-6" style={{ borderBottom: '1px solid var(--f-border-subtle)' }}>
-          <h2 className="text-xl font-semibold" style={{ color: 'var(--f-text-body)' }}>Importer {type === 'customer' ? 'kunder' : 'produkter'} fra CSV</h2>
+          <h2 className="text-xl font-semibold" style={{ color: 'var(--f-text-body)' }}>
+            {type === 'customer' ? t('csv_import.title_customers') : t('csv_import.title_products')}
+          </h2>
           <button
             onClick={onClose}
             className="rounded-lg p-2 transition"
             style={{ color: 'var(--f-text-subtle)' }}
             onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-            aria-label="Lukk"
+            aria-label={t('common.close')}
           >
             <IconX className="h-5 w-5" />
           </button>
@@ -156,13 +160,13 @@ export function CSVImportModal({ isOpen, onClose, onImport, type = 'customer' })
                   className="hidden"
                 />
                 <IconUpload className="mx-auto h-12 w-12" style={{ color: 'var(--f-text-subtle)' }} />
-                <p className="mt-4 text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Last opp CSV-fil</p>
-                <p className="mt-2 text-xs" style={{ color: 'var(--f-text-subtle)' }}>Støttet format: CSV (komma, semikolon eller tab-separert)</p>
+                <p className="mt-4 text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('csv_import.upload_title')}</p>
+                <p className="mt-2 text-xs" style={{ color: 'var(--f-text-subtle)' }}>{t('csv_import.upload_desc')}</p>
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   className="f-btn-primary mt-4 rounded-lg px-4 py-2 text-sm font-medium"
                 >
-                  Velg fil
+                  {t('csv_import.upload_button')}
                 </button>
               </div>
               {errors.length > 0 && (
@@ -178,9 +182,9 @@ export function CSVImportModal({ isOpen, onClose, onImport, type = 'customer' })
           {step === 'mapping' && csvData && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--f-text-body)' }}>Kartlegg kolonner</h3>
+                <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--f-text-body)' }}>{t('csv_import.mapping_title')}</h3>
                 <p className="text-xs mb-4" style={{ color: 'var(--f-text-subtle)' }}>
-                  Velg hvilken CSV-kolonne som skal mappes til hvert felt. {csvData.rows.length} rader funnet.
+                  {t('csv_import.mapping_desc', { count: csvData.rows.length })}
                 </p>
               </div>
 
@@ -190,7 +194,7 @@ export function CSVImportModal({ isOpen, onClose, onImport, type = 'customer' })
                     <div className="flex-1">
                       <p className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{header}</p>
                       <p className="text-xs mt-1" style={{ color: 'var(--f-text-subtle)' }}>
-                        Eksempel: {csvData.rows[0]?.[header] || '(tom)'}
+                        {t('csv_import.example_label', { value: csvData.rows[0]?.[header] || t('csv_import.empty_example') })}
                       </p>
                     </div>
                     <select
@@ -198,7 +202,7 @@ export function CSVImportModal({ isOpen, onClose, onImport, type = 'customer' })
                       onChange={(e) => handleMappingChange(header, e.target.value || null)}
                       className="f-input rounded-lg px-3 py-2 text-sm min-w-[200px]"
                     >
-                      <option value="">-- Ikke bruk --</option>
+                      <option value="">{t('csv_import.skip_field')}</option>
                       {availableFields
                         .filter((field) => !mappedFields.has(field.value) || mapping[header] === field.value)
                         .map((field) => (
@@ -214,7 +218,7 @@ export function CSVImportModal({ isOpen, onClose, onImport, type = 'customer' })
               {!hasFeature('ai_csv_mapping') && (
                 <div className="rounded-lg p-4" style={{ background: 'var(--f-green-bg)', border: '1px solid var(--f-border-green)' }}>
                   <p className="text-sm" style={{ color: 'var(--f-green-text)' }}>
-                    <strong>Supporter-pakken:</strong> Aktiver automatisk AI-kolonnemapping.
+                    {t('csv_import.supporter_ai_mapping')}
                   </p>
                 </div>
               )}
@@ -224,14 +228,14 @@ export function CSVImportModal({ isOpen, onClose, onImport, type = 'customer' })
                   onClick={() => setStep('upload')}
                   className="f-btn-ghost rounded-lg px-4 py-2 text-sm font-medium"
                 >
-                  Tilbake
+                  {t('common.back')}
                 </button>
                 <button
                   onClick={handlePreview}
                   disabled={Object.keys(mapping).length === 0}
                   className="f-btn-primary rounded-lg px-4 py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Forhåndsvis
+                  {t('csv_import.preview_button')}
                 </button>
               </div>
             </div>
@@ -240,9 +244,9 @@ export function CSVImportModal({ isOpen, onClose, onImport, type = 'customer' })
           {step === 'preview' && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--f-text-body)' }}>Forhåndsvisning</h3>
+                <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--f-text-body)' }}>{t('csv_import.preview_title')}</h3>
                 <p className="text-xs" style={{ color: 'var(--f-text-subtle)' }}>
-                  Dette er hvordan de første 5 radene vil se ut etter import.
+                  {t('csv_import.preview_desc')}
                 </p>
               </div>
 
@@ -284,13 +288,15 @@ export function CSVImportModal({ isOpen, onClose, onImport, type = 'customer' })
                   onClick={() => setStep('mapping')}
                   className="f-btn-ghost rounded-lg px-4 py-2 text-sm font-medium"
                 >
-                  Tilbake
+                  {t('common.back')}
                 </button>
                 <button
                   onClick={handleImport}
                   className="f-btn-primary rounded-lg px-4 py-2 text-sm font-medium"
                 >
-                  Importer {csvData.rows.length} {type === 'customer' ? 'kunder' : 'produkter'}
+                  {type === 'customer'
+                    ? t('csv_import.import_button_customers', { count: csvData.rows.length })
+                    : t('csv_import.import_button_products', { count: csvData.rows.length })}
                 </button>
               </div>
             </div>
@@ -299,7 +305,7 @@ export function CSVImportModal({ isOpen, onClose, onImport, type = 'customer' })
           {step === 'importing' && (
             <div className="py-12 text-center">
               <div className="inline-block animate-spin rounded-full h-8 w-8" style={{ border: '2px solid var(--f-border)', borderTopColor: 'var(--f-green)' }}></div>
-              <p className="mt-4 text-sm" style={{ color: 'var(--f-text-subtle)' }}>Importerer...</p>
+              <p className="mt-4 text-sm" style={{ color: 'var(--f-text-subtle)' }}>{t('csv_import.importing')}</p>
             </div>
           )}
         </div>

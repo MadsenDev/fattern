@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '../Modal';
 import { UnitSelect } from '../Select';
 import { ImageUpload } from '../ImageUpload';
 
 export function ProductModal({ isOpen, mode = 'create', initialProduct, onSubmit, onClose }) {
+  const { t } = useTranslation();
   const [name, setName] = useState(initialProduct?.name || '');
   const [sku, setSku] = useState(initialProduct?.sku || '');
   const [description, setDescription] = useState(initialProduct?.description || '');
@@ -40,19 +42,19 @@ export function ProductModal({ isOpen, mode = 'create', initialProduct, onSubmit
     setError('');
 
     if (!name.trim()) {
-      setError('Produktnavn må fylles ut.');
+      setError(t('product_modal.name_required'));
       return;
     }
 
     const price = parseFloat(unitPrice);
     if (isNaN(price) || price < 0) {
-      setError('Pris må være et gyldig tall.');
+      setError(t('product_modal.price_invalid'));
       return;
     }
 
     const vat = parseFloat(vatRate);
     if (isNaN(vat) || vat < 0 || vat > 100) {
-      setError('MVA-sats må være mellom 0 og 100.');
+      setError(t('product_modal.vat_invalid'));
       return;
     }
 
@@ -72,23 +74,18 @@ export function ProductModal({ isOpen, mode = 'create', initialProduct, onSubmit
       onClose?.();
     } catch (err) {
       console.error('Kunne ikke lagre produkt', err);
-      setError('Noe gikk galt under lagring. Prøv igjen.');
+      setError(t('common.save_error'));
     } finally {
       setSaving(false);
     }
   };
 
-  const title = isEdit ? 'Rediger produkt' : 'Nytt produkt';
-  const modalDescription = isEdit
-    ? 'Oppdater produktinformasjon.'
-    : 'Legg til et nytt produkt i systemet.';
-
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={title}
-      description={modalDescription}
+      title={isEdit ? t('product_modal.edit_title') : t('product_modal.create_title')}
+      description={isEdit ? t('product_modal.edit_desc') : t('product_modal.create_desc')}
       footer={
         <>
           <button
@@ -100,7 +97,7 @@ export function ProductModal({ isOpen, mode = 'create', initialProduct, onSubmit
             onClick={onClose}
             disabled={saving}
           >
-            Avbryt
+            {t('common.cancel')}
           </button>
           <button
             type="submit"
@@ -108,19 +105,19 @@ export function ProductModal({ isOpen, mode = 'create', initialProduct, onSubmit
             className="f-btn-primary rounded-2xl px-5 py-2 text-sm font-semibold disabled:opacity-60"
             disabled={saving}
           >
-            {saving ? 'Lagrer …' : isEdit ? 'Lagre endringer' : 'Opprett produkt'}
+            {saving ? t('common.saving') : isEdit ? t('common.save_changes') : t('product_modal.create_button')}
           </button>
         </>
       }
     >
       <form id="product-form" className="space-y-4" onSubmit={handleSubmit}>
         <div>
-          <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Produktnavn *</label>
+          <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('product_modal.name_label')}</label>
           <input
             className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Eksempel: Konsulenttimer"
+            placeholder={t('product_modal.name_placeholder')}
             required
           />
         </div>
@@ -132,33 +129,33 @@ export function ProductModal({ isOpen, mode = 'create', initialProduct, onSubmit
               className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
               value={sku}
               onChange={(e) => setSku(e.target.value)}
-              placeholder="Produktkode"
+              placeholder={t('product_modal.sku_placeholder')}
             />
           </div>
           <div>
-            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Enhet</label>
-            <UnitSelect value={unit || ''} onChange={setUnit} placeholder="Velg eller skriv enhet" />
+            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('product_modal.unit_label')}</label>
+            <UnitSelect value={unit || ''} onChange={setUnit} placeholder={t('product_modal.unit_placeholder')} />
           </div>
         </div>
 
         <div>
-          <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Beskrivelse</label>
+          <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('product_modal.description_label')}</label>
           <textarea
             className="f-input mt-2 w-full rounded-2xl px-4 py-2 text-sm"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Valgfri beskrivelse av produktet"
+            placeholder={t('product_modal.description_placeholder')}
             rows={3}
           />
         </div>
 
         <div>
-          <ImageUpload value={imagePath} onChange={setImagePath} label="Produktbilde" />
+          <ImageUpload value={imagePath} onChange={setImagePath} label={t('product_modal.image_label')} />
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>Pris *</label>
+            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('product_modal.price_label')}</label>
             <input
               type="number"
               step="0.01"
@@ -171,7 +168,7 @@ export function ProductModal({ isOpen, mode = 'create', initialProduct, onSubmit
             />
           </div>
           <div>
-            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>MVA-sats (%)</label>
+            <label className="text-sm font-medium" style={{ color: 'var(--f-text-body)' }}>{t('product_modal.vat_label')}</label>
             <input
               type="number"
               step="0.01"
@@ -182,7 +179,7 @@ export function ProductModal({ isOpen, mode = 'create', initialProduct, onSubmit
               onChange={(e) => setVatRate(e.target.value)}
               placeholder="25"
             />
-            <p className="mt-1 text-xs" style={{ color: 'var(--f-text-subtle)' }}>Standard er 25%</p>
+            <p className="mt-1 text-xs" style={{ color: 'var(--f-text-subtle)' }}>{t('product_modal.vat_hint')}</p>
           </div>
         </div>
 
@@ -194,7 +191,7 @@ export function ProductModal({ isOpen, mode = 'create', initialProduct, onSubmit
             checked={active}
             onChange={(e) => setActive(e.target.checked)}
           />
-          Produktet er aktivt
+          {t('product_modal.active_label')}
         </label>
 
         {error ? <p className="text-sm font-medium" style={{ color: 'var(--f-danger-text)' }}>{error}</p> : null}
@@ -202,4 +199,3 @@ export function ProductModal({ isOpen, mode = 'create', initialProduct, onSubmit
     </Modal>
   );
 }
-
